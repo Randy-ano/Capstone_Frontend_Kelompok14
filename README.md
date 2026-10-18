@@ -5,7 +5,7 @@ Desain mengikuti mockup Stitch "Intellisys Talent Hub Design System".
 
 Backend (Laravel REST API) ada di repo terpisah: [Capstone_Kelompok14](https://github.com/Randy-ano/Capstone_Kelompok14). Ikuti `SETUP.md` di sana untuk menyiapkan backend dan database.
 
-## Menjalankan
+## Cara Menjalankan
 
 Prasyarat: Node.js ≥ 18, dan backend sudah berjalan (`php artisan serve` → `http://localhost:8000`).
 
