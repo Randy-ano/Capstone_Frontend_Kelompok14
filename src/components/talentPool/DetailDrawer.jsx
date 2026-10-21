@@ -1,20 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
-import {
-  Badge,
-  Chip,
-  HASIL_SCREENING,
-  Pesan,
-  STATUS_KANDIDAT,
-  STATUS_KETERSEDIAAN,
-  StatusBadge,
-  TagChip,
-  formatBulan,
-  formatRupiah,
-  formatTanggal,
-  pecahTag,
-} from "./shared";
+import { Badge, Chip, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag } from "../ui";
+import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
 
 // Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
 export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
@@ -378,7 +366,6 @@ function RiwayatScreening({ items }) {
       ) : (
         <ul className="divide-y divide-surface-container-high">
           {items.map((s) => {
-            const hasil = HASIL_SCREENING[s.hasil_screening] ?? { label: s.hasil_screening, className: "bg-surface-container" };
             return (
               <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 flex items-start justify-between gap-space-sm">
                 <div className="min-w-0">
@@ -388,7 +375,7 @@ function RiwayatScreening({ items }) {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <Badge className={hasil.className}>{hasil.label}</Badge>
+                  <HasilBadge hasil={s.hasil_screening} />
                   {s.skor_kecocokan != null && (
                     <span className="font-label-sm text-label-sm text-on-surface-variant">Skor {Number(s.skor_kecocokan).toLocaleString("id-ID")}</span>
                   )}
