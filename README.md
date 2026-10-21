@@ -50,4 +50,4 @@ src/
 
 ## Alur kerja tim
 
-Buat branch sendiri dari `main`, jangan commit langsung ke `main`. Format pesan commit: `SCRUM-<nomor issue Jira> deskripsi singkat`. Selesai → push branch lalu buat Pull Request ke `main`.
+Buat branch sendiri dari `main`, jangan commit langsung ke `main`. Nama branch `<jenis>/<nama-singkat>` dan format pesan commit `<jenis>: <deskripsi singkat>`, dengan jenis `fitur`, `perbaikan`, `pembaruan`, `test`, atau `dokumen` (contoh branch `fitur/talent-pool`, commit `fitur: halaman talent pool`). Jangan pakai kode Jira (`SCRUM-xx`). Selesai → push branch lalu buat Pull Request ke `main`.

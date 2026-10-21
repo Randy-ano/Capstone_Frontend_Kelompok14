@@ -39,4 +39,15 @@ Buka lewat `localhost:5173`, bukan `127.0.0.1`: CORS backend hanya mengizinkan o
 
 ## Alur kerja
 
-Jangan commit langsung ke `main`; kerja di branch sendiri lalu Pull Request. Format pesan commit: `SCRUM-<nomor issue Jira> deskripsi singkat` (belum ada issue → `SCRUM-0`).
+Jangan commit langsung ke `main`; kerja di branch sendiri lalu Pull Request. Jangan pakai kode Jira (`SCRUM-xx`) di branch maupun commit.
+
+- Format commit: `<jenis>: <deskripsi singkat dalam Bahasa Indonesia>`.
+- Nama branch: `<jenis>/<nama-singkat>`, contoh `fitur/talent-pool`, `perbaikan/login-error`.
+
+| Jenis | Dipakai saat | Contoh |
+|---|---|---|
+| `fitur` | menambah fitur/halaman/endpoint baru | `fitur: halaman talent pool dengan filter kompetensi` |
+| `perbaikan` | memperbaiki bug | `perbaikan: badge status tidak muncul di layar HP` |
+| `pembaruan` | mengubah/menyempurnakan yang sudah ada | `pembaruan: rapikan header dan hapus menu mockup` |
+| `test` | hanya menambah/mengubah test | `test: skenario filter kompetensi talent pool` |
+| `dokumen` | README, spec, DECISIONS, black box | `dokumen: catat keputusan rumus skor rekomendasi` |
