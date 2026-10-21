@@ -4,7 +4,8 @@ import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 import DetailDrawer from "../components/talentPool/DetailDrawer";
-import { Chip, Pesan, STATUS_KETERSEDIAAN, StatusBadge, TagChip, formatTanggal, pecahTag } from "../components/talentPool/shared";
+import { Chip, Pagination, Pesan, TagChip, formatTanggal, pecahTag } from "../components/ui";
+import { STATUS_KETERSEDIAAN, StatusBadge } from "../components/talentPool/shared";
 
 const PER_PAGE = 10;
 const MAKS_CHIP = 3;
@@ -231,7 +232,7 @@ export default function TalentPool() {
               </tbody>
             </table>
           </div>
-          {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} />}
+          {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="talent" />}
         </div>
       </div>
 
@@ -285,47 +286,3 @@ function BarisTalent({ item, onOpen }) {
   );
 }
 
-// Nomor halaman ringkas: 1 … 4 5 6 … 10.
-function nomorHalaman(sekarang, terakhir) {
-  const nomor = new Set([1, terakhir, sekarang - 1, sekarang, sekarang + 1].filter((n) => n >= 1 && n <= terakhir));
-  const urut = [...nomor].sort((a, b) => a - b);
-  return urut.flatMap((n, i) => (i > 0 && n - urut[i - 1] > 1 ? ["…", n] : [n]));
-}
-
-function Pagination({ meta, onPage }) {
-  const { current_page: sekarang, last_page: terakhir } = meta;
-  const tombol = "min-w-[2.25rem] h-9 px-2 rounded-lg font-label-md text-label-md transition-colors disabled:opacity-40";
-
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-space-sm px-space-md py-space-sm border-t border-surface-container-high">
-      <span className="font-body-sm text-body-sm text-on-surface-variant">
-        Menampilkan <strong>{meta.from}</strong>–<strong>{meta.to}</strong> dari <strong>{meta.total}</strong> talent
-      </span>
-      <nav className="flex items-center gap-1" aria-label="Halaman">
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang <= 1} onClick={() => onPage(sekarang - 1)} title="Sebelumnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_left</span>
-        </button>
-        {nomorHalaman(sekarang, terakhir).map((n, i) =>
-          n === "…" ? (
-            <span key={`gap-${i}`} className="px-1 text-outline">
-              …
-            </span>
-          ) : (
-            <button
-              key={n}
-              type="button"
-              onClick={() => onPage(n)}
-              aria-current={n === sekarang ? "page" : undefined}
-              className={`${tombol} ${n === sekarang ? "bg-primary text-on-primary" : "hover:bg-surface-container text-on-surface"}`}
-            >
-              {n}
-            </button>
-          ),
-        )}
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang >= terakhir} onClick={() => onPage(sekarang + 1)} title="Berikutnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_right</span>
-        </button>
-      </nav>
-    </div>
-  );
-}
