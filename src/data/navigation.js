@@ -43,6 +43,7 @@ export const NAV_GROUPS = [
     items: [
       { path: "/master-data-skill", label: "Master Data Skill", icon: "database", ready: true, roles: [TALENT_SUPPORT, MANAGER] },
       { path: "/pengaturan-akun", label: "Pengaturan Akun", icon: "settings" },
+      { path: "/kelola-pegawai", label: "Kelola Akun Pegawai", icon: "manage_accounts", ready: true, roles: [MANAGER] },
     ],
   },
 ];
