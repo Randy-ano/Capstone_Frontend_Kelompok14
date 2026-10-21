@@ -4,6 +4,7 @@ import RequireAuth from "./auth/RequireAuth";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import DashboardRekapitulasi from "./pages/DashboardRekapitulasi";
+import KelolaPegawai from "./pages/KelolaPegawai";
 import RekomendasiKandidat from "./pages/RekomendasiKandidat";
 import PenempatanMonitoring from "./pages/PenempatanMonitoring";
 import PermintaanKebutuhan from "./pages/PermintaanKebutuhan";
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="talent-pool" element={<TalentPool />} />
           <Route path="rekomendasi-kandidat" element={<RekomendasiKandidat />} />
           <Route path="penugasan-penempatan" element={<PenempatanMonitoring />} />
+          <Route path="kelola-pegawai" element={<KelolaPegawai />} />
           <Route path="permintaan-kebutuhan" element={<PermintaanKebutuhan />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
