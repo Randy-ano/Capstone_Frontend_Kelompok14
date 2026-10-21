@@ -17,12 +17,23 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const res = await api("/auth/login", { method: "POST", body: { email, password } });
+  // Login dan registrasi sama-sama mengembalikan { token, user }; sesi disimpan dengan cara yang sama.
+  const mulaiSesi = useCallback((res) => {
     tokenStore.set(res.data.token);
     setUser(res.data.user);
     return res.data.user;
   }, []);
+
+  const login = useCallback(
+    async (email, password) => mulaiSesi(await api("/auth/login", { method: "POST", body: { email, password } })),
+    [mulaiSesi],
+  );
+
+  // jenis: "talent" → POST /auth/register/talent, "hr-client" → POST /auth/register/hr-client.
+  const register = useCallback(
+    async (jenis, data) => mulaiSesi(await api(`/auth/register/${jenis}`, { method: "POST", body: data })),
+    [mulaiSesi],
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -33,7 +44,10 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout]);
+  const value = useMemo(
+    () => ({ user, loading, login, register, logout }),
+    [user, loading, login, register, logout],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -56,3 +56,6 @@ export const navGroupsFor = (role) =>
   NAV_GROUPS.map((group) => ({ ...group, items: group.items.filter((item) => canAccess(item, role)) })).filter(
     (group) => group.items.length > 0,
   );
+
+// Halaman pertama setelah masuk: menu pertama yang boleh diakses role tersebut.
+export const berandaFor = (role) => NAV_ITEMS.find((item) => canAccess(item, role))?.path ?? "/";
