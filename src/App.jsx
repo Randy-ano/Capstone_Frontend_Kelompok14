@@ -7,6 +7,7 @@ import DashboardRekapitulasi from "./pages/DashboardRekapitulasi";
 import RekomendasiKandidat from "./pages/RekomendasiKandidat";
 import PenempatanMonitoring from "./pages/PenempatanMonitoring";
 import PermintaanKebutuhan from "./pages/PermintaanKebutuhan";
+import PipelineRekrutmen from "./pages/PipelineRekrutmen";
 import TalentPool from "./pages/TalentPool";
 import ComingSoon from "./pages/ComingSoon";
 
@@ -19,6 +20,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard-rekapitulasi" replace />} />
           <Route path="dashboard-rekapitulasi" element={<DashboardRekapitulasi />} />
+          <Route path="pipeline-rekrutmen" element={<PipelineRekrutmen />} />
           <Route path="talent-pool" element={<TalentPool />} />
           <Route path="rekomendasi-kandidat" element={<RekomendasiKandidat />} />
           <Route path="penugasan-penempatan" element={<PenempatanMonitoring />} />

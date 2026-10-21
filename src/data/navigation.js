@@ -10,7 +10,7 @@ export const NAV_GROUPS = [
     label: "Utama",
     items: [
       { path: "/dashboard-rekapitulasi", label: "Dashboard Rekapitulasi", icon: "grid_view", ready: true },
-      { path: "/pipeline-rekrutmen", label: "Pipeline Rekrutmen", icon: "view_kanban", roles: INTERNAL },
+      { path: "/pipeline-rekrutmen", label: "Pipeline Rekrutmen", icon: "view_kanban", ready: true, roles: INTERNAL },
     ],
   },
   {
