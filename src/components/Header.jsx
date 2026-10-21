@@ -3,13 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser, initials } from "../auth/roles";
 
-export default function Header({ title }) {
+export default function Header({ title, onMenu }) {
   return (
-    <header className="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-md">
-      <div className="flex items-center gap-space-md min-w-0">
-        <div className="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant">
-          <span className="hover:text-primary transition-colors cursor-pointer">Platform</span>
-          <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+    <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-md sm:px-space-lg flex items-center justify-between gap-space-md">
+      <div className="flex items-center gap-space-sm sm:gap-space-md min-w-0">
+        <button
+          type="button"
+          onClick={onMenu}
+          title="Buka menu"
+          className="lg:hidden p-2 -ml-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+        >
+          <span className="material-symbols-outlined text-[22px]">menu</span>
+        </button>
+        <div className="flex items-center gap-2 min-w-0 font-body-sm text-body-sm text-on-surface-variant">
+          <span className="hidden sm:inline hover:text-primary transition-colors cursor-pointer">Platform</span>
+          <span className="hidden sm:inline material-symbols-outlined text-[16px]">chevron_right</span>
           <span className="font-label-md text-label-md text-on-surface font-semibold truncate">{title}</span>
         </div>
         <div className="hidden xl:flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-fixed">
@@ -18,7 +26,7 @@ export default function Header({ title }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-space-md flex-1 max-w-md mx-space-md">
+      <div className="hidden md:flex items-center gap-space-md flex-1 max-w-md mx-space-md">
         <div className="relative w-full">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
           <input
@@ -29,7 +37,7 @@ export default function Header({ title }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-space-sm">
+      <div className="flex items-center gap-space-xs sm:gap-space-sm shrink-0">
         <button
           className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-sm"
           type="button"
@@ -48,7 +56,7 @@ export default function Header({ title }) {
           </span>
         </button>
         <button
-          className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+          className="hidden sm:block p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
           title="Pusat Bantuan"
           type="button"
         >
