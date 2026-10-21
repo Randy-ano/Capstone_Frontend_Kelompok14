@@ -4,7 +4,7 @@ import RequireAuth from "./auth/RequireAuth";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import DashboardRekapitulasi from "./pages/DashboardRekapitulasi";
-import AiMatchRecommendation from "./pages/AiMatchRecommendation";
+import RekomendasiKandidat from "./pages/RekomendasiKandidat";
 import PenempatanMonitoring from "./pages/PenempatanMonitoring";
 import PermintaanKebutuhan from "./pages/PermintaanKebutuhan";
 import TalentPool from "./pages/TalentPool";
@@ -20,7 +20,7 @@ export default function App() {
           <Route index element={<Navigate to="/dashboard-rekapitulasi" replace />} />
           <Route path="dashboard-rekapitulasi" element={<DashboardRekapitulasi />} />
           <Route path="talent-pool" element={<TalentPool />} />
-          <Route path="ai-match-recommendation" element={<AiMatchRecommendation />} />
+          <Route path="rekomendasi-kandidat" element={<RekomendasiKandidat />} />
           <Route path="penugasan-penempatan" element={<PenempatanMonitoring />} />
           <Route path="permintaan-kebutuhan" element={<PermintaanKebutuhan />} />
           <Route path="*" element={<ComingSoon />} />

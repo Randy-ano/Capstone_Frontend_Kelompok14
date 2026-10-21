@@ -23,7 +23,7 @@ Buka lewat `localhost:5173`, bukan `127.0.0.1`: CORS backend hanya mengizinkan o
 - `src/auth/roles.js`: konstanta `ROLE`, `ROLE_LABEL`, `INTERNAL` (AM/TS/Manager), `displayUser()`.
 - `src/data/navigation.js`: menu sidebar. Field `roles` mengikuti kolom Role di tabel endpoint spec (tanpa `roles` = semua role). `AppLayout` menampilkan `AksesDitolak` kalau role tidak berhak. Ini hanya kenyamanan tampilan; pengamanan sebenarnya di backend (403).
 - `src/components/`: `AppLayout`, `Sidebar`, `Header` (berisi menu user + Keluar).
-- `src/pages/`: halaman. `Login` dan `AksesDitolak` sudah memakai API/auth; `DashboardRekapitulasi`, `PermintaanKebutuhan`, `PenempatanMonitoring`, `AiMatchRecommendation` masih **data mockup statis** dari Stitch; menu lain memakai `ComingSoon`.
+- `src/pages/`: halaman. `Login`, `Daftar`, `AksesDitolak`, dan `TalentPool` sudah memakai API/auth; `DashboardRekapitulasi`, `PermintaanKebutuhan`, `PenempatanMonitoring`, `RekomendasiKandidat` masih **data mockup statis** dari Stitch; menu lain memakai `ComingSoon`.
 
 ## Konvensi
 
@@ -31,7 +31,7 @@ Buka lewat `localhost:5173`, bukan `127.0.0.1`: CORS backend hanya mengizinkan o
 - Semua teks UI dalam **Bahasa Indonesia**. Tampilkan pesan error dari backend apa adanya (`err.message`, `err.errors[field][0]`); backend sudah mengirim pesan Bahasa Indonesia.
 - Format response backend: `{ data, message }`; list ber-pagination berisi `data`, `links`, `meta`. Nilai role: `talent`, `hr_client`, `account_manager`, `talent_support`, `manager`.
 - Menyambungkan halaman mockup ke API hanya setelah endpoint-nya ada di backend (cek `routes/api.php` di repo backend). Ganti data statis dengan pemanggilan `api()`, pertahankan tampilan.
-- Istilah "AI": spec melarang kata "AI" di backend karena rekomendasi kandidat berbasis aturan. Halaman/menu `AiMatchRecommendation` ("AI Match Recommendation") masih memakai istilah itu; user belum memutuskan apakah diganti (mis. "Rekomendasi Kandidat"). Tanyakan sebelum mengubahnya, dan jangan menambah istilah "AI" baru.
+- **Tidak ada istilah "AI"** di kode, UI, maupun ikon (termasuk ikon `auto_awesome`). Rekomendasi kandidat berbasis aturan (R9): menu & halaman bernama "Rekomendasi Kandidat" (`/rekomendasi-kandidat`, `RekomendasiKandidat.jsx`); pakai istilah "skor kecocokan", bukan "AI match".
 
 ## Akun demo (dari seeder backend, password `password`)
 

@@ -17,7 +17,7 @@ export const NAV_GROUPS = [
     label: "Talent Management",
     items: [
       { path: "/talent-pool", label: "Talent Pool", icon: "group", ready: true, roles: INTERNAL },
-      { path: "/ai-match-recommendation", label: "AI Match Recommendation", icon: "auto_awesome", ready: true, roles: [TALENT_SUPPORT] },
+      { path: "/rekomendasi-kandidat", label: "Rekomendasi Kandidat", icon: "person_search", ready: true, roles: [TALENT_SUPPORT] },
       { path: "/penugasan-penempatan", label: "Penugasan Penempatan", icon: "assignment_ind", ready: true },
     ],
   },

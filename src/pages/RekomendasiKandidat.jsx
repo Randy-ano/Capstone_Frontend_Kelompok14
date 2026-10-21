@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function AiMatchRecommendation() {
+export default function RekomendasiKandidat() {
   const [minMatch, setMinMatch] = useState(85);
 
   return (
@@ -13,13 +13,13 @@ export default function AiMatchRecommendation() {
       <div className="flex items-center gap-2">
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container text-primary font-label-sm text-label-sm uppercase tracking-wider font-semibold">
       <span className="material-symbols-outlined text-[14px]">psychology</span>
-                  Intellisys Match Engine v4.2
+                  Pencocokan Berbasis Aturan
                 </span>
       <span className="text-outline text-label-sm font-label-sm">|</span>
       <span className="text-on-surface-variant font-label-sm text-label-sm">Sinkronisasi Terakhir: Hari ini, 09:41 WIB</span>
       </div>
-      <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Rekomendasi Kandidat AI &amp; Screening Talent Pool</h1>
-      <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">Pencocokan cerdas profil CV, keahlian teknis, ekspektasi rate/gaji, dan riwayat proyek terhadap kebutuhan klien.</p>
+      <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Rekomendasi Kandidat &amp; Screening Talent Pool</h1>
+      <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">Pencocokan berbasis aturan antara kompetensi dan pengalaman kerja talent dengan kebutuhan klien.</p>
       </div>
       <div className="flex items-center gap-space-sm self-start lg:self-auto">
       <button className="h-10 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-2 transition-all" type="button">
@@ -28,7 +28,7 @@ export default function AiMatchRecommendation() {
       </button>
       <button className="h-10 px-4 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center gap-2 shadow-sm transition-all" type="button">
       <span className="material-symbols-outlined text-[18px]">tune</span>
-      <span>Kalibrasi AI Engine</span>
+      <span>Atur Bobot Penilaian</span>
       </button>
       </div>
       </div>
@@ -113,12 +113,12 @@ export default function AiMatchRecommendation() {
       <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">expand_more</span>
       </div>
       </div>
-      {/* Minimum AI Match Slider Simulator */}
+      {/* Slider skor kecocokan minimum */}
       <div className="md:col-span-4 flex items-center gap-space-sm bg-surface-container-low px-3 py-1.5 rounded-lg">
-      <span className="material-symbols-outlined text-primary text-[20px]">auto_awesome</span>
+      <span className="material-symbols-outlined text-primary text-[20px]">insights</span>
       <div className="flex-1 flex flex-col">
       <div className="flex items-center justify-between text-label-sm font-label-sm">
-      <span className="text-on-surface-variant">Min. AI Match Score:</span>
+      <span className="text-on-surface-variant">Min. Skor Kecocokan:</span>
       <span className="font-bold text-primary" >{minMatch}%+</span>
       </div>
       <input className="w-full accent-primary h-1.5 cursor-pointer bg-surface-container" max="95" min="70" step="5" type="range" value={minMatch} onChange={(e) => setMinMatch(Number(e.target.value))} />
@@ -166,12 +166,12 @@ export default function AiMatchRecommendation() {
       {/* Section Bar Info */}
       <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-      <span className="font-title-sm text-title-sm text-on-surface font-semibold">Kandidat Terpilih Algoritma AI</span>
+      <span className="font-title-sm text-title-sm text-on-surface font-semibold">Kandidat dengan Skor Tertinggi</span>
       <span className="px-2 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold">3 Kandidat Unggulan</span>
       </div>
       <div className="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
       <span>Urutkan:</span>
-      <button className="font-semibold text-primary flex items-center gap-0.5">Skor Kecocokan AI Teratas <span className="material-symbols-outlined text-[16px]">arrow_downward</span></button>
+      <button className="font-semibold text-primary flex items-center gap-0.5">Skor Kecocokan Tertinggi <span className="material-symbols-outlined text-[16px]">arrow_downward</span></button>
       </div>
       </div>
       {/* CARD 1: TOP PICK - 96% MATCH */}
@@ -192,7 +192,7 @@ export default function AiMatchRecommendation() {
       <span className="text-on-surface-variant font-label-sm text-label-sm">Talent ID: #INT-9921</span>
       {/* Score Badge */}
       <div className="px-3 py-1 rounded-full bg-surface-container-low flex items-center gap-1.5 text-on-tertiary-container font-bold font-title-sm text-title-sm">
-      <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+      <span className="material-symbols-outlined text-[18px]">insights</span>
       <span>96% Sangat Sesuai</span>
       </div>
       </div>
@@ -217,11 +217,11 @@ export default function AiMatchRecommendation() {
       </div>
       </div>
       </div>
-      {/* AI Match Dimensional Breakdown Bar */}
+      {/* Rincian skor kecocokan */}
       <div className="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-space-xs">
       <span className="font-label-sm text-label-sm text-on-surface font-semibold flex items-center gap-1.5">
       <span className="material-symbols-outlined text-[16px] text-primary">analytics</span>
-                    Breakdown Parameter AI Match:
+                    Rincian Skor Kecocokan:
                   </span>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-1">
       <div className="bg-surface-container-lowest p-2 rounded flex flex-col">
@@ -299,7 +299,7 @@ export default function AiMatchRecommendation() {
       <div className="flex flex-wrap items-center justify-between gap-space-sm">
       <div className="flex items-center gap-2">
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
-      <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+      <span className="material-symbols-outlined text-[14px]">insights</span>
                       Rekomendasi Kuat
                     </span>
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
@@ -435,18 +435,18 @@ export default function AiMatchRecommendation() {
       </div>
       {/* SIDEBAR WIDGETS COLUMN (4 COLS) */}
       <div className="xl:col-span-4 flex flex-col gap-space-lg">
-      {/* AI Engine Parameters Widget */}
+      {/* Bobot penilaian */}
       <div className="rounded-xl bg-surface-container-lowest shadow-sm p-space-md flex flex-col gap-space-md">
       <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
       <span className="w-7 h-7 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center">
       <span className="material-symbols-outlined text-[18px]">tune</span>
       </span>
-      <h3 className="font-title-sm text-title-sm text-on-surface font-bold">Parameter Bobot AI Matching</h3>
+      <h3 className="font-title-sm text-title-sm text-on-surface font-bold">Bobot Penilaian Kecocokan</h3>
       </div>
       <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Mandiri v2</span>
       </div>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Konfigurasi pembobotan algoritma yang digunakan untuk kalkulasi peringkat requisisi ini:</p>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">Bobot aturan yang digunakan untuk kalkulasi peringkat requisisi ini:</p>
       {/* Weights Visualization */}
       <div className="space-y-space-sm pt-1">
       <div className="flex flex-col gap-1">
