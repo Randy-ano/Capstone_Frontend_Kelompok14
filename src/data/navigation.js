@@ -41,7 +41,7 @@ export const NAV_GROUPS = [
   {
     label: "Pengaturan",
     items: [
-      { path: "/master-data-skill", label: "Master Data Skill", icon: "database", roles: [TALENT_SUPPORT, MANAGER] },
+      { path: "/master-data-skill", label: "Master Data Skill", icon: "database", ready: true, roles: [TALENT_SUPPORT, MANAGER] },
       { path: "/pengaturan-akun", label: "Pengaturan Akun", icon: "settings" },
     ],
   },
