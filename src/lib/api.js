@@ -17,7 +17,8 @@ export const tokenStore = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 };
 
-export async function api(path, { method = "GET", body } = {}) {
+// `blob: true` mengembalikan isi response sebagai Blob (mis. unduh PDF); error tetap dibaca sebagai JSON.
+export async function api(path, { method = "GET", body, blob = false } = {}) {
   const headers = { Accept: "application/json" };
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -33,6 +34,8 @@ export async function api(path, { method = "GET", body } = {}) {
   } catch {
     throw new ApiError(0, "Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.");
   }
+
+  if (blob && response.ok) return response.blob();
 
   const data = await response.json().catch(() => null);
 
