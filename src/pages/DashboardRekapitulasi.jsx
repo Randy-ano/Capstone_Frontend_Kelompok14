@@ -107,9 +107,9 @@ export default function DashboardRekapitulasi() {
       {/* Card 3 */}
       <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm space-y-space-sm hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-      <span className="font-label-md text-label-md text-secondary">AI Match &amp; Screening</span>
+      <span className="font-label-md text-label-md text-secondary">Rekomendasi &amp; Screening</span>
       <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container">
-      <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+      <span className="material-symbols-outlined text-[20px]">insights</span>
       </div>
       </div>
       <div>
@@ -118,7 +118,7 @@ export default function DashboardRekapitulasi() {
       <span className="text-on-tertiary-container font-semibold flex items-center gap-1">
       <span className="material-symbols-outlined text-[14px]">speed</span> 89.2% Skor Rata-rata
                   </span>
-      <span className="text-secondary">akurasi AI</span>
+      <span className="text-secondary">tingkat kecocokan</span>
       </div>
       </div>
       <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
@@ -181,12 +181,12 @@ export default function DashboardRekapitulasi() {
       {/* Step 2 */}
       <div className="bg-surface-container-low p-space-sm rounded-lg flex flex-col justify-between hover:bg-surface-container transition-colors relative group">
       <div className="flex items-center justify-between font-label-sm text-label-sm text-secondary">
-      <span>02. AI Match</span>
-      <span className="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
+      <span>02. Rekomendasi</span>
+      <span className="material-symbols-outlined text-[14px] text-primary">insights</span>
       </div>
       <div className="my-space-xs">
       <span className="font-headline-sm text-headline-sm font-bold text-primary">45</span>
-      <span className="font-label-sm text-label-sm text-secondary block">Rekomendasi AI</span>
+      <span className="font-label-sm text-label-sm text-secondary block">Rekomendasi Kandidat</span>
       </div>
       <div className="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
       <div className="bg-primary h-full" style={{ width: "85%" }}></div>
@@ -302,7 +302,7 @@ export default function DashboardRekapitulasi() {
       <th className="py-3 px-space-md font-semibold">No. Requisisi &amp; Klien</th>
       <th className="py-3 px-space-sm font-semibold">Posisi &amp; Alokasi</th>
       <th className="py-3 px-space-sm font-semibold">SLA Target</th>
-      <th className="py-3 px-space-sm font-semibold">Match AI</th>
+      <th className="py-3 px-space-sm font-semibold">Skor Kecocokan</th>
       <th className="py-3 px-space-sm font-semibold">Status Tahapan</th>
       <th className="py-3 px-space-md text-right font-semibold">Aksi</th>
       </tr>
@@ -392,7 +392,7 @@ export default function DashboardRekapitulasi() {
       <td className="py-3.5 px-space-md text-right">
       <div className="flex items-center justify-end gap-1">
       <button className="h-7 px-2.5 rounded bg-surface-container hover:bg-surface-variant text-primary font-label-sm text-label-sm transition-all" type="button">
-                              Lihat Match AI
+                              Lihat Rekomendasi
                             </button>
       <button className="p-1 text-outline hover:text-on-surface rounded hover:bg-surface-container" type="button">
       <span className="material-symbols-outlined text-[18px]">more_vert</span>
@@ -530,7 +530,7 @@ export default function DashboardRekapitulasi() {
       <td className="py-3.5 px-space-md text-right">
       <div className="flex items-center justify-end gap-1">
       <button className="h-7 px-2.5 rounded bg-surface-container hover:bg-surface-variant text-primary font-label-sm text-label-sm transition-all" type="button">
-                              Lihat Match AI
+                              Lihat Rekomendasi
                             </button>
       <button className="p-1 text-outline hover:text-on-surface rounded hover:bg-surface-container" type="button">
       <span className="material-symbols-outlined text-[18px]">more_vert</span>

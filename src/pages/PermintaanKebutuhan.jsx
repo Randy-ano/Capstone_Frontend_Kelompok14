@@ -77,8 +77,8 @@ export default function PermintaanKebutuhan() {
       </div>
       <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
       <div className="flex items-center justify-between text-on-surface-variant">
-      <span className="font-label-md text-label-md">Rata-rata AI Match Rate</span>
-      <span className="material-symbols-outlined text-tertiary-container text-[20px]">auto_awesome</span>
+      <span className="font-label-md text-label-md">Rata-rata Skor Kecocokan</span>
+      <span className="material-symbols-outlined text-tertiary-container text-[20px]">insights</span>
       </div>
       <div className="mt-space-sm flex items-baseline gap-2">
       <span className="font-headline-lg text-headline-lg text-on-surface">91.4%</span>
@@ -180,7 +180,7 @@ export default function PermintaanKebutuhan() {
       <th className="py-3 px-4">No. Tiket &amp; Tanggal</th>
       <th className="py-3 px-4">Profil Kandidat</th>
       <th className="py-3 px-4">Klien &amp; AM</th>
-      <th className="py-3 px-4 text-center">AI Match</th>
+      <th className="py-3 px-4 text-center">Skor Kecocokan</th>
       <th className="py-3 px-4">Komersial (Rate)</th>
       <th className="py-3 px-4">Status Approval</th>
       <th className="py-3 px-4 text-right">Aksi Evaluasi</th>
@@ -681,7 +681,7 @@ export default function PermintaanKebutuhan() {
       <div className="p-3 bg-surface-container-low rounded-xl flex items-center justify-between text-body-sm text-on-surface-variant">
       <div className="flex items-center gap-2">
       <span className="material-symbols-outlined text-primary text-[20px]">info</span>
-      <span>Permintaan baru akan memicu proses AI Matching dan penyaringan kandidat dalam 1x24 jam.</span>
+      <span>Permintaan baru akan diproses: rekomendasi dan penyaringan kandidat dalam 1x24 jam.</span>
       </div>
       </div>
       {/* Modal Actions */}
