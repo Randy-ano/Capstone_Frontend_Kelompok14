@@ -26,8 +26,8 @@ export const NAV_GROUPS = [
     label: "Klien & Rekuisisi",
     items: [
       { path: "/permintaan-kebutuhan", label: "Permintaan Kebutuhan", icon: "receipt_long", ready: true, roles: [HR_CLIENT, ...INTERNAL] },
-      { path: "/pengajuan-kandidat", label: "Pengajuan Kandidat", icon: "send" },
-      { path: "/jadwal-interview", label: "Jadwal Interview", icon: "event_available" },
+      { path: "/pengajuan-kandidat", label: "Pengajuan Kandidat", icon: "send", ready: true },
+      { path: "/jadwal-interview", label: "Jadwal Interview", icon: "event_available", ready: true },
     ],
   },
   {
