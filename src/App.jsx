@@ -8,6 +8,7 @@ import RekomendasiKandidat from "./pages/RekomendasiKandidat";
 import PenempatanMonitoring from "./pages/PenempatanMonitoring";
 import PermintaanKebutuhan from "./pages/PermintaanKebutuhan";
 import PipelineRekrutmen from "./pages/PipelineRekrutmen";
+import ProfilSaya from "./pages/ProfilSaya";
 import TalentPool from "./pages/TalentPool";
 import ComingSoon from "./pages/ComingSoon";
 
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="pipeline-rekrutmen" element={<PipelineRekrutmen />} />
           <Route path="talent-pool" element={<TalentPool />} />
           <Route path="rekomendasi-kandidat" element={<RekomendasiKandidat />} />
+          <Route path="profil-saya" element={<ProfilSaya />} />
           <Route path="penugasan-penempatan" element={<PenempatanMonitoring />} />
           <Route path="permintaan-kebutuhan" element={<PermintaanKebutuhan />} />
           <Route path="*" element={<ComingSoon />} />

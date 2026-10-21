@@ -16,6 +16,7 @@ export const NAV_GROUPS = [
   {
     label: "Talent Management",
     items: [
+      { path: "/profil-saya", label: "Profil & CV Saya", icon: "badge", ready: true, roles: [TALENT] },
       { path: "/talent-pool", label: "Talent Pool", icon: "group", ready: true, roles: INTERNAL },
       { path: "/rekomendasi-kandidat", label: "Rekomendasi Kandidat", icon: "person_search", ready: true, roles: [TALENT_SUPPORT] },
       { path: "/penugasan-penempatan", label: "Penugasan Penempatan", icon: "assignment_ind", ready: true },

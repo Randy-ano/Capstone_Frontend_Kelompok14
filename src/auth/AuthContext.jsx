@@ -35,6 +35,9 @@ export function AuthProvider({ children }) {
     [mulaiSesi],
   );
 
+  // Dipakai setelah data profil berubah (mis. nama lengkap) agar header ikut diperbarui.
+  const muatUlangUser = useCallback(async () => setUser((await api("/auth/me")).data), []);
+
   const logout = useCallback(async () => {
     try {
       await api("/auth/logout", { method: "POST" });
@@ -45,8 +48,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, register, logout, muatUlangUser }),
+    [user, loading, login, register, logout, muatUlangUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
