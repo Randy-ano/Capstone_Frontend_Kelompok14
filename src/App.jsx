@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import RequireAuth from "./auth/RequireAuth";
 import Login from "./pages/Login";
+import Daftar from "./pages/Daftar";
 import DashboardRekapitulasi from "./pages/DashboardRekapitulasi";
 import AiMatchRecommendation from "./pages/AiMatchRecommendation";
 import PenempatanMonitoring from "./pages/PenempatanMonitoring";
@@ -12,6 +13,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="login" element={<Login />} />
+      <Route path="daftar" element={<Daftar />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard-rekapitulasi" replace />} />

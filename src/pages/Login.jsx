@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL } from "../auth/roles";
 
@@ -120,6 +120,13 @@ export default function Login() {
             {submitting && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
             {submitting ? "Memproses..." : "Masuk"}
           </button>
+
+          <p className="text-center font-body-md text-body-md text-secondary">
+            Belum punya akun?{" "}
+            <Link to="/daftar" className="font-label-lg text-label-lg text-primary hover:underline">
+              Daftar
+            </Link>
+          </p>
         </form>
 
         {import.meta.env.DEV && (
