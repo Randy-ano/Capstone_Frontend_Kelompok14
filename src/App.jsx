@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import CutiShift from "./pages/CutiShift";
 import DashboardRekapitulasi from "./pages/DashboardRekapitulasi";
+import Dokumen from "./pages/Dokumen";
 import JadwalInterview from "./pages/JadwalInterview";
 import KelolaPegawai from "./pages/KelolaPegawai";
 import RekomendasiKandidat from "./pages/RekomendasiKandidat";
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="pengajuan-cuti-shift" element={<CutiShift />} />
           <Route path="monitoring-kinerja" element={<MonitoringKinerja />} />
           <Route path="tiket-komplain-klien" element={<TiketKomplain />} />
+          <Route path="dokumen-quotation-po" element={<Dokumen />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
       </Route>

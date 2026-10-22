@@ -36,7 +36,7 @@ export const NAV_GROUPS = [
       { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [ACCOUNT_MANAGER, MANAGER] },
       { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, MANAGER] },
       { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
-      { path: "/dokumen-quotation-po", label: "Dokumen (Quotation & PO)", icon: "description" },
+      { path: "/dokumen-quotation-po", label: "Dokumen (Quotation & PO)", icon: "description", ready: true },
     ],
   },
   {
