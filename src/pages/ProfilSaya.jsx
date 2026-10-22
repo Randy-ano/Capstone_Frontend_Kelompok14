@@ -11,6 +11,11 @@ const FIELD_PROFIL = ["nama_lengkap", "tanggal_lahir", "nomor_telepon", "domisil
 
 const PENDIDIKAN_KOSONG = { jenjang: "", nama_institusi: "", jurusan: "", tahun_mulai: "", tahun_selesai: "", deskripsi: "" };
 const PENGALAMAN_KOSONG = { nama_perusahaan: "", posisi: "", jenis_pekerjaan: "", lokasi: "", tanggal_mulai: "", tanggal_selesai: "", masih_bekerja: false, deskripsi: "" };
+const SERTIFIKAT_KOSONG = { nama_sertifikat: "", penerbit: "", tanggal_terbit: "", tanggal_kedaluwarsa: "", url_sertifikat: "" };
+const BAHASA_KOSONG = { nama_bahasa: "", tingkat_kemampuan: "" };
+// Sama dengan UpdateTalentProfileRequest::TINGKAT_BAHASA di backend.
+const TINGKAT_BAHASA = ["Dasar", "Menengah", "Fasih", "Penutur Asli"];
+const SARAN_BAHASA = ["Indonesia", "Inggris", "Mandarin", "Jepang", "Korea", "Arab", "Jerman", "Belanda", "Prancis"];
 
 // Data API → isian form (null menjadi "" agar input terkendali).
 const keString = (v) => (v == null ? "" : String(v));
@@ -22,6 +27,8 @@ function keForm(p) {
       ...Object.fromEntries(Object.keys(PENGALAMAN_KOSONG).map((f) => [f, keString(r[f])])),
       masih_bekerja: Boolean(r.masih_bekerja),
     })),
+    sertifikat: p.sertifikat.map((r) => Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, keString(r[f])]))),
+    bahasa: p.bahasa.map((r) => ({ nama_bahasa: r.nama_bahasa, tingkat_kemampuan: keString(r.tingkat_kemampuan) })),
     kompetensi: p.kompetensi.map((k) => k.id_kompetensi),
   };
 }
@@ -51,6 +58,8 @@ function keBody(form) {
     tanggal_selesai: r.masih_bekerja ? null : kosongNull(r.tanggal_selesai),
     deskripsi: kosongNull(r.deskripsi),
   }));
+  body.sertifikat = form.sertifikat.map((r) => Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, kosongNull(r[f])])));
+  body.bahasa = form.bahasa.map((r) => ({ nama_bahasa: kosongNull(r.nama_bahasa), tingkat_kemampuan: kosongNull(r.tingkat_kemampuan) }));
   return body;
 }
 
@@ -319,6 +328,73 @@ export default function ProfilSaya() {
             <Kosong>Belum ada kompetensi.</Kosong>
           )}
           {e("id_kompetensi") && <p className="font-body-sm text-body-sm text-error">{e("id_kompetensi")}</p>}
+        </Bagian>
+
+        <Bagian
+          ikon="workspace_premium"
+          judul="Sertifikat"
+          keterangan="Opsional. Ditampilkan di CV Anda."
+          aksi={<TombolTambah onClick={() => tambahBaris("sertifikat", SERTIFIKAT_KOSONG)} />}
+        >
+          {form.sertifikat.length === 0 && <Kosong>Belum ada sertifikat.</Kosong>}
+          {form.sertifikat.map((r, i) => {
+            const ef = (f) => e(`sertifikat.${i}.${f}`);
+            const set = (f) => (ev) => ubahBaris("sertifikat", i, f, ev.target.value);
+            return (
+              <KartuBaris key={i} judul={`Sertifikat ${i + 1}`} onHapus={() => hapusBaris("sertifikat", i)}>
+                <Field label="Nama sertifikat" wajib error={ef("nama_sertifikat")}>
+                  <input value={r.nama_sertifikat} onChange={set("nama_sertifikat")} maxLength={255} placeholder="Contoh: AWS Certified Developer" className={inputClass(ef("nama_sertifikat"))} />
+                </Field>
+                <Field label="Penerbit" error={ef("penerbit")}>
+                  <input value={r.penerbit} onChange={set("penerbit")} maxLength={255} placeholder="Contoh: Amazon Web Services" className={inputClass(ef("penerbit"))} />
+                </Field>
+                <Field label="Tanggal terbit" error={ef("tanggal_terbit")}>
+                  <input type="date" value={r.tanggal_terbit} onChange={set("tanggal_terbit")} className={inputClass(ef("tanggal_terbit"))} />
+                </Field>
+                <Field label="Berlaku sampai" error={ef("tanggal_kedaluwarsa")}>
+                  <input type="date" value={r.tanggal_kedaluwarsa} onChange={set("tanggal_kedaluwarsa")} className={inputClass(ef("tanggal_kedaluwarsa"))} />
+                </Field>
+                <Field label="Tautan verifikasi" error={ef("url_sertifikat")} className="sm:col-span-2">
+                  <input type="url" value={r.url_sertifikat} onChange={set("url_sertifikat")} maxLength={255} placeholder="https://..." className={inputClass(ef("url_sertifikat"))} />
+                </Field>
+              </KartuBaris>
+            );
+          })}
+        </Bagian>
+
+        <Bagian
+          ikon="translate"
+          judul="Bahasa"
+          keterangan="Opsional. Bahasa yang Anda kuasai beserta tingkat kemampuannya; ditampilkan di CV."
+          aksi={<TombolTambah onClick={() => tambahBaris("bahasa", BAHASA_KOSONG)} />}
+        >
+          {form.bahasa.length === 0 && <Kosong>Belum ada bahasa.</Kosong>}
+          <datalist id="opsi-bahasa">
+            {SARAN_BAHASA.map((b) => (
+              <option key={b} value={b} />
+            ))}
+          </datalist>
+          {form.bahasa.map((r, i) => {
+            const ef = (f) => e(`bahasa.${i}.${f}`);
+            const set = (f) => (ev) => ubahBaris("bahasa", i, f, ev.target.value);
+            return (
+              <KartuBaris key={i} judul={`Bahasa ${i + 1}`} onHapus={() => hapusBaris("bahasa", i)}>
+                <Field label="Bahasa" wajib error={ef("nama_bahasa")}>
+                  <input list="opsi-bahasa" value={r.nama_bahasa} onChange={set("nama_bahasa")} maxLength={100} placeholder="Contoh: Inggris" className={inputClass(ef("nama_bahasa"))} />
+                </Field>
+                <Field label="Tingkat kemampuan" wajib error={ef("tingkat_kemampuan")}>
+                  <select value={r.tingkat_kemampuan} onChange={set("tingkat_kemampuan")} className={inputClass(ef("tingkat_kemampuan"))}>
+                    <option value="">Pilih tingkat</option>
+                    {TINGKAT_BAHASA.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </KartuBaris>
+            );
+          })}
         </Bagian>
 
         <BagianCv profil={profil} adaPerubahan={berubah} onCvDibuat={(data) => setProfil((p) => ({ ...p, ada_cv: data.ada_cv }))} />
