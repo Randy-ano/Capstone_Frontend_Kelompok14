@@ -5,15 +5,24 @@ import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
 import { KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, useTunda } from "../components/ui";
 import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
+import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 
 const PER_PAGE = 10;
 
+const TAB_TALENT = [
+  { key: "penempatan", label: "Penempatan", ikon: "assignment_ind" },
+  { key: "monitoring", label: "Monitoring", ikon: "monitoring" },
+];
+
 // Halaman Penugasan Penempatan (FR-17): placement sesuai scope; TS/Manager mengakhiri placement (R20).
+// Talent ("Penempatan Saya") juga punya tab Monitoring berisi catatan kinerja tentang dirinya (FR-15).
 export default function Penempatan() {
   const { user } = useAuth();
   const internal = INTERNAL.includes(user.role);
+  const talent = user.role === ROLE.TALENT;
   const [params, setParams] = useSearchParams();
   const dipilih = params.get("placement");
+  const tab = talent && params.get("tab") === "monitoring" ? "monitoring" : "penempatan";
 
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
@@ -64,106 +73,132 @@ export default function Penempatan() {
   const adaFilter = Boolean(search || status || klien);
 
   const keterangan =
-    user.role === ROLE.TALENT
-      ? "Penempatan Anda di klien PT Intellisys."
+    talent
+      ? "Penempatan Anda di klien PT Intellisys dan catatan monitoring kinerja Anda."
       : user.role === ROLE.HR_CLIENT
         ? "Talent PT Intellisys yang ditempatkan di perusahaan Anda."
         : "Talent yang sudah ditempatkan di klien. Placement dibuat dari evaluasi yang diterima di halaman Pengajuan Kandidat.";
 
   return (
     <div className="flex flex-col w-full pb-space-xl">
-      <KepalaHalaman ikon="assignment_ind" kategori="Talent Management" judul="Penugasan Penempatan">
+      <KepalaHalaman ikon="assignment_ind" kategori="Talent Management" judul={talent ? "Penempatan Saya" : "Penugasan Penempatan"}>
         {keterangan}
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
-          <PilihFilter
-            ikon="filter_alt"
-            label="Status placement"
-            value={status}
-            onChange={(n) => {
-              setStatus(n);
-              setPage(1);
-            }}
-            semua="Semua Status"
-            opsi={Object.entries(STATUS_PLACEMENT).map(([v, s]) => [v, s.label])}
-          />
-          {internal && (
-            <PilihFilter
-              ikon="business"
-              label="Klien"
-              value={klien}
-              onChange={(n) => {
-                setKlien(n);
-                setPage(1);
-              }}
-              semua="Semua Klien"
-              opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])}
-            />
-          )}
-        </div>
-
-        {error && <Pesan>{error}</Pesan>}
-
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Talent</th>
-                  <th className="py-3 px-4">Posisi</th>
-                  <th className="py-3 px-4">Klien</th>
-                  <th className="py-3 px-4">Periode</th>
-                  <th className="py-3 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat penempatan...
-                    </td>
-                  </tr>
-                )}
-                {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
-                    </td>
-                  </tr>
-                )}
-                {hasil?.data.map((pl) => (
-                  <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                    <td className="py-3 px-4">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          buka(pl.id_placement);
-                        }}
-                        className="text-left group"
-                      >
-                        <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</span>
-                      </button>
-                    </td>
-                    <td className="py-3 px-4 text-on-surface">{pl.posisi_penempatan}</td>
-                    <td className="py-3 px-4 text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
-                    <td className="py-3 px-4 whitespace-nowrap text-on-surface-variant">
-                      {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <PlacementBadge status={pl.status_placement} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {talent && (
+          <div className="inline-flex self-start p-1 bg-surface-container rounded-full shadow-sm" role="tablist">
+            {TAB_TALENT.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setParams(t.key === "penempatan" ? {} : { tab: t.key })}
+                className={`px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
+                  tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[18px]">{t.ikon}</span>
+                {t.label}
+              </button>
+            ))}
           </div>
-          {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="penempatan" />}
-        </div>
+        )}
+
+        {tab === "monitoring" ? (
+          <TabMonitoringTalent />
+        ) : (
+          <>
+            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+              <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
+              <PilihFilter
+                ikon="filter_alt"
+                label="Status placement"
+                value={status}
+                onChange={(n) => {
+                  setStatus(n);
+                  setPage(1);
+                }}
+                semua="Semua Status"
+                opsi={Object.entries(STATUS_PLACEMENT).map(([v, s]) => [v, s.label])}
+              />
+              {internal && (
+                <PilihFilter
+                  ikon="business"
+                  label="Klien"
+                  value={klien}
+                  onChange={(n) => {
+                    setKlien(n);
+                    setPage(1);
+                  }}
+                  semua="Semua Klien"
+                  opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])}
+                />
+              )}
+            </div>
+
+            {error && <Pesan>{error}</Pesan>}
+
+            <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto w-full">
+                <table className={`w-full min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+                  <thead>
+                    <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
+                      <th className="py-3 px-4">Talent</th>
+                      <th className="py-3 px-4">Posisi</th>
+                      <th className="py-3 px-4">Klien</th>
+                      <th className="py-3 px-4">Periode</th>
+                      <th className="py-3 px-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
+                    {!hasil && memuat && (
+                      <tr>
+                        <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
+                          Memuat penempatan...
+                        </td>
+                      </tr>
+                    )}
+                    {hasil?.data.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
+                          {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
+                        </td>
+                      </tr>
+                    )}
+                    {hasil?.data.map((pl) => (
+                      <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                        <td className="py-3 px-4">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              buka(pl.id_placement);
+                            }}
+                            className="text-left group"
+                          >
+                            <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
+                            <span className="block font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</span>
+                          </button>
+                        </td>
+                        <td className="py-3 px-4 text-on-surface">{pl.posisi_penempatan}</td>
+                        <td className="py-3 px-4 text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
+                        <td className="py-3 px-4 whitespace-nowrap text-on-surface-variant">
+                          {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <PlacementBadge status={pl.status_placement} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="penempatan" />}
+            </div>
+          </>
+        )}
       </div>
 
       {dipilih && <PlacementDrawer id={dipilih} user={user} onClose={tutup} onChanged={muatUlang} />}
