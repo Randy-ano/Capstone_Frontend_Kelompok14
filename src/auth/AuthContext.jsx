@@ -18,14 +18,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Login dan registrasi sama-sama mengembalikan { token, user }; sesi disimpan dengan cara yang sama.
-  const mulaiSesi = useCallback((res) => {
-    tokenStore.set(res.data.token);
+  const mulaiSesi = useCallback((res, ingat = true) => {
+    tokenStore.set(res.data.token, ingat);
     setUser(res.data.user);
     return res.data.user;
   }, []);
 
   const login = useCallback(
-    async (email, password) => mulaiSesi(await api("/auth/login", { method: "POST", body: { email, password } })),
+    async (email, password, ingat = true) =>
+      mulaiSesi(await api("/auth/login", { method: "POST", body: { email, password } }), ingat),
     [mulaiSesi],
   );
 
