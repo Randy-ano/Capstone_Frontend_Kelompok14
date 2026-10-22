@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
@@ -44,6 +45,14 @@ export default function PermintaanKebutuhan() {
   const [opsiKompetensi, setOpsiKompetensi] = useState([]);
   const [dipilih, setDipilih] = useState(null);
   const [form, setForm] = useState(null); // null | { job: null } (buat) | { job } (ubah)
+  const [params, setParams] = useSearchParams();
+
+  // `?buat=1` dari tombol "Buat Permintaan" di header: buka form, lalu hapus parameternya.
+  useEffect(() => {
+    if (params.get("buat") !== "1") return;
+    if (kelola) setForm({ job: null });
+    setParams({}, { replace: true });
+  }, [params, setParams, kelola]);
 
   useEffect(() => setPage(1), [search]);
 

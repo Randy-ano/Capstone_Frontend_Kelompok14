@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser, initials } from "../auth/roles";
+import { bolehKelola } from "./jobRequirement/shared";
 import Lonceng from "./notifikasi/Lonceng";
 
-export default function Header({ title, onMenu }) {
+export default function Header({ grup, title, onMenu }) {
+  const { user } = useAuth();
   return (
     <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-md sm:px-space-lg flex items-center justify-between gap-space-md">
       <div className="flex items-center gap-space-sm sm:gap-space-md min-w-0">
@@ -17,43 +19,28 @@ export default function Header({ title, onMenu }) {
           <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
         <div className="flex items-center gap-2 min-w-0 font-body-sm text-body-sm text-on-surface-variant">
-          <span className="hidden sm:inline hover:text-primary transition-colors cursor-pointer">Platform</span>
-          <span className="hidden sm:inline material-symbols-outlined text-[16px]">chevron_right</span>
+          {grup && (
+            <>
+              <span className="hidden sm:inline">{grup}</span>
+              <span className="hidden sm:inline material-symbols-outlined text-[16px]">chevron_right</span>
+            </>
+          )}
           <span className="font-label-md text-label-md text-on-surface font-semibold truncate">{title}</span>
-        </div>
-        <div className="hidden xl:flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-fixed">
-          <span className="w-2 h-2 rounded-full bg-tertiary-container"></span>
-          <span className="font-label-sm text-label-sm font-medium">Sistem Aktif - Sinkronisasi Cloud</span>
-        </div>
-      </div>
-
-      <div className="hidden md:flex items-center gap-space-md flex-1 max-w-md mx-space-md">
-        <div className="relative w-full">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-          <input
-            className="w-full h-9 pl-9 pr-4 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
-            placeholder="Cari talent, klien, no. kontrak, skill..."
-            type="text"
-          />
         </div>
       </div>
 
       <div className="flex items-center gap-space-xs sm:gap-space-sm shrink-0">
-        <button
-          className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-sm"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          <span>Buat Requisisi / Tambah Talent</span>
-        </button>
+        {/* Aksi cepat: HR Client & AM membuat permintaan kebutuhan (R7); form dibuka di halaman Permintaan Kebutuhan. */}
+        {bolehKelola(user) && (
+          <Link
+            to="/permintaan-kebutuhan?buat=1"
+            className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span>Buat Permintaan</span>
+          </Link>
+        )}
         <Lonceng />
-        <button
-          className="hidden sm:block p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-          title="Pusat Bantuan"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[22px]">help</span>
-        </button>
         <div className="h-6 w-px bg-surface-container-high mx-1 hidden sm:block"></div>
         <UserMenu />
       </div>
