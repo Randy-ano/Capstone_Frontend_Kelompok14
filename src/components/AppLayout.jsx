@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import AksesDitolak from "../pages/AksesDitolak";
 import { useAuth } from "../auth/AuthContext";
-import { NAV_GROUPS, NAV_ITEMS, canAccess } from "../data/navigation";
+import { NAV_GROUPS, NAV_ITEMS, canAccess, labelUntuk } from "../data/navigation";
 
 export default function AppLayout() {
   const { user } = useAuth();
@@ -21,7 +21,7 @@ export default function AppLayout() {
     <>
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="lg:pl-72">
-        <Header grup={grup} title={current?.label ?? (pathname === "/notifikasi" ? "Notifikasi" : "Operasional Outsourcing")} onMenu={() => setMenuOpen(true)} />
+        <Header grup={grup} title={current ? labelUntuk(current, user.role) : (pathname === "/notifikasi" ? "Notifikasi" : "Operasional Outsourcing")} onMenu={() => setMenuOpen(true)} />
         <main className="w-full pt-16 bg-surface min-h-screen">{boleh ? <Outlet /> : <AksesDitolak />}</main>
       </div>
     </>

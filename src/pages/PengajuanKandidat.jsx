@@ -62,7 +62,7 @@ export default function PengajuanKandidat() {
       <KepalaHalaman
         ikon="send"
         kategori="Klien & Rekuisisi"
-        judul="Pengajuan Kandidat"
+        judul={user.role === ROLE.TALENT ? "Proses Seleksi" : "Pengajuan Kandidat"}
         aksi={
           user.role === ROLE.ACCOUNT_MANAGER && (
             <button
