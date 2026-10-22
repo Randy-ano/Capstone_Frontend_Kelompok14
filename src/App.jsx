@@ -20,6 +20,7 @@ import ProfilSaya from "./pages/ProfilSaya";
 import TalentPool from "./pages/TalentPool";
 import TiketKomplain from "./pages/TiketKomplain";
 import ComingSoon from "./pages/ComingSoon";
+import PengaturanAkun from "./pages/PengaturanAkun";
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="tiket-komplain-klien" element={<TiketKomplain />} />
           <Route path="dokumen-quotation-po" element={<Dokumen />} />
           <Route path="notifikasi" element={<Notifikasi />} />
+          <Route path="pengaturan-akun" element={<PengaturanAkun />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
       </Route>
