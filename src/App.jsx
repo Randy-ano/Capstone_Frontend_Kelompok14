@@ -12,6 +12,7 @@ import RekomendasiKandidat from "./pages/RekomendasiKandidat";
 import Penempatan from "./pages/Penempatan";
 import MasterDataSkill from "./pages/MasterDataSkill";
 import MonitoringKinerja from "./pages/MonitoringKinerja";
+import Notifikasi from "./pages/Notifikasi";
 import PengajuanKandidat from "./pages/PengajuanKandidat";
 import PermintaanKebutuhan from "./pages/PermintaanKebutuhan";
 import PipelineRekrutmen from "./pages/PipelineRekrutmen";
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="monitoring-kinerja" element={<MonitoringKinerja />} />
           <Route path="tiket-komplain-klien" element={<TiketKomplain />} />
           <Route path="dokumen-quotation-po" element={<Dokumen />} />
+          <Route path="notifikasi" element={<Notifikasi />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
       </Route>

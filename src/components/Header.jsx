@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser, initials } from "../auth/roles";
+import Lonceng from "./notifikasi/Lonceng";
 
 export default function Header({ title, onMenu }) {
   return (
@@ -45,16 +46,7 @@ export default function Header({ title, onMenu }) {
           <span className="material-symbols-outlined text-[18px]">add</span>
           <span>Buat Requisisi / Tambah Talent</span>
         </button>
-        <button
-          className="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
-          title="Notifikasi"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[22px]">notifications</span>
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center font-bold">
-            4
-          </span>
-        </button>
+        <Lonceng />
         <button
           className="hidden sm:block p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
           title="Pusat Bantuan"
