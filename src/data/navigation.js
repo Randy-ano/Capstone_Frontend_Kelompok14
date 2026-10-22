@@ -33,9 +33,9 @@ export const NAV_GROUPS = [
   {
     label: "Operasional & HR",
     items: [
-      { path: "/monitoring-kinerja-sla", label: "Monitoring Kinerja & SLA", icon: "monitoring", roles: INTERNAL },
-      { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", roles: [TALENT, HR_CLIENT, MANAGER] },
-      { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
+      { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [ACCOUNT_MANAGER, MANAGER] },
+      { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, MANAGER] },
+      { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
       { path: "/dokumen-quotation-po", label: "Dokumen (Quotation & PO)", icon: "description" },
     ],
   },
