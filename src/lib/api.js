@@ -22,14 +22,16 @@ export async function api(path, { method = "GET", body, blob = false } = {}) {
   const headers = { Accept: "application/json" };
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  // FormData (unggah file) dikirim apa adanya; browser yang mengisi Content-Type multipart.
+  const multipart = body instanceof FormData;
+  if (body !== undefined && !multipart) headers["Content-Type"] = "application/json";
 
   let response;
   try {
     response = await fetch(`${API_URL}${path}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined || multipart ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, "Tidak dapat terhubung ke server. Pastikan backend sudah berjalan.");
