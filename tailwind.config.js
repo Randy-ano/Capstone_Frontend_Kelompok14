@@ -6,6 +6,11 @@ export default {
   theme: {
     "extend": {
       "colors": {
+        // Aksen halaman masuk & daftar (mockup Stitch "Masuk"/"Daftar Akun Baru").
+        "aksen": "#e11d48",
+        "aksen-hover": "#be123c",
+        "aksen-container": "#fff1f2",
+        "panel-gelap": "#0f172a",
         "on-background": "#0b1c30",
         "on-secondary": "#ffffff",
         "inverse-surface": "#213145",

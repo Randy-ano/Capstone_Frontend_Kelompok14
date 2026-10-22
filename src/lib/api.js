@@ -11,10 +11,17 @@ export class ApiError extends Error {
   }
 }
 
+// "Ingat saya": token di localStorage (bertahan setelah browser ditutup); tanpa itu di sessionStorage (hilang saat tab ditutup).
 export const tokenStore = {
-  get: () => localStorage.getItem(TOKEN_KEY),
-  set: (token) => localStorage.setItem(TOKEN_KEY, token),
-  clear: () => localStorage.removeItem(TOKEN_KEY),
+  get: () => localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY),
+  set: (token, ingat = true) => {
+    tokenStore.clear();
+    (ingat ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+  },
+  clear: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+  },
 };
 
 // `blob: true` mengembalikan isi response sebagai Blob (mis. unduh PDF); error tetap dibaca sebagai JSON.
