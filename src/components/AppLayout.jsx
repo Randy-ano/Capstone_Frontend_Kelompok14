@@ -20,7 +20,7 @@ export default function AppLayout() {
     <>
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="lg:pl-72">
-        <Header title={current?.label ?? "Operasional Outsourcing"} onMenu={() => setMenuOpen(true)} />
+        <Header title={current?.label ?? (pathname === "/notifikasi" ? "Notifikasi" : "Operasional Outsourcing")} onMenu={() => setMenuOpen(true)} />
         <main className="w-full pt-16 bg-surface min-h-screen">{boleh ? <Outlet /> : <AksesDitolak />}</main>
       </div>
     </>
