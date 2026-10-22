@@ -3,7 +3,9 @@
 Frontend sistem outsourcing talent PT Intellisys: React (Vite), Tailwind CSS, React Router.
 Desain mengikuti mockup Stitch "Intellisys Talent Hub Design System".
 
-Backend (Laravel REST API) ada di repo terpisah: [Capstone_Kelompok14](https://github.com/Randy-ano/Capstone_Kelompok14). Ikuti `SETUP.md` di sana untuk menyiapkan backend dan database.
+Backend (Laravel REST API) ada di repo terpisah: [Capstone_Backend_Kelompok14](https://github.com/Randy-ano/Capstone_Backend_Kelompok14). Ikuti `README.md`/`SETUP.md` di sana untuk menyiapkan backend, database, queue, dan scheduler.
+
+Dokumentasi API (semua endpoint beserta contoh request/response): jalankan `php artisan scribe:generate` di repo backend lalu buka http://localhost:8000/docs. File OpenAPI ada di http://localhost:8000/docs.openapi dan koleksi Postman di http://localhost:8000/docs.postman.
 
 ## Cara Menjalankan
 
@@ -32,10 +34,27 @@ Dari seeder backend, password semuanya `password`. Saat `npm run dev`, daftar ak
 
 ## Status
 
-| Bagian | Kondisi |
+Semua halaman memakai API backend asli (tanpa data mockup). Menu & halaman yang tampil mengikuti role; hak akses tetap ditegakkan backend.
+
+| Halaman | Role |
 |---|---|
-| Login, sesi, logout, menu sesuai role | Tersambung ke API backend |
-| Halaman lain (dashboard, permintaan kebutuhan, dst.) | Masih data mockup; disambungkan ke API setelah endpoint-nya tersedia di backend |
+| Login, daftar akun talent / HR Client, lonceng & halaman notifikasi | Semua |
+| Dashboard Rekapitulasi (kartu ringkasan per role; analitik R32 untuk Manager) | Semua |
+| Pipeline Rekrutmen (progres & SLA) | Internal |
+| Profil & CV Saya | Talent |
+| Talent Pool | Internal |
+| Rekomendasi Kandidat & screening | Talent Support |
+| Permintaan Kebutuhan (job requirement) | HR Client, internal |
+| Pengajuan Kandidat, Jadwal Interview, Penugasan Penempatan | Semua (data sesuai role) |
+| Monitoring Kinerja | Account Manager, Manager |
+| Pengajuan Cuti & Shift | Talent, HR Client, Manager |
+| Tiket Komplain Klien | HR Client, Account Manager, Manager |
+| Dokumen (Quotation & PO) + tanda tangan | Semua (data sesuai role) |
+| Master Data Skill | Talent Support, Manager |
+| Kelola Akun Pegawai | Manager |
+| Pengaturan Akun | Belum dibuat (di luar spec backend) |
+
+Hasil uji black box per fitur ada di [`docs/testing/`](docs/testing/).
 
 ## Struktur
 
