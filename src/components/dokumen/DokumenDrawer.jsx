@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../lib/api";
 import { Memuat, Pesan, errorField, formatTanggalWaktu } from "../ui";
-import { JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDokumenBadge, unduhDokumen } from "./shared";
+import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDokumenBadge, unduhDokumen } from "./shared";
 
 const tombol = "flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg font-label-lg text-label-lg transition-all disabled:opacity-50";
 
@@ -144,7 +144,12 @@ function AturPenandatangan({ dokumen, onBerhasil }) {
 
   return (
     <div className="bg-surface-container-low rounded-lg p-space-sm space-y-space-sm">
-      <div className="font-label-md text-label-md text-on-surface">Pilih penandatangan</div>
+      <div>
+        <div className="font-label-md text-label-md text-on-surface">Pilih penandatangan</div>
+        {ATURAN_PENANDATANGAN[dokumen.jenis_dokumen] && (
+          <div className="font-body-sm text-body-sm text-on-surface-variant">Untuk dokumen ini: {ATURAN_PENANDATANGAN[dokumen.jenis_dokumen]}</div>
+        )}
+      </div>
       {error && <Pesan>{errorField(error, "id_user") ?? error.message}</Pesan>}
       {!calon && !error && <Memuat />}
       <ul className="max-h-60 overflow-y-auto space-y-1">

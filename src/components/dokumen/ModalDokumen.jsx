@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { INTERNAL } from "../../auth/roles";
+import { INTERNAL, ROLE } from "../../auth/roles";
 import { Pesan, errorField } from "../ui";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
@@ -59,6 +59,12 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
   return (
     <Modal judul="Unggah Dokumen" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}>{kirim ? "Mengunggah..." : "Unggah"}</button>}>
       {error && <Pesan>{error.message}</Pesan>}
+      {user.role === ROLE.TALENT && (
+        <p className="flex items-start gap-space-sm rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm text-on-surface-variant">
+          <span className="material-symbols-outlined text-[18px] text-primary">info</span>
+          Dokumen yang Anda unggah langsung menunggu tanda tangan Anda sendiri; penandatangan tidak perlu dipilih.
+        </p>
+      )}
       <Field label="File" wajib error={e("file")} keterangan="PDF, DOC, DOCX, PNG, atau JPG; maksimal 5 MB.">
         <input
           type="file"

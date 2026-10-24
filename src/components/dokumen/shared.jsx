@@ -12,6 +12,16 @@ export const JENIS_DOKUMEN = {
   lainnya: { label: "Lainnya", ikon: "description" },
 };
 
+// Siapa yang boleh menandatangani per jenis dokumen (R27, sama dengan DokumenService::calonPenandatangan di backend).
+export const ATURAN_PENANDATANGAN = {
+  quotation: "Account Manager, Manager, dan HR Client dari klien dokumen.",
+  purchase_order: "Account Manager, Manager, dan HR Client dari klien dokumen.",
+  pks: "Account Manager, Manager, dan HR Client dari klien dokumen.",
+  kontrak_kerja: "Talent terkait, Account Manager, dan Manager.",
+  surat_peringatan: "Talent terkait, Account Manager, dan Manager.",
+  lainnya: "Account Manager, Manager, HR Client dari klien dokumen, dan talent terkait.",
+};
+
 export const STATUS_DOKUMEN = {
   draft: { label: "Draft", className: "bg-surface-container-high text-on-surface-variant" },
   menunggu_ttd: { label: "Menunggu Tanda Tangan", className: "bg-secondary-container text-on-secondary-fixed" },
