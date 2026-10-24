@@ -27,3 +27,18 @@
 | D-12 | Scope talent | Login talent; unggah `Kontrak Kerja Budi.pdf` jenis Lainnya | - | Hanya kontrak miliknya tampil; dokumen baru otomatis atas nama Budi; unduh quotation klien 403 | Sesuai | Lulus |
 | D-13 | Talent Support | Login TS | - | Melihat semua dokumen tanpa tombol unggah/template; API generate 403 | Sesuai | Lulus |
 | D-HP | Tampilan HP | Lebar 375px: daftar, modal template, drawer | - | Tanpa scroll horizontal; modal & drawer selebar layar | 375 / 375 / 375 | Lulus |
+
+## Revisi 2026-10-24 — calon penandatangan per jenis dokumen & unggahan talent
+
+Baris D-03 (calon "internal + HR") dan D-12 (unggahan talent berstatus draft) di atas diuji 2026-10-22 dengan aturan lama. Aturan baru (R27): quotation/PO/PKS → AM, Manager, HR Client klien dokumen; kontrak kerja/surat peringatan → talent terkait, AM, Manager; lainnya → AM, Manager, HR Client klien, talent terkait; Talent Support tidak pernah menjadi penandatangan; dokumen unggahan talent otomatis ditandatangani talent itu sendiri. Diuji 2026-10-24 di Chrome (headless).
+
+| ID | Skenario | Langkah | Input | Hasil yang Diharapkan | Hasil Aktual | Status |
+|----|----------|---------|-------|-----------------------|--------------|--------|
+| R-01 | Calon kontrak kerja | AM unggah kontrak kerja untuk penempatan Budi, buka drawer | `kontrak-budi.pdf` | Pilihan: Andi Pratama (AM), Hendra Gunawan (Manager), Budi Santoso (talent); tanpa Sari Wulandari (HR) & Rina Kartika (TS); keterangan "Untuk dokumen ini: Talent terkait, Account Manager, dan Manager." | Sesuai | Lulus |
+| R-02 | Calon quotation | AM buat quotation PT Maju Jaya, buka drawer | `QUO/UJI/001` | Pilihan: Andi Pratama, Sari Wulandari, Hendra Gunawan; tanpa Budi (talent) & Rina (TS) | Sesuai | Lulus |
+| R-03 | Penandatangan di luar aturan | `POST /dokumen/{quotation}/penandatangan` berisi talent | `id_user` Budi | 422 "Penandatangan tidak sesuai jenis dokumen. Pilih dari daftar calon penandatangan." | Sesuai | Lulus |
+| R-04 | Catatan unggah talent | Login talent → **Unggah Dokumen** | - | Catatan "Dokumen yang Anda unggah langsung menunggu tanda tangan Anda sendiri; penandatangan tidak perlu dipilih." | Sesuai | Lulus |
+| R-05 | Talent langsung tanda tangan | Unggah `uji.pdf` jenis Lainnya | - | Drawer: status Menunggu Tanda Tangan, penandatangan Budi; bagian "Tanda Tangan Anda" dengan tombol **Tanda Tangani**; tanpa "Pilih penandatangan" | Sesuai | Lulus |
+| R-06 | Talent menandatangani | Unggah gambar tanda tangan → **Tanda Tangani** | `ttd.png` | "Dokumen telah ditandatangani semua pihak." | Sesuai | Lulus |
+| R-07 | Talent tidak bisa mengatur | `GET /dokumen/{id}/calon-penandatangan` token talent | - | 403 "Penandatangan dokumen yang diunggah talent ditentukan otomatis (talent itu sendiri)." | Sesuai | Lulus |
+| R-08 | Tampilan HP (talent) | Drawer di lebar 390 px | - | Tanpa geser samping | Lebar 390 px | Lulus |

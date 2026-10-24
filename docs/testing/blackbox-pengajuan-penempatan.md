@@ -38,3 +38,19 @@
 | F-HP/penugasan-penempatan | Tampilan HP | 375px, buka drawer | - | Sama | `scrollWidth` 375, drawer 375px | Lulus |
 
 Catatan: notifikasi ke talent/HR Client saat interview dijadwalkan (R16, R30) dibuat di Fase 8.
+
+## Revisi 2026-10-24 — interview khusus Account Manager
+
+Baris F-05 s.d. F-08 di atas diuji 2026-10-21 saat HR Client masih boleh mengatur interview. Sejak revisi ini `POST /interview` dan `PUT /interview/{id}` (jadwalkan, jadwal ulang, tandai selesai/batalkan) **hanya Account Manager**; HR Client & talent hanya melihat. Diuji ulang 2026-10-24 di Chrome (headless) dengan kandidat baru Elisa Humaira Aryani (diajukan AM → dilanjutkan HR ke interview).
+
+| ID | Skenario | Langkah | Input | Hasil yang Diharapkan | Hasil Aktual | Status |
+|----|----------|---------|-------|-----------------------|--------------|--------|
+| R-01 | HR tidak bisa menjadwalkan | `POST /interview` dengan token HR (klien sendiri) | tanggal hari ini, 08:00 | 403 "Anda tidak memiliki akses ke fitur ini." | Sesuai | Lulus |
+| R-02 | Talent tidak bisa menjadwalkan | `POST /interview` dengan token talent | sama | 403 | 403 | Lulus |
+| R-03 | AM menjadwalkan | `POST /interview` dengan token AM | sama | 201 "Interview berhasil dijadwalkan." | Sesuai | Lulus |
+| R-04 | HR tidak bisa menandai selesai | `PUT /interview/{id}` status selesai, token HR | - | 403 "Anda tidak memiliki akses ke fitur ini." | Sesuai | Lulus |
+| R-05 | UI HR hanya melihat | Login HR → **Jadwal Interview** → klik baris Elisa | - | Keterangan "Jadwal diatur oleh Account Manager…"; drawer menampilkan Ronde 1 tanpa tombol Jadwalkan/Tandai Selesai/Jadwal Ulang/Batalkan; evaluasi: "…setelah minimal 1 interview ditandai selesai oleh Account Manager." | Sesuai | Lulus |
+| R-06 | UI talent hanya melihat | Login talent Elisa → **Jadwal Interview** → klik baris | - | Sama seperti R-05 (tanpa tombol) | Sesuai | Lulus |
+| R-07 | UI AM mengatur | Login AM → **Jadwal Interview** → klik baris Elisa | - | Tombol Jadwalkan, Tandai Selesai, Jadwal Ulang, Batalkan tampil | Sesuai | Lulus |
+| R-08 | AM menandai selesai | **Tandai Selesai** | - | Status interview menjadi Selesai | `GET /interview` → `selesai` | Lulus |
+| R-09 | Tampilan HP (HR) | Drawer di lebar 390 px | - | Tanpa geser samping | Lebar 390 px | Lulus |
