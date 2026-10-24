@@ -9,9 +9,9 @@ import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 const PER_PAGE = 10;
 
 const KETERANGAN = {
-  [ROLE.HR_CLIENT]: "Tinjau kandidat yang diajukan PT Intellisys, jadwalkan interview, lalu beri evaluasi.",
+  [ROLE.HR_CLIENT]: "Tinjau kandidat yang diajukan PT Intellisys, pantau jadwal interview dari Account Manager, lalu beri evaluasi.",
   [ROLE.TALENT]: "Pantau proses Anda: diajukan ke klien, interview, sampai hasil evaluasi.",
-  [ROLE.ACCOUNT_MANAGER]: "Ajukan kandidat yang lolos screening ke klien dan pantau proses interview hingga evaluasi.",
+  [ROLE.ACCOUNT_MANAGER]: "Ajukan kandidat yang lolos screening ke klien, jadwalkan interview dan tandai selesai, lalu pantau hingga evaluasi.",
 };
 
 // Halaman Pengajuan Kandidat (FR-10, 11, 12, 17): AM mengajukan, HR Client meninjau/interview/evaluasi, TS membuat placement.

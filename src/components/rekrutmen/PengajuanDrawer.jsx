@@ -207,7 +207,7 @@ function Tinjau({ p, onBerhasil }) {
   );
 }
 
-// R16: daftar ronde interview + jadwalkan / jadwal ulang / selesai / batalkan (AM & HR Client).
+// R16: daftar ronde interview + jadwalkan / jadwal ulang / selesai / batalkan (khusus Account Manager).
 function Interviews({ p, user, terbuka, onBerhasil }) {
   const [tambah, setTambah] = useState(false);
   const atur = bolehAturInterview(user) && terbuka;
@@ -417,7 +417,7 @@ function Evaluasi({ p, user, bolehIsi, perluInterview, onBerhasil }) {
   if (!bolehIsi) {
     return perluInterview && user.role === ROLE.HR_CLIENT ? (
       <Bagian icon="rate_review" judul="Evaluasi Klien">
-        <p className="font-body-sm text-body-sm text-on-surface-variant">Evaluasi dapat diisi setelah minimal 1 interview ditandai selesai.</p>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">Evaluasi dapat diisi setelah minimal 1 interview ditandai selesai oleh Account Manager.</p>
       </Bagian>
     ) : null;
   }

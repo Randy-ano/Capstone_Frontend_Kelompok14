@@ -50,7 +50,8 @@ export function tahapPengajuan(p) {
 export const INTERVIEW_FINAL = ["selesai", "dibatalkan"];
 
 // Siapa boleh melakukan apa (sama dengan aturan backend; backend tetap memeriksa).
-export const bolehAturInterview = (user) => [ROLE.ACCOUNT_MANAGER, ROLE.HR_CLIENT].includes(user.role);
+// R16: interview dibuat, dijadwal ulang, dan ditandai selesai/dibatalkan hanya oleh Account Manager; HR Client & talent hanya melihat.
+export const bolehAturInterview = (user) => user.role === ROLE.ACCOUNT_MANAGER;
 export const bolehTinjau = (user) => user.role === ROLE.HR_CLIENT;
 export const bolehPlacement = (user) => user.role === ROLE.TALENT_SUPPORT;
 export const bolehAkhiriPlacement = (user) => [ROLE.TALENT_SUPPORT, ROLE.MANAGER].includes(user.role);
