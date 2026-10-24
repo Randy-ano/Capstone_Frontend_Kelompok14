@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { KepalaHalaman, Pagination, Pesan, PilihFilter } from "../components/ui";
-import { InterviewBadge, STATUS_INTERVIEW, formatJadwal, hariIni } from "../components/rekrutmen/shared";
+import { InterviewBadge, STATUS_INTERVIEW, bolehAturInterview, formatJadwal, hariIni } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
 const PER_PAGE = 15;
@@ -48,7 +48,10 @@ export default function JadwalInterview() {
   return (
     <div className="flex flex-col w-full pb-space-xl">
       <KepalaHalaman ikon="event_available" kategori="Klien & Rekuisisi" judul="Jadwal Interview">
-        Jadwal interview kandidat, urut dari yang terdekat. Klik baris untuk melihat detail, menandai selesai, menjadwal ulang, atau membatalkan.
+        Jadwal interview kandidat, urut dari yang terdekat.{" "}
+        {bolehAturInterview(user)
+          ? "Klik baris untuk melihat detail, menandai selesai, menjadwal ulang, atau membatalkan."
+          : "Jadwal diatur oleh Account Manager PT Intellisys; klik baris untuk melihat detail."}
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
