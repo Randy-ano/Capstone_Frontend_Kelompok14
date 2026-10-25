@@ -60,15 +60,10 @@ export function StatusApproval({ label, approval }) {
   );
 }
 
-export const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+export const inputClass = (error) => `input ${error ? "input-error" : ""}`;
 
-export const tombol = "flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg font-label-md text-label-md transition-all disabled:opacity-50";
-export const tombolUtama = `${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`;
-export const tombolHalaman =
-  "w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-md";
+export const tombolUtama = "tombol-utama";
+export const tombolHalaman = "tombol-utama w-full md:w-auto";
 
 export function Field({ label, wajib, error, keterangan, className = "", children }) {
   return (
@@ -104,13 +99,13 @@ export function Modal({ judul, sibuk, onClose, onSubmit, aksi, children }) {
       >
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
           <h2 className="font-title-md text-title-md text-on-surface">{judul}</h2>
-          <button type="button" onClick={onClose} disabled={sibuk} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} disabled={sibuk} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">{children}</div>
         <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
-          <button type="button" onClick={onClose} disabled={sibuk} className="h-10 px-4 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+          <button type="button" onClick={onClose} disabled={sibuk} className="tombol-kedua">
             Batal
           </button>
           {aksi}
