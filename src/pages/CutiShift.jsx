@@ -37,7 +37,7 @@ export default function CutiShift() {
               role="tab"
               aria-selected={tab === t.key}
               onClick={() => setParams(t.key === "cuti" ? {} : { tab: t.key })}
-              className={`px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
+              className={`min-h-[40px] px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
                 tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
               }`}
             >

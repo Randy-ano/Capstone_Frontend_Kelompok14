@@ -67,7 +67,7 @@ export default function JadwalInterview() {
             semua="Semua Status"
             opsi={Object.entries(STATUS_INTERVIEW).map(([v, s]) => [v, s.label])}
           />
-          <label className="flex items-center gap-space-sm h-10 px-3 rounded-lg bg-surface-container-low font-label-md text-label-md text-on-surface cursor-pointer">
+          <label className="flex items-center gap-space-sm min-h-[40px] px-3 rounded-lg bg-surface-container-lowest ring-1 ring-inset ring-outline-variant font-label-md text-label-md text-on-surface cursor-pointer">
             <input
               type="checkbox"
               checked={lewat}

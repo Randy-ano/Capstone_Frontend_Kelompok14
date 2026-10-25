@@ -77,7 +77,7 @@ export default function DashboardRekapitulasi() {
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         {error && <Pesan>{error}</Pesan>}
         {!ringkasan && !error && (
-          <div data-memuat role="status" aria-busy="true" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
+          <div data-memuat role="status" aria-busy="true" className="grid grid-cols-2 xl:grid-cols-3 gap-space-sm sm:gap-space-md">
             <span className="sr-only">Memuat ringkasan...</span>
             {Array.from({ length: 6 }, (_, i) => (
               <div key={i} className="kartu p-space-md space-y-space-sm">
@@ -90,7 +90,7 @@ export default function DashboardRekapitulasi() {
         )}
 
         {ringkasan && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-space-sm sm:gap-space-md">
             {ringkasan.kartu.map((k) => (
               <KartuTujuan key={k.kunci} kartu={k} />
             ))}

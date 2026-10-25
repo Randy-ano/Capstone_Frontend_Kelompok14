@@ -87,7 +87,7 @@ export default function Notifikasi() {
               role="tab"
               aria-selected={status === v}
               onClick={() => (setStatus(v), setPage(1))}
-              className={`px-4 py-2 rounded-full font-label-md text-label-md transition-all ${status === v ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
+              className={`min-h-[40px] px-4 py-2 rounded-full font-label-md text-label-md transition-all ${status === v ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
             >
               {label}
             </button>

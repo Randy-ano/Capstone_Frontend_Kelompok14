@@ -149,7 +149,7 @@ export default function PermintaanKebutuhan() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-sm sm:gap-space-md">
           {kartu.map((k) => (
             <KartuRingkasan key={k.label} {...k} />
           ))}

@@ -71,7 +71,7 @@ export default function TiketKomplain() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-sm sm:gap-space-md">
           {KARTU.map((k) => (
             <KartuRingkasan
               key={k.key}
