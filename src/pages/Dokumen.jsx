@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, formatTanggal, useTunda } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, formatTanggal, useTunda } from "../components/ui";
 import { JENIS_DOKUMEN, STATUS_DOKUMEN, StatusDokumenBadge } from "../components/dokumen/shared";
 import { ModalGenerate, ModalUnggah } from "../components/dokumen/ModalDokumen";
 import DokumenDrawer from "../components/dokumen/DokumenDrawer";
@@ -70,13 +70,13 @@ export default function Dokumen() {
         aksi={
           <div className="flex flex-col md:flex-row gap-space-sm">
             {user.role === ROLE.ACCOUNT_MANAGER && (
-              <button type="button" onClick={() => (setSukses(""), setModal("generate"))} className="flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-surface-container-lowest text-primary hover:bg-surface-container font-label-md text-label-md shadow-sm">
+              <button type="button" onClick={() => (setSukses(""), setModal("generate"))} className="tombol-kedua">
                 <span className="material-symbols-outlined text-[18px]">note_add</span>
                 Buat dari Template
               </button>
             )}
             {BOLEH_UNGGAH.includes(user.role) && (
-              <button type="button" onClick={() => (setSukses(""), setModal("unggah"))} className="flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-md">
+              <button type="button" onClick={() => (setSukses(""), setModal("unggah"))} className="tombol-utama">
                 <span className="material-symbols-outlined text-[18px]">upload_file</span>
                 Unggah Dokumen
               </button>
@@ -88,7 +88,7 @@ export default function Dokumen() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama file, klien, atau talent..." />
           <PilihFilter ikon="category" label="Jenis dokumen" value={jenis} onChange={(v) => (setJenis(v), setPage(1))} semua="Semua Jenis" opsi={Object.entries(JENIS_DOKUMEN).map(([v, j]) => [v, j.label])} />
           <PilihFilter ikon="filter_alt" label="Status dokumen" value={status} onChange={(v) => (setStatus(v), setPage(1))} semua="Semua Status" opsi={Object.entries(STATUS_DOKUMEN).map(([v, s]) => [v, s.label])} />
@@ -96,7 +96,9 @@ export default function Dokumen() {
             type="button"
             aria-pressed={perluTtd}
             onClick={() => (setPerluTtd((x) => !x), setPage(1))}
-            className={`h-10 px-3 rounded-lg flex items-center justify-center gap-1.5 font-label-md text-label-md transition-colors ${perluTtd ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface hover:bg-surface-container"}`}
+            className={`min-h-[40px] px-3 rounded-lg flex items-center justify-center gap-1.5 font-label-md text-label-md transition-colors ${
+              perluTtd ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface ring-1 ring-inset ring-outline-variant hover:bg-surface-container-low"
+            }`}
           >
             <span className="material-symbols-outlined text-[18px]">draw</span>
             Perlu Tanda Tangan Saya
@@ -107,30 +109,30 @@ export default function Dokumen() {
         {error && <Pesan>{error}</Pesan>}
         {sukses && !dipilih && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat dokumen...</Memuat>}
           {hasil?.data.length === 0 && (
-            <p className="p-space-xl text-center font-body-md text-body-md text-on-surface-variant">{adaFilter ? "Tidak ada dokumen yang cocok dengan pencarian atau filter." : "Belum ada dokumen."}</p>
+            <KeadaanKosong ikon="description">{adaFilter ? "Tidak ada dokumen yang cocok dengan pencarian atau filter." : "Belum ada dokumen."}</KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
             <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[820px] text-left border-collapse">
+              <table className="tabel min-w-[820px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                    <th className="py-3 px-4">Dokumen</th>
-                    <th className="py-3 px-4">Klien / Talent</th>
-                    <th className="py-3 px-4">Diunggah</th>
-                    <th className="py-3 px-4">Tanda Tangan</th>
-                    <th className="py-3 px-4">Status</th>
+                  <tr>
+                    <th>Dokumen</th>
+                    <th>Klien / Talent</th>
+                    <th>Diunggah</th>
+                    <th>Tanda Tangan</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
-                <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
+                <tbody>
                   {hasil.data.map((d) => {
                     const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
                     const sudah = d.penandatangan.filter((p) => p.status_ttd === "ditandatangani").length;
                     return (
                       <tr key={d.id_dokumen} onClick={() => (setSukses(""), setDipilih(d))} className="hover:bg-surface-container-low cursor-pointer align-top">
-                        <td className="py-3 px-4">
+                        <td>
                           <button type="button" onClick={(e) => (e.stopPropagation(), setSukses(""), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
                             <span className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
                             <span>
@@ -139,15 +141,15 @@ export default function Dokumen() {
                             </span>
                           </button>
                         </td>
-                        <td className="py-3 px-4">
+                        <td>
                           <span className="block text-on-surface">{d.klien?.nama_perusahaan ?? "-"}</span>
                           {d.talent && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
                         </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
+                        <td className="whitespace-nowrap">
                           <span className="block text-on-surface-variant">{formatTanggal(d.tanggal_unggah)}</span>
                           {d.uploader && <span className="block font-body-sm text-body-sm text-outline">oleh {d.uploader.nama}</span>}
                         </td>
-                        <td className="py-3 px-4">
+                        <td>
                           {d.penandatangan.length ? (
                             <span className="text-on-surface-variant">
                               {sudah}/{d.penandatangan.length} menandatangani
@@ -155,9 +157,14 @@ export default function Dokumen() {
                           ) : (
                             <span className="text-outline">-</span>
                           )}
-                          {d.aksi.perlu_tanda_tangan_saya && <span className="block font-label-sm text-label-sm text-error">Menunggu tanda tangan Anda</span>}
+                          {d.aksi.perlu_tanda_tangan_saya && (
+                            <span className="mt-1 flex items-center gap-1 font-label-sm text-label-sm text-warning">
+                              <span className="material-symbols-outlined text-[14px]">draw</span>
+                              Menunggu tanda tangan Anda
+                            </span>
+                          )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td>
                           <StatusDokumenBadge status={d.status_dokumen} />
                         </td>
                       </tr>

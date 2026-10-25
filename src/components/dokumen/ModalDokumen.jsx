@@ -5,7 +5,7 @@ import { Pesan, errorField } from "../ui";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
 
-const tombolSimpan = "h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50";
+const tombolSimpan = "tombol-utama";
 
 // Error lama dihapus saat isian berubah; `message` Error disalin eksplisit.
 function useForm(awal) {
@@ -243,7 +243,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
             </div>
           ))}
           <div className="flex items-center justify-between">
-            <button type="button" onClick={() => setItems((l) => [...l, { ...ITEM_KOSONG }])} disabled={items.length >= 30} className="flex items-center gap-1 h-9 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container">
+            <button type="button" onClick={() => setItems((l) => [...l, { ...ITEM_KOSONG }])} disabled={items.length >= 30} className="tombol-teks">
               <span className="material-symbols-outlined text-[18px]">add</span>
               Tambah item
             </button>

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../lib/api";
-import { Memuat, Pesan, errorField, formatTanggalWaktu } from "../ui";
+import { KeadaanKosong, Memuat, Pesan, errorField, formatTanggalWaktu } from "../ui";
 import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDokumenBadge, unduhDokumen } from "./shared";
 
-const tombol = "flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg font-label-lg text-label-lg transition-all disabled:opacity-50";
 
 // Panel samping detail dokumen: unduh, daftar penandatangan, atur penandatangan (R27), tanda tangan (R28).
 // `pesan` = pesan sukses aksi terakhir (unggah, buat, atur penandatangan, tanda tangan).
@@ -34,9 +33,9 @@ export default function DokumenDrawer({ dokumen: d, pesan, onClose, onBerhasil }
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail dokumen">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Dokumen</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -44,7 +43,7 @@ export default function DokumenDrawer({ dokumen: d, pesan, onClose, onBerhasil }
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
           {pesan && <Pesan jenis="sukses">{pesan}</Pesan>}
           {error && <Pesan>{error}</Pesan>}
-          <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+          <section className="kartu p-space-md space-y-space-sm">
             <div className="flex items-start gap-space-sm">
               <span className="w-10 h-10 shrink-0 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
                 <span className="material-symbols-outlined text-[22px]">{jenis.ikon}</span>
@@ -61,21 +60,21 @@ export default function DokumenDrawer({ dokumen: d, pesan, onClose, onBerhasil }
               <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
               <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
             </dl>
-            <button type="button" onClick={klikUnduh} disabled={unduh} className={`${tombol} w-full bg-surface-container text-primary hover:bg-surface-variant`}>
+            <button type="button" onClick={klikUnduh} disabled={unduh} className="tombol-kedua w-full">
               <span className="material-symbols-outlined text-[18px]">download</span>
               {unduh ? "Mengunduh..." : "Unduh Dokumen"}
             </button>
           </section>
 
-          <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+          <section className="kartu p-space-md space-y-space-sm">
             <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
               <span className="material-symbols-outlined text-primary text-[20px]">draw</span>
               Penandatangan
             </h3>
             {d.penandatangan.length === 0 ? (
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <KeadaanKosong ringkas ikon="draw">
                 {d.aksi.boleh_atur_penandatangan ? "Belum ada penandatangan. Tentukan siapa yang harus menandatangani dokumen ini." : "Dokumen ini tidak memerlukan tanda tangan."}
-              </p>
+              </KeadaanKosong>
             ) : (
               <ul className="divide-y divide-surface-container-high">
                 {d.penandatangan.map((p) => {
@@ -177,7 +176,7 @@ function AturPenandatangan({ dokumen, onBerhasil }) {
       </ul>
       <p className="font-body-sm text-body-sm text-on-surface-variant">Setelah dikirim, penandatangan tidak dapat diubah dan dokumen menunggu tanda tangan.</p>
       <div className="flex justify-end">
-        <button type="button" onClick={simpan} disabled={kirim} className={`${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`}>
+        <button type="button" onClick={simpan} disabled={kirim} className="tombol-utama">
           <span className="material-symbols-outlined text-[18px]">send</span>
           {kirim ? "Mengirim..." : `Minta Tanda Tangan (${dipilih.length})`}
         </button>
@@ -253,7 +252,7 @@ function TandaTangan({ dokumen, onBerhasil }) {
   }
 
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm ring-2 ring-primary-container">
+    <section className="kartu p-space-md space-y-space-sm ring-2 ring-primary-container">
       <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
         <span className="material-symbols-outlined text-primary text-[20px]">signature</span>
         Tanda Tangan Anda
@@ -293,19 +292,19 @@ function TandaTangan({ dokumen, onBerhasil }) {
       {tolak ? (
         <div className="flex flex-wrap items-center justify-end gap-space-sm bg-error-container rounded-lg p-space-sm">
           <span className="font-body-sm text-body-sm text-on-error-container mr-auto">Tolak dokumen ini? Dokumen akan berstatus ditolak.</span>
-          <button type="button" onClick={() => setTolak(false)} disabled={kirim} className={`${tombol} h-9 text-on-error-container`}>
+          <button type="button" onClick={() => setTolak(false)} disabled={kirim} className="tombol-kedua">
             Tidak
           </button>
-          <button type="button" onClick={() => kirimKeputusan("ditolak")} disabled={kirim} className={`${tombol} h-9 bg-error text-on-error`}>
+          <button type="button" onClick={() => kirimKeputusan("ditolak")} disabled={kirim} className="tombol-bahaya">
             {kirim ? "Memproses..." : "Ya, Tolak"}
           </button>
         </div>
       ) : (
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm">
-          <button type="button" onClick={() => setTolak(true)} disabled={kirim} className={`${tombol} text-error hover:bg-error-container`}>
+          <button type="button" onClick={() => setTolak(true)} disabled={kirim} className="tombol-bahaya-garis">
             Tolak
           </button>
-          <button type="button" onClick={() => kirimKeputusan("ditandatangani")} disabled={kirim} className={`${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`}>
+          <button type="button" onClick={() => kirimKeputusan("ditandatangani")} disabled={kirim} className="tombol-utama">
             <span className="material-symbols-outlined text-[18px]">draw</span>
             {kirim ? "Menyimpan..." : "Tanda Tangani"}
           </button>
