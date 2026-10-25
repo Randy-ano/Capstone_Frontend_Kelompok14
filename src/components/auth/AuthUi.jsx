@@ -1,8 +1,22 @@
 // Komponen bersama halaman Masuk & Daftar (mockup Stitch "Masuk" dan "Daftar Akun Baru").
+import { useEffect } from "react";
+import logo from "../../assets/logo-intellisys.png";
 
-// Gambar logo sudah memuat tulisan "Intellisys Talent Hub"; margin negatif menutup ruang kosong di sekitar logo.
-export function Merek() {
-  return <img alt="Intellisys Talent Hub" className="self-start h-20 sm:h-24 w-auto -my-4 -ml-4 object-contain mix-blend-multiply" src="/logo.jpg" />;
+// Judul tab browser halaman di luar AppLayout.
+export function useJudulTab(judul) {
+  useEffect(() => {
+    document.title = `${judul} · Intellisys Talent Hub`;
+  }, [judul]);
+}
+
+// Logo resmi (rasio asli dijaga dengan h tetap + w-auto) dan nama aplikasi di bawahnya.
+export function Merek({ tengah = false }) {
+  return (
+    <div className={`flex flex-col gap-2 ${tengah ? "items-center" : "items-start"}`}>
+      <img alt="Intellisys" className="h-10 sm:h-12 w-auto object-contain" src={logo} />
+      <span className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-on-surface-variant">Talent Hub</span>
+    </div>
+  );
 }
 
 export function KakiHalaman({ className = "" }) {
