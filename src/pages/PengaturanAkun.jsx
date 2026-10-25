@@ -6,10 +6,7 @@ import { KepalaHalaman, Pesan, errorField } from "../components/ui";
 
 const FORM_KOSONG = { password_lama: "", password: "", password_confirmation: "" };
 
-const kelasInput = (error) =>
-  `w-full h-10 pl-3 pr-10 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+const kelasInput = (error) => `input pr-10 ${error ? "input-error" : ""}`;
 
 // Pengaturan Akun (semua role): informasi akun dan ubah password (PUT /auth/password).
 export default function PengaturanAkun() {
@@ -41,7 +38,7 @@ export default function PengaturanAkun() {
 
   const isian = (field, label, keteranganIsian, autoComplete) => (
     <label className="block space-y-1">
-      <span className="font-label-lg text-label-lg text-on-surface">{label}</span>
+      <span className="font-label-md text-label-md text-on-surface">{label}</span>
       <div className="relative">
         <input
           className={kelasInput(errorField(error, field))}
@@ -75,7 +72,7 @@ export default function PengaturanAkun() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-space-lg items-start">
-        <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg space-y-space-md">
+        <section className="kartu p-space-md sm:p-space-lg space-y-space-md">
           <h2 className="font-title-md text-title-md text-on-surface">Informasi Akun</h2>
           <dl className="space-y-space-sm">
             {[
@@ -94,7 +91,7 @@ export default function PengaturanAkun() {
           </dl>
         </section>
 
-        <form onSubmit={simpan} noValidate className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg space-y-space-md">
+        <form onSubmit={simpan} noValidate className="kartu p-space-md sm:p-space-lg space-y-space-md">
           <div>
             <h2 className="font-title-md text-title-md text-on-surface">Ubah Password</h2>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -110,7 +107,7 @@ export default function PengaturanAkun() {
             <button
               type="submit"
               disabled={kirim}
-              className="flex items-center gap-1.5 h-10 px-5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-60"
+              className="tombol-utama"
             >
               <span className="material-symbols-outlined text-[18px]">{kirim ? "progress_activity" : "lock_reset"}</span>
               {kirim ? "Menyimpan..." : "Simpan Password"}

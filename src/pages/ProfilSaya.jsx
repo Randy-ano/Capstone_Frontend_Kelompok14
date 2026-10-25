@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { Chip, KepalaHalaman, Memuat, Pesan, errorField } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField } from "../components/ui";
 import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 
@@ -63,10 +63,7 @@ function keBody(form) {
   return body;
 }
 
-const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all disabled:opacity-50 ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+const inputClass = (error) => `input ${error ? "input-error" : ""}`;
 
 function Field({ label, wajib, error, className = "", children }) {
   return (
@@ -82,7 +79,7 @@ function Field({ label, wajib, error, className = "", children }) {
 
 function Bagian({ ikon, judul, keterangan, aksi, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg space-y-space-md">
+    <section className="kartu p-space-md sm:p-space-lg space-y-space-md">
       <div className="flex items-start justify-between gap-space-sm">
         <div>
           <h2 className="flex items-center gap-space-sm font-title-md text-title-md text-on-surface">
@@ -129,7 +126,14 @@ export default function ProfilSaya() {
       </div>
     );
   }
-  if (!form) return <Memuat>Memuat profil...</Memuat>;
+  if (!form)
+    return (
+      <div className="px-space-md sm:px-space-xl pt-space-lg max-w-5xl">
+        <div className="kartu p-space-lg">
+          <Memuat baris={5}>Memuat profil...</Memuat>
+        </div>
+      </div>
+    );
 
   const awal = keForm(profil);
   const berubah = JSON.stringify(form) !== JSON.stringify(awal);
@@ -298,7 +302,7 @@ export default function ProfilSaya() {
                   <Field label="Tanggal selesai" wajib={!r.masih_bekerja} error={ef("tanggal_selesai")}>
                     <input type="date" value={r.masih_bekerja ? "" : r.tanggal_selesai} onChange={set("tanggal_selesai")} disabled={r.masih_bekerja} className={inputClass(ef("tanggal_selesai"))} />
                   </Field>
-                  <label className="flex items-center gap-space-sm font-body-sm text-body-sm text-on-surface cursor-pointer">
+                  <label className="flex items-center gap-space-sm min-h-[40px] font-body-sm text-body-sm text-on-surface cursor-pointer">
                     <input type="checkbox" checked={r.masih_bekerja} onChange={(ev) => ubahBaris("riwayat_pengalaman_kerja", i, "masih_bekerja", ev.target.checked)} className="accent-primary w-4 h-4" />
                     Masih bekerja di sini
                   </label>
@@ -403,10 +407,10 @@ export default function ProfilSaya() {
       {berubah && (
         <div className="fixed bottom-0 right-0 left-0 lg:left-72 z-40 bg-surface-container-lowest/95 backdrop-blur border-t border-surface-container-high px-space-md sm:px-space-xl py-space-sm flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-space-sm">
           <span className="font-body-sm text-body-sm text-on-surface-variant sm:mr-auto">Ada perubahan yang belum disimpan.</span>
-          <button type="button" onClick={batal} disabled={simpan} className="h-10 px-4 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+          <button type="button" onClick={batal} disabled={simpan} className="tombol-kedua">
             Batalkan Perubahan
           </button>
-          <button type="button" onClick={handleSimpan} disabled={simpan} className="h-10 px-5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+          <button type="button" onClick={handleSimpan} disabled={simpan} className="tombol-utama">
             {simpan ? "Menyimpan..." : "Simpan Perubahan"}
           </button>
         </div>
@@ -415,11 +419,11 @@ export default function ProfilSaya() {
   );
 }
 
-const Kosong = ({ children }) => <p className="font-body-sm text-body-sm text-on-surface-variant">{children}</p>;
+const Kosong = ({ children }) => <KeadaanKosong ringkas>{children}</KeadaanKosong>;
 
 function TombolTambah({ onClick }) {
   return (
-    <button type="button" onClick={onClick} className="shrink-0 flex items-center gap-1 h-9 px-3 rounded-lg text-primary hover:bg-surface-container font-label-md text-label-md">
+    <button type="button" onClick={onClick} className="tombol-teks shrink-0">
       <span className="material-symbols-outlined text-[18px]">add</span>
       Tambah
     </button>
@@ -431,7 +435,7 @@ function KartuBaris({ judul, onHapus, children }) {
     <div className="rounded-xl ring-1 ring-surface-container-high p-space-md space-y-space-sm">
       <div className="flex items-center justify-between">
         <span className="font-label-md text-label-md text-on-surface-variant">{judul}</span>
-        <button type="button" onClick={onHapus} title="Hapus baris" className="flex items-center gap-1 h-8 px-2 rounded-lg text-error hover:bg-error-container font-label-md text-label-md">
+        <button type="button" onClick={onHapus} title="Hapus baris" className="tombol-bahaya-garis px-3">
           <span className="material-symbols-outlined text-[16px]">delete</span>
           Hapus
         </button>
@@ -450,7 +454,11 @@ function StatusProfil({ profil }) {
     ["Minimal 1 kompetensi", profil.kompetensi.length > 0],
   ];
   return (
-    <div className={`rounded-xl p-space-md flex flex-col sm:flex-row sm:items-center gap-space-md ${lengkap ? "bg-tertiary-fixed text-on-tertiary-fixed-variant" : "bg-secondary-container text-on-secondary-fixed"}`}>
+    <div
+      className={`rounded-xl ring-1 ring-inset p-space-md flex flex-col sm:flex-row sm:items-center gap-space-md ${
+        lengkap ? "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25" : "bg-warning-container text-on-warning-container ring-warning/25"
+      }`}
+    >
       <span className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
       <div className="flex-1 min-w-0">
         <div className="font-title-md text-title-md">{lengkap ? "Profil lengkap" : "Profil belum lengkap"}</div>
@@ -531,7 +539,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           type="button"
           onClick={lihat}
           disabled={!profil.ada_cv || !!proses}
-          className="flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-surface-container text-primary hover:bg-surface-variant font-label-lg text-label-lg disabled:opacity-50"
+          className="tombol-kedua"
         >
           <span className="material-symbols-outlined text-[18px]">visibility</span>
           {proses === "lihat" ? "Membuka..." : "Lihat CV"}
@@ -540,7 +548,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           type="button"
           onClick={generate}
           disabled={adaPerubahan || !lengkap || !!proses}
-          className="flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50"
+          className="tombol-utama"
         >
           <span className="material-symbols-outlined text-[18px]">description</span>
           {proses === "generate" ? "Membuat..." : profil.ada_cv ? "Buat Ulang CV" : "Buat CV"}
