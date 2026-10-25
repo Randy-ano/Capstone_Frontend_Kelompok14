@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
-import { Chip, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu } from "../ui";
+import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu } from "../ui";
 import { HasilBadge } from "../talentPool/shared";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola } from "./shared";
 
@@ -41,9 +41,9 @@ export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, 
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail permintaan kebutuhan">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Permintaan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface">
+          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -78,7 +78,7 @@ export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, 
 
 function Bagian({ icon, judul, aksi, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+    <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
           <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
@@ -168,7 +168,6 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
     }
   }
 
-  const tombol = "flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg font-label-lg text-label-lg transition-all disabled:opacity-50";
 
   return (
     <div className="space-y-space-sm">
@@ -180,10 +179,10 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
             Batalkan permintaan <strong>{job.posisi}</strong>? Kandidat yang sedang diproses untuk permintaan ini akan dikembalikan menjadi tersedia.
           </p>
           <div className="flex flex-wrap justify-end gap-space-sm">
-            <button type="button" onClick={() => setKonfirmasi(false)} disabled={!!kirim} className={`${tombol} text-on-error-container hover:bg-surface-container-lowest/40`}>
+            <button type="button" onClick={() => setKonfirmasi(false)} disabled={!!kirim} className="tombol-kedua">
               Tidak
             </button>
-            <button type="button" onClick={() => ubahStatus("dibatalkan")} disabled={!!kirim} className={`${tombol} bg-error text-on-error`}>
+            <button type="button" onClick={() => ubahStatus("dibatalkan")} disabled={!!kirim} className="tombol-bahaya">
               {kirim ? "Membatalkan..." : "Ya, Batalkan"}
             </button>
           </div>
@@ -191,25 +190,25 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
       ) : (
         <div className="flex flex-wrap gap-space-sm">
           {cariKandidat && (
-            <Link to={`/rekomendasi-kandidat?job=${job.id_job_req}`} className={`${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`}>
+            <Link to={`/rekomendasi-kandidat?job=${job.id_job_req}`} className="tombol-utama">
               <span className="material-symbols-outlined text-[18px]">person_search</span>
               Cari Kandidat
             </Link>
           )}
           {bisaAjukan && (
-            <button type="button" onClick={() => ubahStatus("diajukan")} disabled={!!kirim} className={`${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`}>
+            <button type="button" onClick={() => ubahStatus("diajukan")} disabled={!!kirim} className="tombol-utama">
               <span className="material-symbols-outlined text-[18px]">send</span>
               {kirim === "diajukan" ? "Mengajukan..." : "Ajukan"}
             </button>
           )}
           {bisaUbah && (
-            <button type="button" onClick={onEdit} disabled={!!kirim} className={`${tombol} bg-surface-container-lowest text-primary shadow-sm hover:bg-surface-container`}>
+            <button type="button" onClick={onEdit} disabled={!!kirim} className="tombol-kedua">
               <span className="material-symbols-outlined text-[18px]">edit</span>
               Ubah
             </button>
           )}
           {bisaBatal && (
-            <button type="button" onClick={() => setKonfirmasi(true)} disabled={!!kirim} className={`${tombol} text-error hover:bg-error-container`}>
+            <button type="button" onClick={() => setKonfirmasi(true)} disabled={!!kirim} className="tombol-bahaya-garis">
               <span className="material-symbols-outlined text-[18px]">cancel</span>
               Batalkan
             </button>
@@ -248,7 +247,7 @@ function KandidatScreening({ items }) {
       {!items ? (
         <Memuat />
       ) : items.length === 0 ? (
-        <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada kandidat yang di-screening.</p>
+        <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat yang di-screening.</KeadaanKosong>
       ) : (
         <ul className="divide-y divide-surface-container-high">
           {items.map((s) => (
@@ -276,7 +275,7 @@ function LogProgres({ items }) {
   return (
     <Bagian icon="timeline" judul="Log Progres">
       {items.length === 0 ? (
-        <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada progres. Log dimulai saat permintaan diajukan.</p>
+        <KeadaanKosong ringkas ikon="timeline">Belum ada progres. Log dimulai saat permintaan diajukan.</KeadaanKosong>
       ) : (
         <ol className="relative border-l-2 border-surface-container-high ml-3 space-y-space-md">
           {items.map((log) => {

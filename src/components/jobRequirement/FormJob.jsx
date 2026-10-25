@@ -4,10 +4,7 @@ import { ROLE } from "../../auth/roles";
 import { Chip, Pesan, errorField } from "../ui";
 import FilterKompetensi, { kunciKompetensi } from "../talentPool/FilterKompetensi";
 
-const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+const inputClass = (error) => `input ${error ? "input-error" : ""}`;
 
 function Field({ label, wajib, error, children, className = "" }) {
   return (
@@ -159,7 +156,7 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
       >
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
           <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Permintaan Kebutuhan" : "Buat Permintaan Kebutuhan"}</h2>
-          <button type="button" onClick={onClose} disabled={!!kirim} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} disabled={!!kirim} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -243,23 +240,23 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
         </div>
 
         <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
-          <button type="button" onClick={onClose} disabled={!!kirim} className="h-10 px-4 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+          <button type="button" onClick={onClose} disabled={!!kirim} className="tombol-kedua">
             Batal
           </button>
           {ubah ? (
-            <button type="submit" disabled={!!kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+            <button type="submit" disabled={!!kirim} className="tombol-utama">
               {kirim ? "Menyimpan..." : "Simpan Perubahan"}
             </button>
           ) : (
             <>
-              <button type="submit" disabled={!!kirim} className="h-10 px-4 rounded-lg bg-surface-container text-primary hover:bg-surface-variant font-label-lg text-label-lg disabled:opacity-50">
+              <button type="submit" disabled={!!kirim} className="tombol-kedua">
                 {kirim === "draft" ? "Menyimpan..." : "Simpan Draft"}
               </button>
               <button
                 type="button"
                 onClick={() => simpan("diajukan")}
                 disabled={!!kirim}
-                className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50"
+                className="tombol-utama"
               >
                 {kirim === "diajukan" ? "Mengajukan..." : "Simpan & Ajukan"}
               </button>

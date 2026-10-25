@@ -3,17 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
-import {
-  Chip,
-  KartuRingkasan,
-  KepalaHalaman,
-  KotakCari,
-  Pagination,
-  Pesan,
-  PilihFilter,
-  formatTanggalWaktu,
-  useTunda,
-} from "../components/ui";
+import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, bolehKelola } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -145,7 +135,7 @@ export default function PermintaanKebutuhan() {
             <button
               type="button"
               onClick={() => setForm({ job: null })}
-              className="w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-md"
+              className="tombol-utama w-full md:w-auto"
             >
               <span className="material-symbols-outlined text-[18px]">add_circle</span>
               Buat Permintaan
@@ -165,7 +155,7 @@ export default function PermintaanKebutuhan() {
           ))}
         </div>
 
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder={internal ? "Cari posisi atau nama klien..." : "Cari posisi..."} />
           <PilihFilter ikon="filter_alt" label="Status" value={status} onChange={ubahFilter(setStatus)} semua="Semua Status" opsi={Object.entries(STATUS_REQ).map(([v, s]) => [v, s.label])} />
           <PilihFilter ikon="timer" label="Indikator SLA" value={sla} onChange={ubahFilter(setSla)} semua="Semua SLA" opsi={Object.entries(INDIKATOR_SLA).map(([v, s]) => [v, s.label])} />
@@ -173,7 +163,7 @@ export default function PermintaanKebutuhan() {
             <PilihFilter ikon="business" label="Klien" value={klien} onChange={ubahFilter(setKlien)} semua="Semua Klien" opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])} />
           )}
           {adaFilter && (
-            <button type="button" onClick={resetFilter} className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1">
+            <button type="button" onClick={resetFilter} className="tombol-teks">
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
@@ -182,33 +172,25 @@ export default function PermintaanKebutuhan() {
 
         {error && <Pesan>{error}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[900px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[900px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Posisi</th>
-                  <th className="py-3 px-4">Klien</th>
-                  <th className="py-3 px-4">Kebutuhan</th>
-                  <th className="py-3 px-4">Kompetensi</th>
-                  <th className="py-3 px-4">SLA Deadline</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th>Posisi</th>
+                  <th>Klien</th>
+                  <th>Kebutuhan</th>
+                  <th>Kompetensi</th>
+                  <th>SLA Deadline</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat permintaan kebutuhan...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={6} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={6} ikon="receipt_long">
+                    {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((job) => (
                   <BarisJob key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
@@ -230,7 +212,7 @@ function BarisJob({ job, onOpen }) {
   const sisa = job.kompetensi.length - MAKS_CHIP;
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td className="py-3 px-4">
+      <td>
         <button
           type="button"
           onClick={(e) => {
@@ -245,14 +227,14 @@ function BarisJob({ job, onOpen }) {
           </span>
         </button>
       </td>
-      <td className="py-3 px-4 text-on-surface-variant">
+      <td className="text-on-surface-variant">
         <span className="block">{job.klien.nama_perusahaan}</span>
         {job.account_manager && <span className="block font-body-sm text-body-sm text-outline">AM: {job.account_manager.nama_pegawai}</span>}
       </td>
-      <td className="py-3 px-4">
+      <td>
         <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
       </td>
-      <td className="py-3 px-4">
+      <td>
         <div className="flex flex-wrap gap-1 max-w-[240px]">
           {job.kompetensi.slice(0, MAKS_CHIP).map((k) => (
             <Chip key={k.id_kompetensi} title={k.kategori}>
@@ -269,13 +251,13 @@ function BarisJob({ job, onOpen }) {
           )}
         </div>
       </td>
-      <td className="py-3 px-4 whitespace-nowrap">
+      <td className="whitespace-nowrap">
         <span className="block text-on-surface-variant">{formatTanggalWaktu(job.sla_deadline)}</span>
         <span className="block mt-1">
           <SlaBadge indikator={job.indikator_sla} />
         </span>
       </td>
-      <td className="py-3 px-4">
+      <td>
         <StatusReqBadge status={job.status_req} />
       </td>
     </tr>

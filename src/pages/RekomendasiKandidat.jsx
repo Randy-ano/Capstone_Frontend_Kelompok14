@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
-import { Chip, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag } from "../components/ui";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
@@ -38,14 +38,14 @@ export default function RekomendasiKandidat() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm space-y-space-sm">
+        <div className="kartu p-space-md space-y-space-sm">
           <label className="block space-y-1">
             <span className="font-label-md text-label-md text-on-surface">Permintaan kebutuhan</span>
             <select
               value={idJob}
               onChange={(e) => pilihJob(e.target.value)}
               disabled={!opsiJob}
-              className="w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container"
+              className="input"
             >
               <option value="">{opsiJob ? "Pilih permintaan yang diajukan / diproses..." : "Memuat permintaan..."}</option>
               {opsiJob?.map((j) => (
@@ -57,7 +57,7 @@ export default function RekomendasiKandidat() {
           </label>
           {errorJob && <Pesan>{errorJob}</Pesan>}
           {opsiJob && opsiJob.length === 0 && (
-            <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada permintaan berstatus diajukan atau diproses.</p>
+            <KeadaanKosong ringkas ikon="receipt_long">Belum ada permintaan berstatus diajukan atau diproses.</KeadaanKosong>
           )}
           {idJob && opsiJob && !job && <Pesan>Permintaan tidak ditemukan atau sudah tidak terbuka untuk pencarian kandidat.</Pesan>}
         </div>
@@ -90,7 +90,7 @@ export default function RekomendasiKandidat() {
 
 function RingkasanJob({ job }) {
   return (
-    <div className="bg-surface-container-lowest p-space-md sm:p-space-lg rounded-xl shadow-sm flex flex-col lg:flex-row gap-space-md lg:items-center justify-between">
+    <div className="kartu p-space-md sm:p-space-lg flex flex-col lg:flex-row gap-space-md lg:items-center justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-1">
           <StatusReqBadge status={job.status_req} />
@@ -116,7 +116,7 @@ function RingkasanJob({ job }) {
 
 function Bagian({ ikon, judul, info, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+    <section className="kartu overflow-hidden">
       <div className="p-space-md bg-surface-container-low flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-2 font-title-sm text-title-sm text-on-surface">
           <span className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
@@ -152,13 +152,16 @@ function DaftarKandidat({ job, onScreening }) {
       {error && <Pesan>{error}</Pesan>}
       {!error && !hasil && <Memuat>Menghitung skor kecocokan...</Memuat>}
       {hasil?.data.length === 0 && (
-        <p className="font-body-md text-body-md text-on-surface-variant py-space-md text-center">
+        <KeadaanKosong
+          ikon="person_search"
+          aksi={
+            <Link to="/talent-pool" className="tombol-teks">
+              Lihat talent pool
+            </Link>
+          }
+        >
           Tidak ada kandidat tersedia yang memiliki minimal 1 kompetensi yang dibutuhkan.
-          <br />
-          <Link to="/talent-pool" className="text-primary hover:underline">
-            Lihat talent pool
-          </Link>
-        </p>
+        </KeadaanKosong>
       )}
       <ol className="space-y-space-md">
         {hasil?.data.map((k, i) => (
@@ -195,7 +198,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
     <li className="rounded-xl ring-1 ring-surface-container-high p-space-md space-y-space-sm">
       <div className="flex items-start justify-between gap-space-md">
         <div className="flex items-start gap-space-sm min-w-0">
-          <span className="w-7 h-7 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md text-label-md">
+          <span className="w-7 h-7 shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md">
             {peringkat}
           </span>
           <div className="min-w-0">
@@ -259,13 +262,13 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
             onChange={(e) => setCatatan(e.target.value)}
             maxLength={2000}
             placeholder="Catatan screening (opsional)"
-            className="w-full px-3 py-2 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
+            className="input py-2"
           />
           <div className="flex flex-wrap justify-end gap-space-sm">
-            <button type="button" onClick={() => setBuka(false)} disabled={kirim} className="h-9 px-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container">
+            <button type="button" onClick={() => setBuka(false)} disabled={kirim} className="tombol-kedua">
               Batal
             </button>
-            <button type="button" onClick={screening} disabled={kirim} className="h-9 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-sm disabled:opacity-50">
+            <button type="button" onClick={screening} disabled={kirim} className="tombol-utama">
               {kirim ? "Memproses..." : "Konfirmasi Screening"}
             </button>
           </div>
@@ -275,7 +278,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
           <button
             type="button"
             onClick={() => setBuka(true)}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-sm"
+            className="tombol-utama"
           >
             <span className="material-symbols-outlined text-[18px]">fact_check</span>
             Screening
@@ -309,7 +312,7 @@ function SudahScreening({ job, onUbah }) {
     <Bagian ikon="fact_check" judul="Sudah di-screening" info={items && <span className="font-label-sm text-label-sm text-on-surface-variant">{items.length} kandidat</span>}>
       {error && <Pesan>{error}</Pesan>}
       {!error && !items && <Memuat />}
-      {items?.length === 0 && <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada kandidat yang di-screening untuk permintaan ini.</p>}
+      {items?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat yang di-screening untuk permintaan ini.</KeadaanKosong>}
       <ul className="divide-y divide-surface-container-high">
         {items?.map((s) => (
           <ItemScreening key={s.id_screening} screening={s} onSaved={ganti} />
@@ -377,7 +380,7 @@ function ItemScreening({ screening: s, onSaved }) {
                   role="radio"
                   aria-checked={hasil === nilai}
                   onClick={() => setHasil(nilai)}
-                  className={`h-9 rounded-lg font-label-md text-label-md transition-colors ${
+                  className={`h-10 rounded-lg font-label-md text-label-md transition-colors ${
                     hasil === nilai ? "bg-primary text-on-primary shadow-sm" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"
                   }`}
                 >
@@ -407,7 +410,7 @@ function ItemScreening({ screening: s, onSaved }) {
                 setError(null);
               }}
               disabled={kirim}
-              className="h-9 px-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container"
+              className="tombol-kedua"
             >
               Batal
             </button>
@@ -415,7 +418,7 @@ function ItemScreening({ screening: s, onSaved }) {
               type="button"
               onClick={simpan}
               disabled={kirim || (hasil === s.hasil_screening && (catatan.trim() || null) === (s.catatan_screening ?? null))}
-              className="h-9 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-sm disabled:opacity-50"
+              className="tombol-utama"
             >
               {kirim ? "Menyimpan..." : "Simpan"}
             </button>
