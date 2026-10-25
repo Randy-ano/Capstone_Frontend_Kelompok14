@@ -8,13 +8,13 @@ import Lonceng from "./notifikasi/Lonceng";
 export default function Header({ grup, title, onMenu }) {
   const { user } = useAuth();
   return (
-    <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-md sm:px-space-lg flex items-center justify-between gap-space-md">
+    <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-xl border-b border-surface-container-high z-40 px-space-md sm:px-space-lg flex items-center justify-between gap-space-md">
       <div className="flex items-center gap-space-sm sm:gap-space-md min-w-0">
         <button
           type="button"
           onClick={onMenu}
           title="Buka menu"
-          className="lg:hidden p-2 -ml-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+          className="lg:hidden w-10 h-10 -ml-2 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
         >
           <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
@@ -25,7 +25,7 @@ export default function Header({ grup, title, onMenu }) {
               <span className="hidden sm:inline material-symbols-outlined text-[16px]">chevron_right</span>
             </>
           )}
-          <span className="font-label-md text-label-md text-on-surface font-semibold truncate">{title}</span>
+          <span className="font-title-sm text-title-sm text-on-surface truncate">{title}</span>
         </div>
       </div>
 
@@ -34,7 +34,7 @@ export default function Header({ grup, title, onMenu }) {
         {bolehKelola(user) && (
           <Link
             to="/permintaan-kebutuhan?buat=1"
-            className="hidden lg:flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-sm"
+            className="hidden lg:inline-flex tombol-utama"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             <span>Buat Permintaan</span>
@@ -76,8 +76,8 @@ function UserMenu() {
 
   return (
     <div ref={ref} className="relative">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-space-sm pl-1 group">
-        <span className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container ring-2 ring-surface-container-high flex items-center justify-center font-label-md text-label-md font-semibold">
+      <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className="flex items-center gap-space-sm min-h-[40px] pl-1 pr-1 rounded-lg hover:bg-surface-container-low group">
+        <span className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md font-semibold">
           {initials(nama)}
         </span>
         <span className="hidden md:flex flex-col text-left">
@@ -92,7 +92,7 @@ function UserMenu() {
           <div className="px-space-md py-space-sm border-b border-surface-container-high">
             <div className="font-label-md text-label-md text-on-surface truncate">{nama}</div>
             <div className="font-body-sm text-body-sm text-on-surface-variant truncate">{user.email}</div>
-            <div className="mt-1 inline-block px-2 py-0.5 rounded-full bg-secondary-container font-label-sm text-label-sm text-on-secondary-fixed">
+            <div className="mt-1.5 inline-block px-2 py-0.5 rounded-full bg-primary-fixed font-label-sm text-label-sm text-primary">
               {ROLE_LABEL[user.role]}
             </div>
           </div>
@@ -100,7 +100,7 @@ function UserMenu() {
             type="button"
             onClick={handleLogout}
             disabled={keluar}
-            className="w-full flex items-center gap-space-sm px-space-md py-2 font-body-md text-body-md text-error hover:bg-error-container transition-colors disabled:opacity-60"
+            className="w-full flex items-center gap-space-sm min-h-[40px] px-space-md py-2 font-body-md text-body-md text-error hover:bg-error-container transition-colors disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>
             {keluar ? "Keluar..." : "Keluar"}

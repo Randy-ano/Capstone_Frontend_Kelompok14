@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL } from "../auth/roles";
-import { IkonKiri, InputSandi, Isian, KakiHalaman, PesanError, TombolUtama, kelasInput } from "../components/auth/AuthUi";
+import { IkonKiri, InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
 
 // Akun demo dari seeder backend (password semuanya "password"); hanya tampil saat development.
 const AKUN_DEMO = [
@@ -16,6 +16,7 @@ const AKUN_DEMO = [
 // Mockup Stitch "Masuk - Varian 1 (Clean Enterprise Minimalist)": kartu di tengah dengan latar pola titik.
 export default function Login() {
   const { user, login } = useAuth();
+  useJudulTab("Masuk");
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
@@ -68,8 +69,8 @@ export default function Login() {
       <main className="relative flex-1 flex flex-col items-center justify-center px-space-md py-space-xl gap-space-lg">
         <div className="w-full max-w-[460px] bg-surface-container-lowest rounded-2xl border border-outline-variant/50 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.18)] p-space-lg sm:p-9">
           <div className="text-center mb-space-xl">
-            <img alt="Intellisys Talent Hub" className="mx-auto h-20 w-auto -my-3 object-contain mix-blend-multiply" src="/logo.jpg" />
-            <h1 className="mt-space-sm font-headline-md text-headline-md text-on-surface">Masuk ke Akun Anda</h1>
+            <Merek tengah />
+            <h1 className="mt-space-lg font-headline-md text-headline-md text-on-surface">Masuk ke Akun Anda</h1>
             <p className="mt-1.5 font-body-md text-body-md text-on-surface-variant">Akses terintegrasi pengelolaan talenta dan operasional.</p>
           </div>
 

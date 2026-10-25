@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { berandaFor } from "../data/navigation";
-import { InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput } from "../components/auth/AuthUi";
+import { InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
 
 // Jenis akun yang bisa mendaftar sendiri; `key` dipakai sebagai path endpoint /auth/register/{key}.
 const JENIS_AKUN = [
@@ -61,6 +61,7 @@ function validasi(jenis, form) {
 
 export default function Daftar() {
   const { user, register } = useAuth();
+  useJudulTab("Daftar Akun");
   const navigate = useNavigate();
   const [jenis, setJenis] = useState("talent");
   const [form, setForm] = useState(FORM_KOSONG);
@@ -152,8 +153,8 @@ export default function Daftar() {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col items-center px-space-md py-space-xl">
-      <header className="w-full max-w-2xl flex">
-        <Merek />
+      <header className="w-full max-w-2xl flex justify-center">
+        <Merek tengah />
       </header>
 
       <form

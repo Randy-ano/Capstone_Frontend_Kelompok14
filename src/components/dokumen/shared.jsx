@@ -1,6 +1,6 @@
 // Label & helper dokumen (FR-13).
 import { api } from "../../lib/api";
-import { Badge } from "../ui";
+import { Badge, NADA } from "../ui";
 
 export const JENIS_DOKUMEN = {
   quotation: { label: "Quotation", ikon: "request_quote" },
@@ -23,14 +23,14 @@ export const ATURAN_PENANDATANGAN = {
 };
 
 export const STATUS_DOKUMEN = {
-  draft: { label: "Draft", className: "bg-surface-container-high text-on-surface-variant" },
-  menunggu_ttd: { label: "Menunggu Tanda Tangan", className: "bg-secondary-container text-on-secondary-fixed" },
-  ditandatangani: { label: "Ditandatangani", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  ditolak: { label: "Ditolak", className: "bg-error-container text-on-error-container" },
+  draft: { label: "Draft", className: NADA.netral },
+  menunggu_ttd: { label: "Menunggu Tanda Tangan", className: NADA.menunggu },
+  ditandatangani: { label: "Ditandatangani", className: NADA.sukses },
+  ditolak: { label: "Ditolak", className: NADA.bahaya },
 };
 
 export const STATUS_TTD = {
-  menunggu: { label: "Menunggu", ikon: "hourglass_top", className: "text-on-surface-variant" },
+  menunggu: { label: "Menunggu", ikon: "hourglass_top", className: "text-warning" },
   ditandatangani: { label: "Ditandatangani", ikon: "draw", className: "text-on-tertiary-container" },
   ditolak: { label: "Menolak", ikon: "cancel", className: "text-error" },
 };
@@ -44,7 +44,7 @@ export const ROLE_SINGKAT = {
 };
 
 export function StatusDokumenBadge({ status }) {
-  const s = STATUS_DOKUMEN[status] ?? { label: status, className: "bg-surface-container" };
+  const s = STATUS_DOKUMEN[status] ?? { label: status, className: NADA.netral };
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 

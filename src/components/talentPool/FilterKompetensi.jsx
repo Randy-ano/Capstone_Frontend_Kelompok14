@@ -64,9 +64,9 @@ export default function FilterKompetensi({
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={`w-full h-10 flex items-center gap-1.5 px-3 rounded-lg bg-surface-container-low font-label-md text-label-md text-on-surface hover:bg-surface-container transition-colors disabled:opacity-60 ${
+        className={`w-full min-h-[40px] flex items-center gap-1.5 px-3 rounded-lg bg-surface-container-lowest ring-1 ring-inset ring-outline-variant font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors disabled:opacity-60 ${
           penuh ? "" : "sm:w-auto"
-        } ${error ? "ring-2 ring-error" : ""}`}
+        } ${error ? "!ring-2 !ring-error" : ""}`}
       >
         <span className="material-symbols-outlined text-outline text-[18px]">psychology</span>
         <span className="flex-1 text-left">{label}</span>
@@ -90,7 +90,7 @@ export default function FilterKompetensi({
                 if (bisaTambah) tambah();
               }}
               placeholder={onTambah ? "Cari atau ketik kompetensi baru..." : "Cari kompetensi..."}
-              className="w-full h-9 px-3 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
+              className="input"
             />
             {keterangan && <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{keterangan}</p>}
           </div>
@@ -100,7 +100,7 @@ export default function FilterKompetensi({
                 <button
                   type="button"
                   onClick={tambah}
-                  className="w-full flex items-start gap-space-sm px-space-md py-2 text-left font-body-md text-body-md text-primary hover:bg-surface-container-low"
+                  className="w-full min-h-[40px] flex items-start gap-space-sm px-space-md py-2 text-left font-body-md text-body-md text-primary hover:bg-surface-container-low"
                 >
                   <span className="material-symbols-outlined text-[20px]">add_circle</span>
                   <span className="flex-1 break-words">
@@ -112,7 +112,7 @@ export default function FilterKompetensi({
             {tampil.length === 0 && !bisaTambah && <li className="px-space-md py-2 font-body-sm text-body-sm text-on-surface-variant">Kompetensi tidak ditemukan.</li>}
             {tampil.map((k) => (
               <li key={k.id_kompetensi}>
-                <label className="flex items-center gap-space-sm px-space-md py-1.5 cursor-pointer hover:bg-surface-container-low">
+                <label className="flex items-center gap-space-sm min-h-[40px] px-space-md py-1.5 cursor-pointer hover:bg-surface-container-low">
                   <input
                     type="checkbox"
                     checked={nilai.includes(k.id_kompetensi)}
@@ -130,7 +130,7 @@ export default function FilterKompetensi({
               <button
                 type="button"
                 onClick={() => onChange([])}
-                className="w-full h-8 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low"
+                className="tombol-teks w-full"
               >
                 Hapus pilihan
               </button>

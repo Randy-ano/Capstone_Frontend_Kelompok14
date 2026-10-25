@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
 import { hariIni } from "../rekrutmen/shared";
-import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombol, tombolHalaman, tombolUtama, usePlacement } from "./shared";
+import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombolHalaman, tombolUtama, usePlacement } from "./shared";
 
 // Tab Cuti (FR-14, R21): talent mengajukan & membatalkan; HR Client dan Manager memberi keputusan masing-masing.
 export default function TabCuti({ user }) {
@@ -40,7 +40,7 @@ export default function TabCuti({ user }) {
 
   return (
     <div className="flex flex-col gap-space-md">
-      <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+      <div className="kartu p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
         <PilihFilter
           ikon="filter_alt"
           label="Status cuti"
@@ -64,8 +64,10 @@ export default function TabCuti({ user }) {
       {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       {!hasil && !error && <Memuat>Memuat pengajuan cuti...</Memuat>}
       {hasil?.data.length === 0 && (
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl text-center font-body-md text-body-md text-on-surface-variant">
+        <div className="kartu">
+          <KeadaanKosong ikon="event_busy">
           {status ? "Tidak ada cuti dengan status ini." : talent ? "Anda belum pernah mengajukan cuti." : "Belum ada pengajuan cuti."}
+          </KeadaanKosong>
         </div>
       )}
 
@@ -75,7 +77,7 @@ export default function TabCuti({ user }) {
         ))}
       </ul>
       {hasil && hasil.meta.total > 0 && (
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm">
+        <div className="kartu">
           <Pagination meta={hasil.meta} onPage={setPage} satuan="pengajuan cuti" />
         </div>
       )}
@@ -115,7 +117,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
   }
 
   return (
-    <li className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
+    <li className="kartu p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-space-sm">
           <span className="font-title-sm text-title-sm text-on-surface">
@@ -144,7 +146,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
               <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">
                 {konfirmasi === "batal" ? "Batalkan cuti ini?" : konfirmasi === "ditolak" ? "Tolak cuti ini?" : "Setujui cuti ini?"}
               </span>
-              <button type="button" onClick={() => setKonfirmasi("")} disabled={kirim} className={`${tombol} text-on-surface-variant hover:bg-surface-container`}>
+              <button type="button" onClick={() => setKonfirmasi("")} disabled={kirim} className="tombol-kedua">
                 Tidak
               </button>
               <button
@@ -153,7 +155,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
                 onClick={() =>
                   konfirmasi === "batal" ? kirimAksi(`/cuti/${c.id_cuti}/batal`) : kirimAksi(`/cuti/${c.id_cuti}/approval`, { keputusan: konfirmasi })
                 }
-                className={`${tombol} ${konfirmasi === "disetujui" ? "bg-primary text-on-primary" : "bg-error text-on-error"}`}
+                className={konfirmasi === "disetujui" ? "tombol-utama" : "tombol-bahaya"}
               >
                 {kirim ? "Memproses..." : "Ya"}
               </button>
@@ -164,13 +166,13 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
                 <span className="material-symbols-outlined text-[18px]">check</span>
                 Setujui
               </button>
-              <button type="button" onClick={() => setKonfirmasi("ditolak")} className={`${tombol} text-error hover:bg-error-container`}>
+              <button type="button" onClick={() => setKonfirmasi("ditolak")} className="tombol-bahaya-garis">
                 <span className="material-symbols-outlined text-[18px]">close</span>
                 Tolak
               </button>
             </>
           ) : (
-            <button type="button" onClick={() => setKonfirmasi("batal")} className={`${tombol} text-error hover:bg-error-container`}>
+            <button type="button" onClick={() => setKonfirmasi("batal")} className="tombol-bahaya-garis">
               <span className="material-symbols-outlined text-[18px]">event_busy</span>
               Batalkan
             </button>
@@ -224,7 +226,7 @@ function ModalAjukanCuti({ onClose, onBerhasil }) {
       onClose={onClose}
       onSubmit={simpan}
       aksi={
-        <button type="submit" disabled={kirim || daftar?.length === 0} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+        <button type="submit" disabled={kirim || daftar?.length === 0} className="tombol-utama">
           {kirim ? "Mengirim..." : "Kirim Pengajuan"}
         </button>
       }

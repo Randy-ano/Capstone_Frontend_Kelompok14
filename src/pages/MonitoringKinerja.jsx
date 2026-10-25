@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda } from "../components/ui";
 import { PlacementBadge } from "../components/rekrutmen/shared";
 import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
@@ -60,7 +60,7 @@ export default function MonitoringKinerja() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
           {placement && (
             <PilihFilter
@@ -81,14 +81,16 @@ export default function MonitoringKinerja() {
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
         {!hasil && !error && <Memuat>Memuat monitoring...</Memuat>}
         {hasil?.data.length === 0 && (
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl text-center font-body-md text-body-md text-on-surface-variant">
+          <div className="kartu">
+            <KeadaanKosong ikon="monitoring">
             {search || idPlacement ? "Tidak ada catatan monitoring yang cocok." : "Belum ada catatan monitoring."}
+            </KeadaanKosong>
           </div>
         )}
 
         <ol className="flex flex-col gap-space-sm">
           {hasil?.data.map((m) => (
-            <li key={m.id_monitoring} className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+            <li key={m.id_monitoring} className="kartu p-space-md space-y-space-sm">
               <div className="flex flex-wrap items-start justify-between gap-space-sm">
                 <div className="min-w-0">
                   <div className="font-title-sm text-title-sm text-on-surface">{m.placement.talent.nama_lengkap}</div>
@@ -116,7 +118,7 @@ export default function MonitoringKinerja() {
           ))}
         </ol>
         {hasil && hasil.meta.total > 0 && (
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm">
+          <div className="kartu">
             <Pagination meta={hasil.meta} onPage={setPage} satuan="catatan" />
           </div>
         )}
@@ -175,7 +177,7 @@ function ModalCatat({ placement, awal, onClose, onBerhasil }) {
       onClose={onClose}
       onSubmit={simpan}
       aksi={
-        <button type="submit" disabled={kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+        <button type="submit" disabled={kirim} className="tombol-utama">
           {kirim ? "Menyimpan..." : "Simpan"}
         </button>
       }

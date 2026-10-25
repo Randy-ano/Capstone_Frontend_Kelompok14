@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, TAHAPAN } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -113,19 +113,19 @@ export default function PipelineRekrutmen() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-sm sm:gap-space-md">
           {kartu.map((k) => (
             <KartuRingkasan key={k.label} {...k} />
           ))}
         </div>
 
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari posisi atau nama klien..." />
           <PilihFilter ikon="filter_alt" label="Status" value={status} onChange={ubahFilter(setStatus)} semua="Semua Status" opsi={Object.entries(STATUS_REQ).map(([v, s]) => [v, s.label])} />
           <PilihFilter ikon="timer" label="Indikator SLA" value={sla} onChange={ubahFilter(setSla)} semua="Semua SLA" opsi={Object.entries(INDIKATOR_SLA).map(([v, s]) => [v, s.label])} />
           <PilihFilter ikon="business" label="Klien" value={klien} onChange={ubahFilter(setKlien)} semua="Semua Klien" opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])} />
           {adaFilter && (
-            <button type="button" onClick={resetFilter} className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1">
+            <button type="button" onClick={resetFilter} className="tombol-teks">
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
@@ -134,33 +134,25 @@ export default function PipelineRekrutmen() {
 
         {error && <Pesan>{error}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[960px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[960px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Permintaan</th>
-                  <th className="py-3 px-4">SLA</th>
-                  <th className="py-3 px-4">Pemenuhan</th>
-                  <th className="py-3 px-4 text-center">Screening</th>
-                  <th className="py-3 px-4">Progres Terakhir</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th>Permintaan</th>
+                  <th>SLA</th>
+                  <th>Pemenuhan</th>
+                  <th className="angka">Screening</th>
+                  <th>Progres Terakhir</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat pipeline...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={6} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={6} ikon="view_kanban">
+                    {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((job) => (
                   <BarisPipeline key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
@@ -198,7 +190,7 @@ function BarisPipeline({ job, onOpen }) {
 
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td className="py-3 px-4">
+      <td>
         <button
           type="button"
           onClick={(e) => {
@@ -211,17 +203,17 @@ function BarisPipeline({ job, onOpen }) {
           <span className="block font-body-sm text-body-sm text-on-surface-variant">{job.klien.nama_perusahaan}</span>
         </button>
       </td>
-      <td className="py-3 px-4 whitespace-nowrap">
+      <td className="whitespace-nowrap">
         <span className="block">
           <SlaBadge indikator={job.indikator_sla} />
         </span>
         <span className="block mt-1 font-body-sm text-body-sm text-on-surface-variant">{formatTanggalWaktu(job.sla_deadline)}</span>
       </td>
-      <td className="py-3 px-4">
+      <td>
         <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
       </td>
-      <td className="py-3 px-4 text-center font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</td>
-      <td className="py-3 px-4">
+      <td className="angka font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</td>
+      <td>
         {log ? (
           <div className="flex items-start gap-space-sm">
             <span className="material-symbols-outlined text-[18px] text-primary">{tahapan.ikon}</span>
@@ -237,7 +229,7 @@ function BarisPipeline({ job, onOpen }) {
           <span className="font-body-sm text-body-sm text-outline">Belum diajukan</span>
         )}
       </td>
-      <td className="py-3 px-4">
+      <td>
         <StatusReqBadge status={job.status_req} />
       </td>
     </tr>

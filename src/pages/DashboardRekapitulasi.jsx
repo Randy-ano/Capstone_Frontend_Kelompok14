@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE, displayUser } from "../auth/roles";
-import { Memuat, Pesan } from "../components/ui";
+import { Memuat, Pesan, Skeleton } from "../components/ui";
 
 const IKON = {
   job_aktif: "receipt_long",
@@ -54,8 +54,11 @@ export default function DashboardRekapitulasi() {
 
   return (
     <div className="flex flex-col w-full pb-space-xl">
-      <div className="bg-surface-container-low px-space-md sm:px-space-xl py-space-lg">
-        <div className="font-label-sm text-label-sm text-primary uppercase tracking-wider">{tanggal}</div>
+      <div className="px-space-md sm:px-space-xl pt-space-lg pb-space-sm space-y-1">
+        <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-primary uppercase tracking-wider">
+          <span className="material-symbols-outlined text-[16px]">today</span>
+          {tanggal}
+        </div>
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile sm:font-headline-lg sm:text-headline-lg text-on-surface tracking-tight">
           {sapaan()}, {displayUser(user).nama}
         </h1>
@@ -73,10 +76,21 @@ export default function DashboardRekapitulasi() {
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         {error && <Pesan>{error}</Pesan>}
-        {!ringkasan && !error && <Memuat>Memuat ringkasan...</Memuat>}
+        {!ringkasan && !error && (
+          <div data-memuat role="status" aria-busy="true" className="grid grid-cols-2 xl:grid-cols-3 gap-space-sm sm:gap-space-md">
+            <span className="sr-only">Memuat ringkasan...</span>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="kartu p-space-md space-y-space-sm">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-9 w-16" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {ringkasan && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-space-sm sm:gap-space-md">
             {ringkasan.kartu.map((k) => (
               <KartuTujuan key={k.kunci} kartu={k} />
             ))}
@@ -84,7 +98,11 @@ export default function DashboardRekapitulasi() {
         )}
 
         {manager && analitik && <AnalitikManager data={analitik} />}
-        {manager && !analitik && !error && <Memuat>Memuat analitik...</Memuat>}
+        {manager && !analitik && !error && (
+          <div className="kartu p-space-lg">
+            <Memuat>Memuat analitik...</Memuat>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -93,17 +111,23 @@ export default function DashboardRekapitulasi() {
 function KartuTujuan({ kartu: k }) {
   const isi = (
     <>
-      <div className="flex items-center justify-between gap-space-sm text-on-surface-variant">
-        <span className="font-label-md text-label-md">{k.label}</span>
-        <span className={`material-symbols-outlined text-[20px] ${k.kunci === "sla_terlambat" && k.nilai > 0 ? "text-error" : "text-primary"}`}>{IKON[k.kunci] ?? "insights"}</span>
+      <div className="flex items-start justify-between gap-space-sm text-on-surface-variant">
+        <span className="font-label-lg text-label-lg">{k.label}</span>
+        <span
+          className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-lg material-symbols-outlined text-[20px] ${
+            k.kunci === "sla_terlambat" && k.nilai > 0 ? "bg-error-container text-error" : "bg-primary-fixed text-primary"
+          }`}
+        >
+          {IKON[k.kunci] ?? "insights"}
+        </span>
       </div>
-      <div className={`mt-space-sm text-on-surface ${typeof k.nilai === "number" ? "font-headline-lg text-headline-lg" : "font-headline-sm text-headline-sm"}`}>{k.nilai}</div>
-      {k.keterangan && <div className="font-body-sm text-body-sm text-on-surface-variant">{k.keterangan}</div>}
+      <div className={`mt-auto pt-space-sm text-on-surface tabular-nums ${typeof k.nilai === "number" ? "font-headline-xl text-headline-xl" : "font-headline-sm text-headline-sm"}`}>{k.nilai}</div>
+      {k.keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{k.keterangan}</div>}
     </>
   );
-  const kelas = "block bg-surface-container-lowest p-space-md rounded-xl shadow-sm transition-all";
+  const kelas = "kartu h-full flex flex-col p-space-md transition-shadow";
   return k.tujuan ? (
-    <Link to={k.tujuan} className={`${kelas} hover:shadow-md hover:ring-2 hover:ring-primary-container`}>
+    <Link to={k.tujuan} className={`${kelas} hover:shadow-md hover:ring-primary/40`}>
       {isi}
     </Link>
   ) : (
@@ -113,7 +137,7 @@ function KartuTujuan({ kartu: k }) {
 
 function Panel({ judul, ikon, keterangan, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg space-y-space-md min-w-0">
+    <section className="kartu p-space-md sm:p-space-lg space-y-space-md min-w-0">
       <div>
         <h2 className="flex items-center gap-space-sm font-title-md text-title-md text-on-surface">
           <span className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
@@ -155,7 +179,7 @@ function DaftarBatang({ data, satuan }) {
         <li key={d.label} title={`${d.label}: ${d.jumlah} ${satuan}`}>
           <div className="flex items-baseline justify-between gap-space-sm font-body-sm text-body-sm">
             <span className="text-on-surface-variant">{d.label}</span>
-            <span className="font-label-md text-label-md text-on-surface">{d.jumlah}</span>
+            <span className="font-label-md text-label-md text-on-surface tabular-nums">{d.jumlah}</span>
           </div>
           <div className="mt-1 h-2 rounded-full bg-surface-container overflow-hidden">
             <div className="h-full rounded-full bg-primary" style={{ width: `${(d.jumlah / maks) * 100}%`, minWidth: d.jumlah ? "4px" : 0 }} />

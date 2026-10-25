@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { Memuat, Pagination, Pesan, PilihFilter, formatTanggalWaktu } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, formatTanggalWaktu } from "../ui";
 import { PlacementBadge } from "../rekrutmen/shared";
 
 // FR-15: talent melihat catatan monitoring kinerja tentang dirinya (read-only; backend hanya mengirim placement miliknya).
@@ -36,7 +36,7 @@ export default function TabMonitoringTalent() {
 
   return (
     <div className="flex flex-col gap-space-md">
-      <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+      <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
         <p className="flex-1 min-w-0 font-body-md text-body-md text-on-surface-variant">
           Catatan pemantauan kinerja Anda dari Manager PT Intellisys beserta rencana tindak lanjutnya.
         </p>
@@ -58,14 +58,16 @@ export default function TabMonitoringTalent() {
       {error && <Pesan>{error}</Pesan>}
       {!hasil && !error && <Memuat>Memuat monitoring...</Memuat>}
       {hasil?.data.length === 0 && (
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl text-center font-body-md text-body-md text-on-surface-variant">
+        <div className="kartu">
+          <KeadaanKosong ikon="monitoring">
           Belum ada catatan monitoring untuk penempatan Anda.
+          </KeadaanKosong>
         </div>
       )}
 
       <ol className="flex flex-col gap-space-sm">
         {hasil?.data.map((m) => (
-          <li key={m.id_monitoring} className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+          <li key={m.id_monitoring} className="kartu p-space-md space-y-space-sm">
             <div className="flex flex-wrap items-start justify-between gap-space-sm">
               <div className="min-w-0">
                 <div className="font-title-sm text-title-sm text-on-surface">{formatTanggalWaktu(m.tanggal_monitoring)}</div>
@@ -88,7 +90,7 @@ export default function TabMonitoringTalent() {
         ))}
       </ol>
       {hasil && hasil.meta.total > 0 && (
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm">
+        <div className="kartu">
           <Pagination meta={hasil.meta} onPage={setPage} satuan="catatan" />
         </div>
       )}

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
-import { KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, useTunda } from "../components/ui";
 import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 
@@ -95,7 +95,7 @@ export default function Penempatan() {
                 role="tab"
                 aria-selected={tab === t.key}
                 onClick={() => setParams(t.key === "penempatan" ? {} : { tab: t.key })}
-                className={`px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
+                className={`min-h-[40px] px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
                   tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
@@ -110,7 +110,7 @@ export default function Penempatan() {
           <TabMonitoringTalent />
         ) : (
           <>
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+            <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
               <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
               <PilihFilter
                 ikon="filter_alt"
@@ -140,36 +140,28 @@ export default function Penempatan() {
 
             {error && <Pesan>{error}</Pesan>}
 
-            <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <div className="kartu overflow-hidden">
               <div className="overflow-x-auto w-full">
-                <table className={`w-full min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+                <table className={`tabel min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
                   <thead>
-                    <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                      <th className="py-3 px-4">Talent</th>
-                      <th className="py-3 px-4">Posisi</th>
-                      <th className="py-3 px-4">Klien</th>
-                      <th className="py-3 px-4">Periode</th>
-                      <th className="py-3 px-4">Status</th>
+                    <tr>
+                      <th>Talent</th>
+                      <th>Posisi</th>
+                      <th>Klien</th>
+                      <th>Periode</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                    {!hasil && memuat && (
-                      <tr>
-                        <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                          Memuat penempatan...
-                        </td>
-                      </tr>
-                    )}
+                  <tbody>
+                    {!hasil && memuat && <BarisMemuat kolom={5} />}
                     {hasil?.data.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                          {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
-                        </td>
-                      </tr>
+                      <BarisKosong kolom={5} ikon="assignment_ind">
+                        {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
+                      </BarisKosong>
                     )}
                     {hasil?.data.map((pl) => (
                       <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                        <td className="py-3 px-4">
+                        <td>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -182,12 +174,12 @@ export default function Penempatan() {
                             <span className="block font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</span>
                           </button>
                         </td>
-                        <td className="py-3 px-4 text-on-surface">{pl.posisi_penempatan}</td>
-                        <td className="py-3 px-4 text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
-                        <td className="py-3 px-4 whitespace-nowrap text-on-surface-variant">
+                        <td className="text-on-surface">{pl.posisi_penempatan}</td>
+                        <td className="text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
+                        <td className="whitespace-nowrap text-on-surface-variant">
                           {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
                         </td>
-                        <td className="py-3 px-4">
+                        <td>
                           <PlacementBadge status={pl.status_placement} />
                         </td>
                       </tr>
@@ -240,9 +232,9 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail penempatan">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Penempatan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface">
+          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -252,7 +244,7 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
           {!error && !pl && <Memuat>Memuat detail...</Memuat>}
           {pl && (
             <>
-              <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+              <section className="kartu p-space-md space-y-space-sm">
                 <div className="flex items-start justify-between gap-space-sm">
                   <div className="min-w-0">
                     <div className="font-title-md text-title-md text-on-surface">{pl.talent.nama_lengkap}</div>
@@ -275,7 +267,7 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
                 </dl>
               </section>
               {ringkasan && (
-                <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+                <section className="kartu p-space-md space-y-space-sm">
                   <h3 className="font-title-sm text-title-sm text-on-surface">Ringkasan Operasional</h3>
                   <div className="grid grid-cols-4 gap-space-sm">
                     {ringkasan.map(([label, nilai]) => (
@@ -326,7 +318,7 @@ function AkhiriPlacement({ pl, onBerhasil }) {
   }
 
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+    <section className="kartu p-space-md space-y-space-sm">
       <h3 className="font-title-sm text-title-sm text-on-surface">Akhiri Penempatan</h3>
       {error && <Pesan>{errorField(error, "tanggal_selesai") ?? errorField(error, "status_placement") ?? error.message}</Pesan>}
       <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Status akhir">
@@ -357,7 +349,7 @@ function AkhiriPlacement({ pl, onBerhasil }) {
           type="button"
           onClick={simpan}
           disabled={!status || kirim}
-          className="flex items-center gap-1.5 h-10 px-4 rounded-lg bg-error text-on-error font-label-lg text-label-lg shadow-sm disabled:opacity-50"
+          className="tombol-bahaya"
         >
           {kirim ? "Menyimpan..." : "Akhiri Penempatan"}
         </button>

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 import { infoTipe, waktuRelatif } from "./shared";
+import { KeadaanKosong, Skeleton } from "../ui";
 
 const INTERVAL_MS = 60_000;
 
@@ -92,8 +93,16 @@ export default function Lonceng() {
           </div>
           <ul className="max-h-[60vh] overflow-y-auto divide-y divide-surface-container-low">
             {error && <li className="px-space-md py-space-md font-body-sm text-body-sm text-error">{error}</li>}
-            {!daftar && !error && <li className="px-space-md py-space-md font-body-sm text-body-sm text-on-surface-variant">Memuat...</li>}
-            {daftar?.length === 0 && <li className="px-space-md py-space-lg text-center font-body-sm text-body-sm text-on-surface-variant">Belum ada notifikasi.</li>}
+            {!daftar && !error && (
+              <li data-memuat className="px-space-md py-space-md space-y-2">
+                <span className="sr-only">Memuat...</span>
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </li>
+            )}
+            {daftar?.length === 0 && <li>
+              <KeadaanKosong ringkas ikon="notifications_off">Belum ada notifikasi.</KeadaanKosong>
+            </li>}
             {daftar?.map((n) => (
               <li key={n.id_notifikasi}>
                 <button

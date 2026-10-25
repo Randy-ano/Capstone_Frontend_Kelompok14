@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KartuRingkasan, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
 import { Field, LaporanBadge, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
 const KARTU = [
@@ -71,7 +71,7 @@ export default function TiketKomplain() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-space-sm sm:gap-space-md">
           {KARTU.map((k) => (
             <KartuRingkasan
               key={k.key}
@@ -88,36 +88,36 @@ export default function TiketKomplain() {
           ))}
         </div>
 
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+        <div className="kartu p-space-md">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari judul laporan atau nama talent..." />
         </div>
 
         {error && <Pesan>{error}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat tiket...</Memuat>}
           {hasil?.data.length === 0 && (
-            <p className="p-space-xl text-center font-body-md text-body-md text-on-surface-variant">
+            <KeadaanKosong ikon="support_agent">
               {search || status ? "Tidak ada tiket yang cocok dengan pencarian atau filter." : "Belum ada tiket komplain."}
-            </p>
+            </KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
             <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[760px] text-left border-collapse">
+              <table className="tabel min-w-[760px] text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                    <th className="py-3 px-4">Laporan</th>
-                    <th className="py-3 px-4">Talent</th>
-                    <th className="py-3 px-4">Dilaporkan</th>
-                    <th className="py-3 px-4">Ditindaklanjuti</th>
-                    <th className="py-3 px-4">Status</th>
+                  <tr>
+                    <th>Laporan</th>
+                    <th>Talent</th>
+                    <th>Dilaporkan</th>
+                    <th>Ditindaklanjuti</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
-                <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
+                <tbody>
                   {hasil.data.map((l) => (
                     <tr key={l.id_laporan} onClick={() => setDipilih(l)} className="hover:bg-surface-container-low cursor-pointer align-top">
-                      <td className="py-3 px-4 max-w-[320px]">
+                      <td className="max-w-[320px]">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -130,16 +130,16 @@ export default function TiketKomplain() {
                         </button>
                         <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{l.deskripsi_keluhan}</p>
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <span className="block text-on-surface">{l.placement.talent.nama_lengkap}</span>
                         <span className="block font-body-sm text-body-sm text-on-surface-variant">{l.placement.klien.nama_perusahaan}</span>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap">
                         <span className="block text-on-surface-variant">{formatTanggal(l.tanggal_laporan)}</span>
                         {l.pelapor && <span className="block font-body-sm text-body-sm text-outline">oleh {l.pelapor.nama_hr}</span>}
                       </td>
-                      <td className="py-3 px-4 text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</td>
-                      <td className="py-3 px-4">
+                      <td className="text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</td>
+                      <td>
                         <LaporanBadge status={l.status_laporan} />
                       </td>
                     </tr>
@@ -215,7 +215,7 @@ function ModalBuat({ onClose, onBerhasil }) {
       onClose={onClose}
       onSubmit={simpan}
       aksi={
-        <button type="submit" disabled={kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+        <button type="submit" disabled={kirim} className="tombol-utama">
           {kirim ? "Mengirim..." : "Kirim Laporan"}
         </button>
       }
@@ -275,14 +275,14 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail tiket">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Tiket</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+          <section className="kartu p-space-md space-y-space-sm">
             <div className="flex items-start justify-between gap-space-sm">
               <h3 className="font-title-md text-title-md text-on-surface">{l.judul_laporan}</h3>
               <LaporanBadge status={l.status_laporan} />
@@ -308,7 +308,7 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
             </dl>
           </section>
 
-          <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+          <section className="kartu p-space-md space-y-space-sm">
             <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
               <span className="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
               Tindak Lanjut
@@ -338,7 +338,7 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
                       role="radio"
                       aria-checked={status === v}
                       onClick={() => (setStatus(v), setError(null))}
-                      className={`h-9 rounded-lg font-label-md text-label-md ${status === v ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
+                      className={`h-10 rounded-lg font-label-md text-label-md ${status === v ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
                     >
                       {label}
                     </button>
@@ -354,7 +354,7 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
                   />
                 </Field>
                 <div className="flex justify-end">
-                  <button type="button" onClick={simpan} disabled={kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+                  <button type="button" onClick={simpan} disabled={kirim} className="tombol-utama">
                     {kirim ? "Menyimpan..." : "Simpan Tindak Lanjut"}
                   </button>
                 </div>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
-import { KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
 
@@ -66,7 +66,7 @@ export default function MasterDataSkill() {
               setSukses("");
               setForm({ kompetensi: null });
             }}
-            className="w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-md"
+            className="tombol-utama w-full md:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             Tambah Kompetensi
@@ -77,7 +77,7 @@ export default function MasterDataSkill() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama kompetensi..." />
           <PilihFilter
             ikon="category"
@@ -98,7 +98,7 @@ export default function MasterDataSkill() {
                 setKategori("");
                 setPage(1);
               }}
-              className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1"
+              className="tombol-teks"
             >
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
@@ -109,32 +109,24 @@ export default function MasterDataSkill() {
         {error && <Pesan>{error}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[640px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[640px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Nama Kompetensi</th>
-                  <th className="py-3 px-4">Kategori</th>
-                  <th className="py-3 px-4 text-center">Dipakai Talent</th>
-                  <th className="py-3 px-4 text-center">Dipakai Permintaan</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
+                <tr>
+                  <th>Nama Kompetensi</th>
+                  <th>Kategori</th>
+                  <th className="angka">Dipakai Talent</th>
+                  <th className="angka">Dipakai Permintaan</th>
+                  <th className="aksi">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat kompetensi...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={5} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={5} ikon="psychology">
+                    {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((k) => (
                   <BarisKompetensi
@@ -183,28 +175,27 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
     }
   }
 
-  const tombol = "h-8 px-3 rounded-lg font-label-md text-label-md transition-colors disabled:opacity-40";
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td className="py-3 px-4 font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</td>
-      <td className="py-3 px-4 text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</td>
-      <td className="py-3 px-4 text-center">{k.jumlah_talent}</td>
-      <td className="py-3 px-4 text-center">{k.jumlah_job_requirement}</td>
-      <td className="py-3 px-4">
+      <td className="font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</td>
+      <td className="text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</td>
+      <td className="angka">{k.jumlah_talent}</td>
+      <td className="angka">{k.jumlah_job_requirement}</td>
+      <td>
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">Hapus?</span>
-            <button type="button" onClick={() => setKonfirmasi(false)} disabled={hapus} className={`${tombol} text-on-surface-variant hover:bg-surface-container`}>
+            <button type="button" onClick={() => setKonfirmasi(false)} disabled={hapus} className="tombol-kedua">
               Tidak
             </button>
-            <button type="button" onClick={handleHapus} disabled={hapus} className={`${tombol} bg-error text-on-error`}>
+            <button type="button" onClick={handleHapus} disabled={hapus} className="tombol-bahaya">
               {hapus ? "Menghapus..." : "Ya, Hapus"}
             </button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-1">
-            <button type="button" onClick={onUbah} className={`${tombol} text-primary hover:bg-surface-container flex items-center gap-1`}>
+            <button type="button" onClick={onUbah} className="tombol-kedua">
               <span className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
@@ -213,7 +204,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
               onClick={() => setKonfirmasi(true)}
               disabled={dipakai}
               title={dipakai ? "Masih dipakai talent atau permintaan kebutuhan, tidak dapat dihapus" : "Hapus kompetensi"}
-              className={`${tombol} text-error hover:bg-error-container flex items-center gap-1`}
+              className="tombol-bahaya-garis"
             >
               <span className="material-symbols-outlined text-[16px]">delete</span>
               Hapus
@@ -225,10 +216,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
   );
 }
 
-const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+const inputClass = (error) => `input ${error ? "input-error" : ""}`;
 
 // Modal tambah (POST /kompetensi) atau ubah (PUT /kompetensi/{id}).
 function FormKompetensi({ kompetensi, opsiKategori, onClose, onSaved }) {
@@ -274,7 +262,7 @@ function FormKompetensi({ kompetensi, opsiKategori, onClose, onSaved }) {
       >
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
           <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Kompetensi" : "Tambah Kompetensi"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -306,10 +294,10 @@ function FormKompetensi({ kompetensi, opsiKategori, onClose, onSaved }) {
         </div>
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
-          <button type="button" onClick={onClose} disabled={kirim} className="h-10 px-4 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+          <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
-          <button type="submit" disabled={kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+          <button type="submit" disabled={kirim} className="tombol-utama">
             {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah"}
           </button>
         </div>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
 import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -71,7 +71,7 @@ export default function PengajuanKandidat() {
                 setSukses("");
                 setAjukan(true);
               }}
-              className="w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-md"
+              className="tombol-utama w-full md:w-auto"
             >
               <span className="material-symbols-outlined text-[18px]">send</span>
               Ajukan Kandidat
@@ -83,7 +83,7 @@ export default function PengajuanKandidat() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama kandidat atau posisi..." />
           <PilihFilter
             ikon="filter_alt"
@@ -104,7 +104,7 @@ export default function PengajuanKandidat() {
                 setStatus("");
                 setPage(1);
               }}
-              className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1"
+              className="tombol-teks"
             >
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
@@ -115,38 +115,30 @@ export default function PengajuanKandidat() {
         {error && <Pesan>{error}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[860px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[860px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Kandidat</th>
-                  <th className="py-3 px-4">Posisi & Klien</th>
-                  <th className="py-3 px-4">Diajukan</th>
-                  <th className="py-3 px-4">Tahap Saat Ini</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th>Kandidat</th>
+                  <th>Posisi & Klien</th>
+                  <th>Diajukan</th>
+                  <th>Tahap Saat Ini</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat pengajuan...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={5} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={5} ikon="send">
+                    {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((p) => {
                   const tahap = tahapPengajuan(p);
                   return (
                     <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                      <td className="py-3 px-4">
+                      <td>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -159,21 +151,21 @@ export default function PengajuanKandidat() {
                           <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
                         </button>
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <span className="block text-on-surface">{p.job_requirement.posisi}</span>
                         <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
                       </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap">
                         <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
                         {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <span className="flex items-center gap-1 text-on-surface">
                           <span className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
                           {tahap.label}
                         </span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <PengajuanBadge status={p.status_pengajuan} />
                       </td>
                     </tr>
@@ -238,7 +230,7 @@ function ModalAjukan({ onClose, onBerhasil }) {
       <div className="relative w-full sm:max-w-2xl max-h-[90vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl">
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
           <h2 className="font-title-md text-title-md text-on-surface">Ajukan Kandidat ke Klien</h2>
-          <button type="button" autoFocus onClick={onClose} disabled={!!kirim} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" autoFocus onClick={onClose} disabled={!!kirim} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -246,7 +238,7 @@ function ModalAjukan({ onClose, onBerhasil }) {
           <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
           {error && <Pesan>{error}</Pesan>}
           {!error && !daftar && <Memuat />}
-          {daftar?.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant py-space-md text-center">Belum ada kandidat lolos screening yang menunggu diajukan.</p>}
+          {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
           <ul className="divide-y divide-surface-container-high">
             {daftar?.map((s) => (
               <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
@@ -261,7 +253,7 @@ function ModalAjukan({ onClose, onBerhasil }) {
                   type="button"
                   onClick={() => ajukan(s)}
                   disabled={!!kirim}
-                  className="shrink-0 flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-sm disabled:opacity-50"
+                  className="tombol-utama shrink-0"
                 >
                   <span className="material-symbols-outlined text-[18px]">send</span>
                   {kirim === s.id_screening ? "Mengajukan..." : "Ajukan"}

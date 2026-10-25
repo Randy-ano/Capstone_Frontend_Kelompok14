@@ -1,33 +1,33 @@
 // Label & badge pengajuan, interview, evaluasi, dan placement (FR-10, 11, 12, 17).
 import { ROLE } from "../../auth/roles";
-import { Badge } from "../ui";
+import { Badge, NADA } from "../ui";
 
 export const STATUS_PENGAJUAN = {
-  diajukan: { label: "Menunggu Tinjauan", className: "bg-secondary-container text-on-secondary-fixed" },
-  lanjut_interview: { label: "Lanjut Interview", className: "bg-primary-fixed text-on-primary-fixed-variant" },
-  ditolak: { label: "Ditolak Klien", className: "bg-error-container text-on-error-container" },
+  diajukan: { label: "Menunggu Tinjauan", className: NADA.menunggu },
+  lanjut_interview: { label: "Lanjut Interview", className: NADA.proses },
+  ditolak: { label: "Ditolak Klien", className: NADA.bahaya },
 };
 
 export const STATUS_INTERVIEW = {
-  dijadwalkan: { label: "Dijadwalkan", className: "bg-primary-fixed text-on-primary-fixed-variant" },
-  dijadwal_ulang: { label: "Dijadwal Ulang", className: "bg-secondary-fixed-dim text-on-secondary-fixed" },
-  selesai: { label: "Selesai", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  dibatalkan: { label: "Dibatalkan", className: "bg-error-container text-on-error-container" },
+  dijadwalkan: { label: "Dijadwalkan", className: NADA.proses },
+  dijadwal_ulang: { label: "Dijadwal Ulang", className: NADA.menunggu },
+  selesai: { label: "Selesai", className: NADA.netral },
+  dibatalkan: { label: "Dibatalkan", className: NADA.netral },
 };
 
 export const STATUS_EVALUASI = {
-  diterima: { label: "Diterima", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  ditolak: { label: "Ditolak", className: "bg-error-container text-on-error-container" },
+  diterima: { label: "Diterima", className: NADA.sukses },
+  ditolak: { label: "Ditolak", className: NADA.bahaya },
 };
 
 export const STATUS_PLACEMENT = {
-  aktif: { label: "Aktif", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  selesai: { label: "Selesai", className: "bg-surface-container-high text-on-surface-variant" },
-  dihentikan: { label: "Dihentikan", className: "bg-error-container text-on-error-container" },
+  aktif: { label: "Aktif", className: NADA.sukses },
+  selesai: { label: "Selesai", className: NADA.netral },
+  dihentikan: { label: "Dihentikan", className: NADA.bahaya },
 };
 
 function BadgeDari({ peta, nilai }) {
-  const s = peta[nilai] ?? { label: nilai, className: "bg-surface-container" };
+  const s = peta[nilai] ?? { label: nilai, className: NADA.netral };
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
