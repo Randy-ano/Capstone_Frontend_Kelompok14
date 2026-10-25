@@ -103,7 +103,7 @@ export function Skeleton({ className = "" }) {
 // Placeholder saat memuat (pengganti halaman kosong). `children` dibacakan pembaca layar.
 export function Memuat({ children = "Memuat...", baris = 3 }) {
   return (
-    <div data-memuat role="status" aria-busy="true" className="space-y-space-md py-space-md">
+    <div data-memuat role="status" aria-busy="true" className="space-y-space-md p-space-md">
       <span className="sr-only">{children}</span>
       <div className="flex items-center gap-space-md">
         <Skeleton className="w-12 h-12 rounded-full shrink-0" />

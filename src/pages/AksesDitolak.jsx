@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export default function AksesDitolak() {
   return (
     <div className="px-space-lg py-space-xl">
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col items-center text-center gap-space-md max-w-xl mx-auto">
+      <div className="kartu p-space-xl flex flex-col items-center text-center gap-space-md max-w-xl mx-auto">
         <div className="w-14 h-14 rounded-xl bg-error-container flex items-center justify-center text-error">
           <span className="material-symbols-outlined text-[32px]">lock</span>
         </div>
@@ -14,7 +14,7 @@ export default function AksesDitolak() {
         </div>
         <Link
           to="/dashboard-rekapitulasi"
-          className="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg transition-all shadow-sm"
+          className="tombol-utama"
         >
           <span className="material-symbols-outlined text-[18px]">grid_view</span>
           Kembali ke Dashboard
