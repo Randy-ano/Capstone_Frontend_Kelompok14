@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
+// Kunci pencocokan nama kompetensi, sama dengan backend (R33): huruf kecil tanpa spasi, titik, tanda hubung, garis bawah.
+export const kunciKompetensi = (nama) => nama.toLowerCase().replace(/[\s._-]+/g, "");
+
 // Dropdown pilih banyak kompetensi. `opsi` = data GET /kompetensi; `nilai` = daftar id_kompetensi terpilih.
 // Dipakai sebagai filter (Talent Pool) maupun pemilih di form (job requirement, `lebar` = "penuh").
+// `onTambah(teks)` (opsional) menampilkan opsi menambah kompetensi baru jika teks yang dicari belum ada di master.
 export default function FilterKompetensi({
   opsi,
   nilai,
@@ -11,6 +15,7 @@ export default function FilterKompetensi({
   keterangan = "Talent harus memiliki semua kompetensi terpilih.",
   lebar = "otomatis",
   error = false,
+  onTambah,
 }) {
   const penuh = lebar === "penuh";
   const [open, setOpen] = useState(false);
@@ -36,8 +41,19 @@ export default function FilterKompetensi({
 
   const kata = cari.trim().toLowerCase();
   const tampil = opsi.filter(
-    (k) => !kata || k.nama_kompetensi.toLowerCase().includes(kata) || k.kategori?.toLowerCase().includes(kata),
+    (k) =>
+      !kata ||
+      k.nama_kompetensi.toLowerCase().includes(kata) ||
+      kunciKompetensi(k.nama_kompetensi).includes(kunciKompetensi(kata)) ||
+      k.kategori?.toLowerCase().includes(kata),
   );
+
+  const teks = cari.trim().replace(/\s+/g, " ");
+  const bisaTambah = onTambah && kunciKompetensi(teks) !== "" && !opsi.some((k) => kunciKompetensi(k.nama_kompetensi) === kunciKompetensi(teks));
+  const tambah = () => {
+    onTambah(teks);
+    setCari("");
+  };
 
   const toggle = (id) => onChange(nilai.includes(id) ? nilai.filter((v) => v !== id) : [...nilai, id]);
 
@@ -67,13 +83,33 @@ export default function FilterKompetensi({
               autoFocus
               value={cari}
               onChange={(e) => setCari(e.target.value)}
-              placeholder="Cari kompetensi..."
+              // Enter di form tidak boleh mengirim form; jika teks belum ada di master, Enter menambahkannya.
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" || !onTambah) return;
+                e.preventDefault();
+                if (bisaTambah) tambah();
+              }}
+              placeholder={onTambah ? "Cari atau ketik kompetensi baru..." : "Cari kompetensi..."}
               className="w-full h-9 px-3 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
             />
             {keterangan && <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{keterangan}</p>}
           </div>
           <ul className="max-h-64 overflow-y-auto py-space-xs">
-            {tampil.length === 0 && <li className="px-space-md py-2 font-body-sm text-body-sm text-on-surface-variant">Kompetensi tidak ditemukan.</li>}
+            {bisaTambah && (
+              <li>
+                <button
+                  type="button"
+                  onClick={tambah}
+                  className="w-full flex items-start gap-space-sm px-space-md py-2 text-left font-body-md text-body-md text-primary hover:bg-surface-container-low"
+                >
+                  <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                  <span className="flex-1 break-words">
+                    Tambah "<strong>{teks}</strong>" sebagai kompetensi baru
+                  </span>
+                </button>
+              </li>
+            )}
+            {tampil.length === 0 && !bisaTambah && <li className="px-space-md py-2 font-body-sm text-body-sm text-on-surface-variant">Kompetensi tidak ditemukan.</li>}
             {tampil.map((k) => (
               <li key={k.id_kompetensi}>
                 <label className="flex items-center gap-space-sm px-space-md py-1.5 cursor-pointer hover:bg-surface-container-low">

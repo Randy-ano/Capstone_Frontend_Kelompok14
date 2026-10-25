@@ -15,7 +15,7 @@ import {
   useTunda,
 } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, bolehKelola } from "../components/jobRequirement/shared";
-import FormJob from "../components/jobRequirement/FormJob";
+import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
 
 const PER_PAGE = 10;
@@ -112,6 +112,7 @@ export default function PermintaanKebutuhan() {
 
   function tersimpan(job, pesan) {
     setForm(null);
+    setOpsiKompetensi((opsi) => tambahOpsiKompetensi(opsi, job.kompetensi));
     setSukses(pesan);
     setDipilih(job.id_job_req);
     muatUlang();
