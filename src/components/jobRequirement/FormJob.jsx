@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
 import { Chip, Pesan, errorField } from "../ui";
-import FilterKompetensi from "../talentPool/FilterKompetensi";
+import FilterKompetensi, { kunciKompetensi } from "../talentPool/FilterKompetensi";
 
 const inputClass = (error) =>
   `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
@@ -21,6 +21,19 @@ function Field({ label, wajib, error, children, className = "" }) {
   );
 }
 
+// Kompetensi baru (belum ada di master) dengan label "baru" dan tombol hapus.
+function ChipBaru({ children, onHapus, disabled }) {
+  return (
+    <span className="inline-flex items-center gap-1 max-w-full pl-2 pr-0.5 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
+      <span className="truncate">{children}</span>
+      <span className="px-1 rounded bg-surface-container-lowest/70 font-label-sm text-label-sm">baru</span>
+      <button type="button" onClick={onHapus} disabled={disabled} title={`Hapus ${children}`} className="p-0.5 rounded hover:bg-surface-container-lowest/70 disabled:opacity-50">
+        <span className="material-symbols-outlined text-[16px] leading-none">close</span>
+      </button>
+    </span>
+  );
+}
+
 // "2026-11-20T17:00:00+07:00" → "2026-11-20T17:00" (nilai input datetime-local, jam Asia/Jakarta dari backend).
 const keInput = (iso) => (iso ? iso.slice(0, 16) : "");
 const keApi = (nilai) => (nilai ? `${nilai.replace("T", " ")}:00` : "");
@@ -34,8 +47,16 @@ function awal(job) {
     sla_deadline: keInput(job?.sla_deadline),
     kualifikasi: job?.kualifikasi ?? "",
     kompetensi: job?.kompetensi.map((k) => k.id_kompetensi) ?? [],
+    // R33: nama kompetensi yang belum ada di master; dibuat backend saat job disimpan.
+    kompetensi_baru: [],
   };
 }
+
+// Kompetensi baru yang dibuat saat job disimpan (R33) ditambahkan ke opsi master tanpa memuat ulang, urut nama.
+export const tambahOpsiKompetensi = (opsi, kompetensi) => {
+  const baru = kompetensi.filter((k) => !opsi.some((o) => o.id_kompetensi === k.id_kompetensi));
+  return baru.length ? [...opsi, ...baru].sort((a, b) => a.nama_kompetensi.localeCompare(b.nama_kompetensi, "id")) : opsi;
+};
 
 // Modal buat (POST /job-requirements) atau ubah (PUT /job-requirements/{id}) job requirement.
 export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved }) {
@@ -67,6 +88,7 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
       sla_deadline: keApi(form.sla_deadline),
       kualifikasi: form.kualifikasi.trim() || null,
       kompetensi: form.kompetensi,
+      kompetensi_baru: form.kompetensi_baru,
     };
     if (pilihKlien) body.id_klien = form.id_klien ? Number(form.id_klien) : null;
     if (!ubah) body.status_req = statusReq;
@@ -86,6 +108,36 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
 
   const e = (field) => errorField(error, field);
   const namaKompetensi = (id) => opsiKompetensi.find((k) => k.id_kompetensi === id)?.nama_kompetensi ?? `#${id}`;
+  const jumlahKompetensi = form.kompetensi.length + form.kompetensi_baru.length;
+  // Error pertama untuk kompetensi, kompetensi.N, kompetensi_baru, atau kompetensi_baru.N.
+  const errorKompetensi = Object.entries(error?.errors ?? {}).find(([field, pesan]) => /^kompetensi(_baru)?(\.\d+)?$/.test(field) && pesan)?.[1][0];
+
+  const hapusErrorKompetensi = () =>
+    setError((err) =>
+      err?.errors ? { message: err.message, errors: Object.fromEntries(Object.entries(err.errors).filter(([field]) => !field.startsWith("kompetensi"))) } : err,
+    );
+
+  function pilihKompetensi(ids) {
+    setForm((f) => ({ ...f, kompetensi: ids }));
+    hapusErrorKompetensi();
+  }
+
+  // Teks yang sama dengan kompetensi master (setelah normalisasi) dipilih dari master; yang sudah ditambahkan tidak dobel.
+  function tambahKompetensiBaru(teks) {
+    const kunci = kunciKompetensi(teks);
+    const master = opsiKompetensi.find((k) => kunciKompetensi(k.nama_kompetensi) === kunci);
+    setForm((f) => {
+      if (master) return f.kompetensi.includes(master.id_kompetensi) ? f : { ...f, kompetensi: [...f.kompetensi, master.id_kompetensi] };
+      if (f.kompetensi_baru.some((nama) => kunciKompetensi(nama) === kunci)) return f;
+      return { ...f, kompetensi_baru: [...f.kompetensi_baru, teks] };
+    });
+    hapusErrorKompetensi();
+  }
+
+  function hapusKompetensiBaru(nama) {
+    setForm((f) => ({ ...f, kompetensi_baru: f.kompetensi_baru.filter((n) => n !== nama) }));
+    hapusErrorKompetensi();
+  }
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah permintaan" : "Buat permintaan"}>
@@ -156,20 +208,26 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
             <FilterKompetensi
               opsi={opsiKompetensi}
               nilai={form.kompetensi}
-              onChange={set("kompetensi")}
-              label={form.kompetensi.length ? `${form.kompetensi.length} kompetensi dipilih` : "Pilih kompetensi"}
-              keterangan="Rekomendasi kandidat dihitung dari kecocokan kompetensi ini."
+              onChange={pilihKompetensi}
+              onTambah={tambahKompetensiBaru}
+              label={jumlahKompetensi ? `${jumlahKompetensi} kompetensi dipilih` : "Pilih kompetensi"}
+              keterangan="Rekomendasi kandidat dihitung dari kecocokan kompetensi ini. Belum ada di daftar? Ketik namanya untuk menambah kompetensi baru."
               lebar="penuh"
-              error={Boolean(e("kompetensi"))}
+              error={Boolean(errorKompetensi)}
             />
-            {form.kompetensi.length > 0 && (
+            {jumlahKompetensi > 0 && (
               <div className="flex flex-wrap gap-1 pt-1">
                 {form.kompetensi.map((id) => (
                   <Chip key={id}>{namaKompetensi(id)}</Chip>
                 ))}
+                {form.kompetensi_baru.map((nama) => (
+                  <ChipBaru key={nama} onHapus={() => hapusKompetensiBaru(nama)} disabled={!!kirim}>
+                    {nama}
+                  </ChipBaru>
+                ))}
               </div>
             )}
-            {(e("kompetensi") || e("kompetensi.0")) && <span className="block font-body-sm text-body-sm text-error">{e("kompetensi") || e("kompetensi.0")}</span>}
+            {errorKompetensi && <span className="block font-body-sm text-body-sm text-error">{errorKompetensi}</span>}
           </div>
 
           <Field label="Kualifikasi" error={e("kualifikasi")}>

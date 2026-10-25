@@ -3,7 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, TAHAPAN } from "../components/jobRequirement/shared";
-import FormJob from "../components/jobRequirement/FormJob";
+import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
 
 const PER_PAGE = 10;
@@ -181,6 +181,7 @@ export default function PipelineRekrutmen() {
           onClose={tutupForm}
           onSaved={(job, pesan) => {
             setForm(null);
+            setOpsiKompetensi((opsi) => tambahOpsiKompetensi(opsi, job.kompetensi));
             setSukses(pesan);
             setDipilih(job.id_job_req);
             muatUlang();
