@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE_LABEL } from "../auth/roles";
-import { Badge, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
 const OPSI_ROLE = INTERNAL.map((r) => [r, ROLE_LABEL[r]]);
@@ -70,7 +70,7 @@ export default function KelolaPegawai() {
               setSukses("");
               setForm({ pegawai: null });
             }}
-            className="w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-md"
+            className="tombol-utama w-full md:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             Tambah Pegawai
@@ -81,7 +81,7 @@ export default function KelolaPegawai() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama atau email..." />
           <PilihFilter
             ikon="badge"
@@ -102,7 +102,7 @@ export default function KelolaPegawai() {
                 setRole("");
                 setPage(1);
               }}
-              className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1"
+              className="tombol-teks"
             >
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
@@ -113,33 +113,25 @@ export default function KelolaPegawai() {
         {error && <Pesan>{error}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[760px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[760px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Nama</th>
-                  <th className="py-3 px-4">Email</th>
-                  <th className="py-3 px-4">Role</th>
-                  <th className="py-3 px-4">No. Telepon</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
+                <tr>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>No. Telepon</th>
+                  <th>Status</th>
+                  <th className="aksi">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat pegawai...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={6} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={6} ikon="manage_accounts">
+                    {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((p) => (
                   <BarisPegawai
@@ -188,38 +180,37 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
     }
   }
 
-  const tombol = "h-8 px-3 rounded-lg font-label-md text-label-md transition-colors disabled:opacity-40 flex items-center gap-1";
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td className="py-3 px-4">
+      <td>
         <span className="block font-title-sm text-title-sm text-on-surface">
           {p.nama_pegawai} {diriSendiri && <span className="font-label-sm text-label-sm text-primary">(Anda)</span>}
         </span>
         <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.jabatan}</span>
       </td>
-      <td className="py-3 px-4 text-on-surface-variant">{p.akun.email}</td>
-      <td className="py-3 px-4">
+      <td className="text-on-surface-variant">{p.akun.email}</td>
+      <td>
         <Badge className="bg-secondary-container text-on-secondary-fixed">{ROLE_LABEL[p.akun.role] ?? p.akun.role}</Badge>
       </td>
-      <td className="py-3 px-4 text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</td>
-      <td className="py-3 px-4">
+      <td className="text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</td>
+      <td>
         <Badge className={aktif ? "bg-tertiary-fixed text-on-tertiary-fixed-variant" : "bg-error-container text-on-error-container"}>{aktif ? "Aktif" : "Nonaktif"}</Badge>
       </td>
-      <td className="py-3 px-4">
+      <td>
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">{aktif ? "Nonaktifkan?" : "Aktifkan?"}</span>
-            <button type="button" onClick={() => setKonfirmasi(false)} disabled={kirim} className={`${tombol} text-on-surface-variant hover:bg-surface-container`}>
+            <button type="button" onClick={() => setKonfirmasi(false)} disabled={kirim} className="tombol-kedua">
               Tidak
             </button>
-            <button type="button" onClick={ubahStatus} disabled={kirim} className={`${tombol} ${aktif ? "bg-error text-on-error" : "bg-primary text-on-primary"}`}>
+            <button type="button" onClick={ubahStatus} disabled={kirim} className={aktif ? "tombol-bahaya" : "tombol-utama"}>
               {kirim ? "Menyimpan..." : "Ya"}
             </button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-1">
-            <button type="button" onClick={onUbah} className={`${tombol} text-primary hover:bg-surface-container`}>
+            <button type="button" onClick={onUbah} className="tombol-kedua">
               <span className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
@@ -227,7 +218,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
               <button
                 type="button"
                 onClick={() => setKonfirmasi(true)}
-                className={`${tombol} ${aktif ? "text-error hover:bg-error-container" : "text-on-tertiary-container hover:bg-tertiary-fixed"}`}
+                className={aktif ? "tombol-bahaya-garis" : "tombol-kedua"}
               >
                 <span className="material-symbols-outlined text-[16px]">{aktif ? "block" : "check_circle"}</span>
                 {aktif ? "Nonaktifkan" : "Aktifkan"}
@@ -240,10 +231,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
   );
 }
 
-const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
+const inputClass = (error) => `input ${error ? "input-error" : ""}`;
 
 function Field({ label, wajib, error, keterangan, children }) {
   return (
@@ -321,7 +309,7 @@ function FormPegawai({ pegawai, onClose, onSaved }) {
       >
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
           <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Pegawai" : "Tambah Pegawai"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high">
+          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -358,10 +346,10 @@ function FormPegawai({ pegawai, onClose, onSaved }) {
         </div>
 
         <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
-          <button type="button" onClick={onClose} disabled={kirim} className="h-10 px-4 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+          <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
-          <button type="submit" disabled={kirim} className="h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm disabled:opacity-50">
+          <button type="submit" disabled={kirim} className="tombol-utama">
             {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah Pegawai"}
           </button>
         </div>

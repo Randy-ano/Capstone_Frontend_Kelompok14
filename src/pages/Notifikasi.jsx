@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { KepalaHalaman, Memuat, Pagination, Pesan, formatTanggalWaktu } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, Memuat, Pagination, Pesan, formatTanggalWaktu } from "../components/ui";
 import { infoTipe, waktuRelatif } from "../components/notifikasi/shared";
 
 const FILTER = [
@@ -68,7 +68,7 @@ export default function Notifikasi() {
         judul="Notifikasi"
         aksi={
           jumlah > 0 && (
-            <button type="button" onClick={bacaSemua} className="w-full md:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-md">
+            <button type="button" onClick={bacaSemua} className="tombol-utama w-full md:w-auto">
               <span className="material-symbols-outlined text-[18px]">done_all</span>
               Tandai Semua Dibaca ({jumlah})
             </button>
@@ -97,9 +97,9 @@ export default function Notifikasi() {
         {error && <Pesan>{error}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat notifikasi...</Memuat>}
-          {hasil?.data.length === 0 && <p className="p-space-xl text-center font-body-md text-body-md text-on-surface-variant">Tidak ada notifikasi.</p>}
+          {hasil?.data.length === 0 && <KeadaanKosong ikon="notifications_off">Tidak ada notifikasi.</KeadaanKosong>}
           <ul className="divide-y divide-surface-container-low">
             {hasil?.data.map((n) => (
               <li key={n.id_notifikasi}>
