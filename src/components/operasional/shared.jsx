@@ -1,36 +1,36 @@
 // Komponen & label bersama halaman operasional (cuti, shift, monitoring, keluhan; FR-14, 15, 18, 19).
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { Badge } from "../ui";
+import { Badge, NADA } from "../ui";
 
 export const STATUS_CUTI = {
-  menunggu: { label: "Menunggu", className: "bg-secondary-container text-on-secondary-fixed" },
-  disetujui: { label: "Disetujui", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  ditolak: { label: "Ditolak", className: "bg-error-container text-on-error-container" },
-  dibatalkan: { label: "Dibatalkan", className: "bg-surface-container-high text-on-surface-variant" },
+  menunggu: { label: "Menunggu", className: NADA.menunggu },
+  disetujui: { label: "Disetujui", className: NADA.sukses },
+  ditolak: { label: "Ditolak", className: NADA.bahaya },
+  dibatalkan: { label: "Dibatalkan", className: NADA.netral },
 };
 
 export const STATUS_APPROVAL = {
-  menunggu: { label: "Menunggu", ikon: "hourglass_top", className: "text-on-surface-variant" },
+  menunggu: { label: "Menunggu", ikon: "hourglass_top", className: "text-warning" },
   disetujui: { label: "Disetujui", ikon: "check_circle", className: "text-on-tertiary-container" },
   ditolak: { label: "Ditolak", ikon: "cancel", className: "text-error" },
 };
 
 export const JENIS_SHIFT = {
-  pagi: { label: "Pagi", ikon: "wb_sunny", className: "bg-primary-fixed text-on-primary-fixed-variant" },
-  siang: { label: "Siang", ikon: "light_mode", className: "bg-secondary-fixed-dim text-on-secondary-fixed" },
-  malam: { label: "Malam", ikon: "dark_mode", className: "bg-inverse-surface text-inverse-on-surface" },
-  libur: { label: "Libur", ikon: "beach_access", className: "bg-surface-container-high text-on-surface-variant" },
+  pagi: { label: "Pagi", ikon: "wb_sunny", className: NADA.proses },
+  siang: { label: "Siang", ikon: "light_mode", className: NADA.menunggu },
+  malam: { label: "Malam", ikon: "dark_mode", className: NADA.gelap },
+  libur: { label: "Libur", ikon: "beach_access", className: NADA.netral },
 };
 
 export const STATUS_LAPORAN = {
-  baru: { label: "Baru", className: "bg-error-container text-on-error-container" },
-  diproses: { label: "Diproses", className: "bg-secondary-container text-on-secondary-fixed" },
-  selesai: { label: "Selesai", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
+  baru: { label: "Baru", className: NADA.menunggu },
+  diproses: { label: "Diproses", className: NADA.proses },
+  selesai: { label: "Selesai", className: NADA.netral },
 };
 
 function BadgeDari({ peta, nilai }) {
-  const s = peta[nilai] ?? { label: nilai, className: "bg-surface-container" };
+  const s = peta[nilai] ?? { label: nilai, className: NADA.netral };
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
@@ -38,7 +38,7 @@ export const CutiBadge = ({ status }) => <BadgeDari peta={STATUS_CUTI} nilai={st
 export const LaporanBadge = ({ status }) => <BadgeDari peta={STATUS_LAPORAN} nilai={status} />;
 
 export function ShiftBadge({ jenis }) {
-  const s = JENIS_SHIFT[jenis] ?? { label: jenis, ikon: "schedule", className: "bg-surface-container" };
+  const s = JENIS_SHIFT[jenis] ?? { label: jenis, ikon: "schedule", className: NADA.netral };
   return (
     <Badge className={`gap-1 ${s.className}`}>
       <span className="material-symbols-outlined text-[14px]">{s.ikon}</span>

@@ -19,6 +19,86 @@
   }
 }
 
+/* Gaya bersama semua halaman. Pakai kelas ini, jangan menyusun ulang deretan kelas yang sama di tiap halaman. */
+@layer components {
+  /* Tombol: utama = aksi utama halaman/form, kedua = aksi pendamping, bahaya = hapus/tolak/batalkan,
+     teks = aksi ringan (reset filter, lihat detail), ikon = tombol berisi ikon saja. Tinggi minimal 40px agar mudah disentuh. */
+  .tombol {
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition-colors
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .tombol-utama {
+    @apply tombol bg-primary text-on-primary shadow-sm hover:bg-primary-container;
+  }
+  .tombol-kedua {
+    @apply tombol bg-surface-container-lowest text-on-surface ring-1 ring-inset ring-outline-variant hover:bg-surface-container-low;
+  }
+  .tombol-bahaya {
+    @apply tombol bg-error text-on-error shadow-sm hover:bg-on-error-container;
+  }
+  .tombol-bahaya-garis {
+    @apply tombol bg-surface-container-lowest text-error ring-1 ring-inset ring-error/40 hover:bg-error-container;
+  }
+  .tombol-teks {
+    @apply tombol px-3 text-primary hover:bg-primary-fixed;
+  }
+  .tombol-ikon {
+    @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50;
+  }
+
+  /* Kartu/panel putih dengan sudut, bayangan, dan garis tepi yang sama. */
+  .kartu {
+    @apply bg-surface-container-lowest rounded-xl shadow-sm ring-1 ring-surface-container-high;
+  }
+
+  /* Isian form. Label di atas, error di bawah (lihat Field di operasional/shared.jsx). */
+  .input {
+    @apply w-full min-h-[40px] px-3 rounded-lg bg-surface-container-lowest ring-1 ring-inset ring-outline-variant font-body-md text-body-md text-on-surface
+      placeholder:text-outline transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/60 disabled:bg-surface-container-low disabled:text-on-surface-variant;
+  }
+  .input-error {
+    @apply ring-2 ring-error focus:ring-error;
+  }
+
+  /* Tabel: header jelas, garis tipis antar baris, sorot saat hover. Kolom angka diberi kelas "angka" (rata kanan),
+     kolom aksi selalu terakhir dengan kelas "aksi". */
+  .tabel {
+    @apply w-full text-left border-collapse font-body-md text-body-md;
+  }
+  .tabel :where(thead th) {
+    @apply py-3 px-4 bg-surface-container-low text-on-surface-variant font-label-md text-label-md font-semibold uppercase tracking-wide whitespace-nowrap border-b border-surface-container-high;
+  }
+  .tabel :where(tbody tr) {
+    @apply border-b border-surface-container transition-colors;
+  }
+  .tabel :where(tbody tr:last-child) {
+    @apply border-b-0;
+  }
+  .tabel :where(tbody td) {
+    @apply py-3 px-4 align-top;
+  }
+  .tabel :where(.angka) {
+    @apply text-right tabular-nums;
+  }
+  .tabel :where(.aksi) {
+    @apply text-right whitespace-nowrap;
+  }
+}
+
+/* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d6cfcf transparent;
+}
 ::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6cfcf;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }

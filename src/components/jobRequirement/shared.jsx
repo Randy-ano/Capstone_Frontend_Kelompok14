@@ -1,19 +1,19 @@
 // Label & komponen khusus job requirement, screening, dan progres (FR-05, 07, 08, 09).
 import { ROLE } from "../../auth/roles";
-import { Badge } from "../ui";
+import { Badge, NADA } from "../ui";
 
 export const STATUS_REQ = {
-  draft: { label: "Draft", className: "bg-surface-container-high text-on-surface-variant" },
-  diajukan: { label: "Diajukan", className: "bg-secondary-container text-on-secondary-fixed" },
-  diproses: { label: "Diproses", className: "bg-primary-fixed text-on-primary-fixed-variant" },
-  terpenuhi: { label: "Terpenuhi", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  dibatalkan: { label: "Dibatalkan", className: "bg-error-container text-on-error-container" },
+  draft: { label: "Draft", className: NADA.netral },
+  diajukan: { label: "Diajukan", className: NADA.menunggu },
+  diproses: { label: "Diproses", className: NADA.proses },
+  terpenuhi: { label: "Terpenuhi", className: NADA.sukses },
+  dibatalkan: { label: "Dibatalkan", className: NADA.netral },
 };
 
 export const INDIKATOR_SLA = {
-  aman: { label: "Aman", ikon: "check_circle", className: "bg-tertiary-fixed text-on-tertiary-fixed-variant" },
-  mendekati: { label: "Mendekati", ikon: "schedule", className: "bg-secondary-fixed-dim text-on-secondary-fixed" },
-  terlambat: { label: "Terlambat", ikon: "warning", className: "bg-error-container text-on-error-container" },
+  aman: { label: "Aman", ikon: "check_circle", className: NADA.sukses },
+  mendekati: { label: "Mendekati", ikon: "schedule", className: NADA.menunggu },
+  terlambat: { label: "Terlambat", ikon: "warning", className: NADA.bahaya },
 };
 
 export const TAHAPAN = {
@@ -35,12 +35,12 @@ export const TERBUKA = ["diajukan", "diproses"];
 export const bolehKelola = (user) => [ROLE.HR_CLIENT, ROLE.ACCOUNT_MANAGER].includes(user.role);
 
 export function StatusReqBadge({ status }) {
-  const s = STATUS_REQ[status] ?? { label: status, className: "bg-surface-container" };
+  const s = STATUS_REQ[status] ?? { label: status, className: NADA.netral };
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
 export function SlaBadge({ indikator }) {
-  const s = INDIKATOR_SLA[indikator] ?? { label: indikator, ikon: "help", className: "bg-surface-container" };
+  const s = INDIKATOR_SLA[indikator] ?? { label: indikator, ikon: "help", className: NADA.netral };
   return (
     <Badge className={`gap-1 ${s.className}`}>
       <span className="material-symbols-outlined text-[14px]">{s.ikon}</span>
