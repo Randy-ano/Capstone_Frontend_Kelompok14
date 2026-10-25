@@ -128,7 +128,7 @@ export default function ProfilSaya() {
   }
   if (!form)
     return (
-      <div className="px-space-md sm:px-space-xl pt-space-lg max-w-5xl">
+      <div className="px-space-md sm:px-space-xl pt-space-lg">
         <div className="kartu p-space-lg">
           <Memuat baris={5}>Memuat profil...</Memuat>
         </div>
@@ -181,13 +181,13 @@ export default function ProfilSaya() {
         Lengkapi profil Anda. Profil yang lengkap otomatis masuk talent pool PT Intellisys dan dapat direkomendasikan ke klien sesuai kompetensi dan pengalaman.
       </KepalaHalaman>
 
-      <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg max-w-5xl">
+      <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <StatusProfil profil={profil} />
         {error && <Pesan>{error.message}</Pesan>}
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <Bagian ikon="person" judul="Data Pribadi">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
             <Field label="Nama lengkap" wajib error={e("nama_lengkap")}>
               <input value={form.nama_lengkap} onChange={ubah("nama_lengkap")} maxLength={255} className={inputClass(e("nama_lengkap"))} />
             </Field>
@@ -206,14 +206,14 @@ export default function ProfilSaya() {
             <Field label="Alamat" error={e("alamat")}>
               <input value={form.alamat} onChange={ubah("alamat")} className={inputClass(e("alamat"))} />
             </Field>
-            <Field label="Tentang saya" error={e("tentang_saya")} className="sm:col-span-2">
+            <Field label="Tentang saya" error={e("tentang_saya")} className="sm:col-span-2 xl:col-span-3">
               <textarea rows={4} value={form.tentang_saya} onChange={ubah("tentang_saya")} maxLength={5000} placeholder="Ringkasan singkat keahlian dan minat Anda" className={`${inputClass(e("tentang_saya"))} h-auto py-2`} />
             </Field>
           </div>
         </Bagian>
 
         <Bagian ikon="link" judul="Tautan" keterangan="Diawali http:// atau https://">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
             {[
               ["linkedin", "LinkedIn", "https://linkedin.com/in/..."],
               ["github", "GitHub", "https://github.com/..."],
@@ -440,7 +440,7 @@ function KartuBaris({ judul, onHapus, children }) {
           Hapus
         </button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">{children}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">{children}</div>
     </div>
   );
 }
