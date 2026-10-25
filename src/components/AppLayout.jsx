@@ -17,11 +17,17 @@ export default function AppLayout() {
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
+  const judul = current ? labelUntuk(current, user.role) : pathname === "/notifikasi" ? "Notifikasi" : "Operasional Outsourcing";
+  // Judul tab browser: "<halaman> · Intellisys Talent Hub".
+  useEffect(() => {
+    document.title = `${judul} · Intellisys Talent Hub`;
+  }, [judul]);
+
   return (
     <>
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="lg:pl-72">
-        <Header grup={grup} title={current ? labelUntuk(current, user.role) : (pathname === "/notifikasi" ? "Notifikasi" : "Operasional Outsourcing")} onMenu={() => setMenuOpen(true)} />
+        <Header grup={grup} title={judul} onMenu={() => setMenuOpen(true)} />
         <main className="w-full pt-16 bg-surface min-h-screen">{boleh ? <Outlet /> : <AksesDitolak />}</main>
       </div>
     </>
