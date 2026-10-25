@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { Memuat, Pesan, errorField, formatAngka, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal } from "../ui";
 import {
   EvaluasiBadge,
   INTERVIEW_FINAL,
@@ -15,13 +15,9 @@ import {
   hariIni,
 } from "./shared";
 
-const inputClass = (error) =>
-  `w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 transition-all ${
-    error ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-  }`;
-const tombol = "flex items-center justify-center gap-1.5 h-9 px-3 rounded-lg font-label-md text-label-md transition-all disabled:opacity-50";
-const tombolUtama = `${tombol} bg-primary text-on-primary hover:bg-primary-container shadow-sm`;
-const tombolKedua = `${tombol} bg-surface-container-lowest text-primary ring-1 ring-surface-container-high hover:bg-surface-container`;
+const inputClass = (error) => `input ${error ? "input-error" : ""}`;
+const tombolUtama = "tombol-utama";
+const tombolKedua = "tombol-kedua";
 
 function Field({ label, wajib, error, className = "", children }) {
   return (
@@ -37,7 +33,7 @@ function Field({ label, wajib, error, className = "", children }) {
 
 function Bagian({ icon, judul, aksi, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+    <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
           <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
@@ -109,9 +105,9 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail pengajuan">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Pengajuan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface">
+          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
@@ -183,10 +179,10 @@ function Tinjau({ p, onBerhasil }) {
         <div className="bg-error-container rounded-lg p-space-sm space-y-space-sm">
           <p className="font-body-sm text-body-sm text-on-error-container">Tolak {p.talent.nama_lengkap}? Kandidat akan dikembalikan ke talent pool.</p>
           <div className="flex justify-end gap-space-sm">
-            <button type="button" onClick={() => setKonfirmasi(false)} disabled={kirim} className={`${tombol} text-on-error-container`}>
+            <button type="button" onClick={() => setKonfirmasi(false)} disabled={kirim} className="tombol-kedua">
               Tidak
             </button>
-            <button type="button" onClick={() => ubah("ditolak")} disabled={kirim} className={`${tombol} bg-error text-on-error`}>
+            <button type="button" onClick={() => ubah("ditolak")} disabled={kirim} className="tombol-bahaya">
               {kirim ? "Memproses..." : "Ya, Tolak"}
             </button>
           </div>
@@ -197,7 +193,7 @@ function Tinjau({ p, onBerhasil }) {
             <span className="material-symbols-outlined text-[18px]">event_available</span>
             {kirim ? "Memproses..." : "Lanjut Interview"}
           </button>
-          <button type="button" onClick={() => setKonfirmasi(true)} disabled={kirim} className={`${tombol} text-error hover:bg-error-container`}>
+          <button type="button" onClick={() => setKonfirmasi(true)} disabled={kirim} className="tombol-bahaya-garis">
             <span className="material-symbols-outlined text-[18px]">person_remove</span>
             Tolak
           </button>
@@ -226,7 +222,7 @@ function Interviews({ p, user, terbuka, onBerhasil }) {
       }
     >
       {p.interviews.length === 0 && !tambah && (
-        <p className="font-body-sm text-body-sm text-on-surface-variant">{atur ? "Belum ada jadwal. Jadwalkan interview pertama." : "Belum ada jadwal interview."}</p>
+        <KeadaanKosong ringkas ikon="event_available">{atur ? "Belum ada jadwal. Jadwalkan interview pertama." : "Belum ada jadwal interview."}</KeadaanKosong>
       )}
       {tambah && (
         <FormJadwal
@@ -285,16 +281,16 @@ function ItemInterview({ iv, ronde, atur, onBerhasil }) {
             onClick={() => jalankan(`/interview/${iv.id_interview}`, "PUT", { status_interview: "selesai" })}
             disabled={kirim || !sudahTiba}
             title={sudahTiba ? "" : "Interview belum berlangsung"}
-            className={`${tombol} text-on-tertiary-container hover:bg-tertiary-fixed`}
+            className="tombol-kedua"
           >
             <span className="material-symbols-outlined text-[16px]">task_alt</span>
             Tandai Selesai
           </button>
-          <button type="button" onClick={() => setMode("ulang")} disabled={kirim} className={`${tombol} text-primary hover:bg-surface-container`}>
+          <button type="button" onClick={() => setMode("ulang")} disabled={kirim} className="tombol-kedua">
             <span className="material-symbols-outlined text-[16px]">edit_calendar</span>
             Jadwal Ulang
           </button>
-          <button type="button" onClick={() => setMode("batal")} disabled={kirim} className={`${tombol} text-error hover:bg-error-container`}>
+          <button type="button" onClick={() => setMode("batal")} disabled={kirim} className="tombol-bahaya-garis">
             <span className="material-symbols-outlined text-[16px]">event_busy</span>
             Batalkan
           </button>
@@ -303,14 +299,14 @@ function ItemInterview({ iv, ronde, atur, onBerhasil }) {
       {mode === "batal" && (
         <div className="flex flex-wrap items-center justify-end gap-1 pt-1">
           <span className="font-body-sm text-body-sm text-on-surface-variant mr-auto">Batalkan jadwal ini?</span>
-          <button type="button" onClick={() => setMode("")} disabled={kirim} className={`${tombol} text-on-surface-variant`}>
+          <button type="button" onClick={() => setMode("")} disabled={kirim} className="tombol-kedua">
             Tidak
           </button>
           <button
             type="button"
             onClick={() => jalankan(`/interview/${iv.id_interview}`, "PUT", { status_interview: "dibatalkan" })}
             disabled={kirim}
-            className={`${tombol} bg-error text-on-error`}
+            className="tombol-bahaya"
           >
             {kirim ? "Memproses..." : "Ya, Batalkan"}
           </button>
@@ -379,7 +375,7 @@ function FormJadwal({ judul, awal, onBatal, onKirim, onBerhasil }) {
         </Field>
       </div>
       <div className="flex justify-end gap-space-sm">
-        <button type="button" onClick={onBatal} disabled={kirim} className={`${tombol} text-on-surface-variant hover:bg-surface-container`}>
+        <button type="button" onClick={onBatal} disabled={kirim} className="tombol-kedua">
           Batal
         </button>
         <button type="button" onClick={simpan} disabled={kirim} className={tombolUtama}>

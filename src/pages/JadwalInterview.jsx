@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { KepalaHalaman, Pagination, Pesan, PilihFilter } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, Pagination, Pesan, PilihFilter } from "../components/ui";
 import { InterviewBadge, STATUS_INTERVIEW, bolehAturInterview, formatJadwal, hariIni } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -55,7 +55,7 @@ export default function JadwalInterview() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <PilihFilter
             ikon="filter_alt"
             label="Status interview"
@@ -83,42 +83,34 @@ export default function JadwalInterview() {
 
         {error && <Pesan>{error}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[820px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[820px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Jadwal</th>
-                  <th className="py-3 px-4">Kandidat</th>
-                  <th className="py-3 px-4">Posisi & Klien</th>
-                  <th className="py-3 px-4">Link / Lokasi</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th>Jadwal</th>
+                  <th>Kandidat</th>
+                  <th>Posisi & Klien</th>
+                  <th>Link / Lokasi</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat jadwal...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={5} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-space-xl text-center text-on-surface-variant">
-                      {lewat || status ? "Tidak ada jadwal interview yang cocok." : "Tidak ada jadwal interview mendatang."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={5} ikon="event_available">
+                    {lewat || status ? "Tidak ada jadwal interview yang cocok." : "Tidak ada jadwal interview mendatang."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((iv) => {
                   const link = /^https?:\/\//i.test(iv.link_lokasi_meeting ?? "") ? iv.link_lokasi_meeting : null;
                   return (
                     <tr key={iv.id_interview} onClick={() => setDipilih(iv.pengajuan.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                      <td className="py-3 px-4 whitespace-nowrap">
+                      <td className="whitespace-nowrap">
                         <span className="block font-title-sm text-title-sm text-on-surface">{formatJadwal(iv.tanggal_interview, iv.waktu_interview)}</span>
                         {iv.tanggal_interview === hari && <span className="font-label-sm text-label-sm text-primary">Hari ini</span>}
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -130,11 +122,11 @@ export default function JadwalInterview() {
                           {iv.pengajuan.talent.nama_lengkap}
                         </button>
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <span className="block text-on-surface">{iv.pengajuan.job_requirement.posisi}</span>
                         <span className="block font-body-sm text-body-sm text-on-surface-variant">{iv.pengajuan.job_requirement.klien.nama_perusahaan}</span>
                       </td>
-                      <td className="py-3 px-4 max-w-[240px] break-all text-on-surface-variant">
+                      <td className="max-w-[240px] break-all text-on-surface-variant">
                         {link ? (
                           <a href={link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline">
                             {link}
@@ -143,7 +135,7 @@ export default function JadwalInterview() {
                           iv.link_lokasi_meeting ?? <span className="text-outline">-</span>
                         )}
                       </td>
-                      <td className="py-3 px-4">
+                      <td>
                         <InterviewBadge status={iv.status_interview} />
                       </td>
                     </tr>
