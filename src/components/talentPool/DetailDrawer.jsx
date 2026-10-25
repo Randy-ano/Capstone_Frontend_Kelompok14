@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
-import { Badge, Chip, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag } from "../ui";
+import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag } from "../ui";
 import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
 
 // Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
@@ -36,13 +36,13 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail talent">
       <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
       <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] shrink-0">
+        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">Detail Talent</h2>
           <button
             type="button"
             onClick={onClose}
             title="Tutup"
-            className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+            className="tombol-ikon -mr-2"
           >
             <span className="material-symbols-outlined text-[22px]">close</span>
           </button>
@@ -51,10 +51,7 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
           {error && <Pesan>{error}</Pesan>}
           {!error && !detail && (
-            <div className="flex items-center justify-center gap-space-sm py-space-xl font-body-md text-body-md text-on-surface-variant">
-              <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
-              Memuat detail...
-            </div>
+            <Memuat>Memuat detail...</Memuat>
           )}
           {detail && (
             <>
@@ -80,7 +77,7 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
 
 function Bagian({ icon, judul, aksi, children }) {
   return (
-    <section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md space-y-space-sm">
+    <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
           <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
@@ -93,7 +90,7 @@ function Bagian({ icon, judul, aksi, children }) {
   );
 }
 
-const Kosong = ({ children }) => <p className="font-body-sm text-body-sm text-on-surface-variant">{children}</p>;
+const Kosong = ({ children }) => <KeadaanKosong ringkas>{children}</KeadaanKosong>;
 
 function Info({ label, children }) {
   return (
@@ -119,7 +116,7 @@ function Profil({ detail }) {
   return (
     <Bagian icon="person" judul="Profil">
       <div className="flex items-center gap-space-md">
-        <span className="w-12 h-12 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-title-md text-title-md">
+        <span className="w-12 h-12 shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-title-md text-title-md">
           {initials(talent.nama_lengkap ?? "")}
         </span>
         <div className="min-w-0">
@@ -127,7 +124,7 @@ function Profil({ detail }) {
           <div className="font-body-sm text-body-sm text-on-surface-variant truncate">{talent.email}</div>
           <div className="flex flex-wrap gap-1 mt-1">
             <StatusBadge status={detail.status_ketersediaan} />
-            <Badge className="bg-secondary-container text-on-secondary-fixed">
+            <Badge className={NADA.netral}>
               Kandidat: {STATUS_KANDIDAT[talent.status_kandidat] ?? talent.status_kandidat}
             </Badge>
           </div>
@@ -263,9 +260,7 @@ function FormUbah({ detail, onUpdated }) {
             onChange={(e) => setTag(e.target.value)}
             maxLength={255}
             placeholder="Contoh: Laravel, MySQL, REST API"
-            className={`w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 ${
-              errorField("tag_keahlian") ? "ring-2 ring-error focus:ring-error" : "focus:ring-primary-container"
-            }`}
+            className={`input ${errorField("tag_keahlian") ? "input-error" : ""}`}
           />
           <span className="block font-body-sm text-body-sm text-on-surface-variant">Pisahkan dengan koma. Kosongkan untuk menghapus semua tag.</span>
           {errorField("tag_keahlian") && <span className="block font-body-sm text-body-sm text-error">{errorField("tag_keahlian")}</span>}
@@ -275,7 +270,7 @@ function FormUbah({ detail, onUpdated }) {
           <button
             type="submit"
             disabled={simpan || (!berubah.status && !berubah.tag)}
-            className="flex items-center gap-1.5 h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm transition-all disabled:opacity-50 disabled:hover:bg-primary"
+            className="tombol-utama"
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             {simpan ? "Menyimpan..." : "Simpan Perubahan"}
@@ -317,7 +312,7 @@ function PengalamanKerja({ items, lama }) {
       icon="work_history"
       judul="Pengalaman Kerja"
       aksi={
-        <Badge className="bg-primary-fixed text-on-primary-fixed-variant">
+        <Badge className={NADA.netral}>
           Total {Number(lama).toLocaleString("id-ID", { maximumFractionDigits: 1 })} tahun
         </Badge>
       }
@@ -424,7 +419,7 @@ function TombolCv({ id, adaCv, nama }) {
           type="button"
           onClick={lihatCv}
           disabled={!adaCv || memuat}
-          className="shrink-0 flex items-center gap-1.5 h-10 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg shadow-sm transition-all disabled:opacity-50 disabled:hover:bg-primary"
+          className="tombol-utama shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
           {memuat ? "Membuka..." : "Lihat CV"}

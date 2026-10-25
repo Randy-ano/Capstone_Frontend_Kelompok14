@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 import DetailDrawer from "../components/talentPool/DetailDrawer";
-import { Chip, Pagination, Pesan, TagChip, formatTanggal, pecahTag } from "../components/ui";
+import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, TagChip, formatTanggal, pecahTag } from "../components/ui";
 import { STATUS_KETERSEDIAAN, StatusBadge } from "../components/talentPool/shared";
 
 const PER_PAGE = 10;
@@ -96,80 +96,41 @@ export default function TalentPool() {
 
   return (
     <div className="flex flex-col w-full pb-space-xl">
-      <div className="bg-surface-container-low px-space-md sm:px-space-xl py-space-lg">
-        <div className="flex items-center gap-space-xs text-primary font-label-sm text-label-sm tracking-wider uppercase">
-          <span className="material-symbols-outlined text-[16px]">group</span>
-          <span>Talent Management</span>
-        </div>
-        <h1 className="font-headline-lg-mobile text-headline-lg-mobile sm:font-headline-lg sm:text-headline-lg text-on-surface tracking-tight">
-          Talent Pool
-        </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
-          Talent berprofil lengkap otomatis masuk talent pool. Cari kandidat berdasarkan kompetensi
-          {bolehUbah ? ", lalu kelola status ketersediaan dan tag keahliannya." : " dan lihat profil serta CV-nya."}
-        </p>
-      </div>
+      <KepalaHalaman ikon="group" kategori="Talent Management" judul="Talent Pool">
+        Talent berprofil lengkap otomatis masuk talent pool. Cari kandidat berdasarkan kompetensi
+        {bolehUbah ? ", lalu kelola status ketersediaan dan tag keahliannya." : " dan lihat profil serta CV-nya."}
+      </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
           {KARTU.map((k) => (
-            <button
+            <KartuRingkasan
               key={k.key}
-              type="button"
+              label={k.label}
+              nilai={ringkasan?.[k.key]}
+              ikon={k.icon}
+              warna={k.warna}
+              keterangan={k.status ? `Klik untuk menyaring ${k.label.toLowerCase()}` : "Seluruh talent pool"}
+              aktif={status === k.status}
               onClick={() => ubahFilter(setStatus)(k.status)}
-              aria-pressed={status === k.status}
-              className={`text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm transition-all hover:shadow-md ${
-                status === k.status ? "ring-2 ring-primary-container" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between text-on-surface-variant">
-                <span className="font-label-md text-label-md">{k.label}</span>
-                <span className={`material-symbols-outlined text-[20px] ${k.warna}`}>{k.icon}</span>
-              </div>
-              <div className="mt-space-sm font-headline-lg text-headline-lg text-on-surface">{ringkasan ? ringkasan[k.key] : "–"}</div>
-              <div className="font-label-sm text-label-sm text-on-surface-variant">
-                {k.status ? `Klik untuk menyaring ${k.label.toLowerCase()}` : "Seluruh talent pool"}
-              </div>
-            </button>
+            />
           ))}
         </div>
 
-        <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+        <div className="kartu p-space-md flex flex-col gap-space-sm">
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-            <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-              <input
-                type="search"
-                value={cari}
-                onChange={(e) => setCari(e.target.value)}
-                maxLength={255}
-                placeholder="Cari nama, email, domisili, kompetensi, atau tag..."
-                className="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
-              />
-            </div>
+            <KotakCari value={cari} onChange={setCari} placeholder="Cari nama, email, domisili, kompetensi, atau tag..." />
             <FilterKompetensi opsi={opsiKompetensi} nilai={kompetensi} onChange={ubahFilter(setKompetensi)} disabled={!!errorKompetensi} />
-            <div className="flex items-center gap-1.5 h-10 bg-surface-container-low px-2 rounded-lg w-full sm:w-auto">
-              <span className="material-symbols-outlined text-outline text-[18px] ml-1">filter_alt</span>
-              <select
-                value={status}
-                onChange={(e) => ubahFilter(setStatus)(e.target.value)}
-                aria-label="Status ketersediaan"
-                className="flex-1 bg-transparent font-label-md text-label-md text-on-surface focus:outline-none pr-2 cursor-pointer"
-              >
-                <option value="">Semua Status</option>
-                {Object.entries(STATUS_KETERSEDIAAN).map(([nilai, { label }]) => (
-                  <option key={nilai} value={nilai}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <PilihFilter
+              ikon="filter_alt"
+              label="Status ketersediaan"
+              value={status}
+              onChange={ubahFilter(setStatus)}
+              semua="Semua Status"
+              opsi={Object.entries(STATUS_KETERSEDIAAN).map(([nilai, { label }]) => [nilai, label])}
+            />
             {adaFilter && (
-              <button
-                type="button"
-                onClick={resetFilter}
-                className="h-10 px-3 rounded-lg font-label-md text-label-md text-primary hover:bg-surface-container-low flex items-center justify-center gap-1"
-              >
+              <button type="button" onClick={resetFilter} className="tombol-teks">
                 <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
                 Reset
               </button>
@@ -185,7 +146,7 @@ export default function TalentPool() {
                   type="button"
                   onClick={() => ubahFilter(setKompetensi)(kompetensi.filter((v) => v !== id))}
                   title="Hapus filter"
-                  className="inline-flex items-center gap-0.5 pl-2 pr-1 py-0.5 rounded-lg bg-primary-fixed text-on-primary-fixed-variant font-label-md text-label-md hover:bg-primary-fixed-dim"
+                  className="inline-flex items-center gap-0.5 min-h-[32px] pl-2.5 pr-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-md text-label-md hover:bg-primary-fixed-dim"
                 >
                   {namaKompetensi(id)}
                   <span className="material-symbols-outlined text-[16px]">close</span>
@@ -198,33 +159,25 @@ export default function TalentPool() {
 
         {error && <Pesan>{error}</Pesan>}
 
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div className="kartu overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className={`w-full min-w-[880px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
+            <table className={`tabel min-w-[880px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
-                  <th className="py-3 px-4">Nama</th>
-                  <th className="py-3 px-4">Pendidikan</th>
-                  <th className="py-3 px-4">Kompetensi</th>
-                  <th className="py-3 px-4">Tag Keahlian</th>
-                  <th className="py-3 px-4">Tanggal Masuk</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th>Nama</th>
+                  <th>Pendidikan</th>
+                  <th>Kompetensi</th>
+                  <th>Tag Keahlian</th>
+                  <th>Tanggal Masuk</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-body-md divide-y divide-surface-container-low">
-                {!hasil && memuat && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      Memuat talent pool...
-                    </td>
-                  </tr>
-                )}
+              <tbody>
+                {!hasil && memuat && <BarisMemuat kolom={6} />}
                 {hasil?.data.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-space-xl text-center text-on-surface-variant">
-                      {adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Talent pool masih kosong."}
-                    </td>
-                  </tr>
+                  <BarisKosong kolom={6} ikon="group">
+                    {adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Talent pool masih kosong."}
+                  </BarisKosong>
                 )}
                 {hasil?.data.map((item) => (
                   <BarisTalent key={item.id_talent_pool} item={item} onOpen={() => setDipilih(item.id_talent_pool)} />
@@ -248,14 +201,14 @@ function BarisTalent({ item, onOpen }) {
 
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td className="py-3 px-4">
+      <td>
         <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="text-left group">
           <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{talent.nama_lengkap}</span>
           <span className="block font-body-sm text-body-sm text-on-surface-variant">{talent.email}</span>
         </button>
       </td>
-      <td className="py-3 px-4 text-on-surface-variant max-w-[220px]">{talent.pendidikan ?? "-"}</td>
-      <td className="py-3 px-4">
+      <td className="text-on-surface-variant max-w-[220px]">{talent.pendidikan ?? "-"}</td>
+      <td>
         <div className="flex flex-wrap gap-1 max-w-[260px]">
           {talent.kompetensi.slice(0, MAKS_CHIP).map((k) => (
             <Chip key={k.id_kompetensi} title={k.kategori}>
@@ -265,7 +218,7 @@ function BarisTalent({ item, onOpen }) {
           {sisa > 0 && (
             <span
               title={talent.kompetensi.slice(MAKS_CHIP).map((k) => k.nama_kompetensi).join(", ")}
-              className="inline-flex items-center px-2 py-0.5 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md"
+              className="inline-flex items-center px-2 py-0.5 rounded-md bg-surface-container text-on-surface-variant font-label-md text-label-md"
             >
               +{sisa}
             </span>
@@ -273,13 +226,13 @@ function BarisTalent({ item, onOpen }) {
           {talent.kompetensi.length === 0 && <span className="text-outline">-</span>}
         </div>
       </td>
-      <td className="py-3 px-4">
+      <td>
         <div className="flex flex-wrap gap-1 max-w-[220px]">
           {tag.length ? tag.map((t) => <TagChip key={t}>{t}</TagChip>) : <span className="text-outline">-</span>}
         </div>
       </td>
-      <td className="py-3 px-4 whitespace-nowrap text-on-surface-variant">{formatTanggal(item.tanggal_masuk)}</td>
-      <td className="py-3 px-4">
+      <td className="whitespace-nowrap text-on-surface-variant">{formatTanggal(item.tanggal_masuk)}</td>
+      <td>
         <StatusBadge status={item.status_ketersediaan} />
       </td>
     </tr>
