@@ -1,17 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { ROLE_LABEL } from "../auth/roles";
 import { IkonKiri, InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
-
-// Akun demo dari seeder backend (password semuanya "password"); hanya tampil saat development.
-const AKUN_DEMO = [
-  { email: "manager@intellisys.test", role: "manager" },
-  { email: "am@intellisys.test", role: "account_manager" },
-  { email: "ts@intellisys.test", role: "talent_support" },
-  { email: "hr@intellisys.test", role: "hr_client" },
-  { email: "talent@intellisys.test", role: "talent" },
-];
 
 // Mockup Stitch "Masuk - Varian 1 (Clean Enterprise Minimalist)": kartu di tengah dengan latar pola titik.
 export default function Login() {
@@ -49,13 +39,6 @@ export default function Login() {
     }
   }
 
-  function pakaiAkunDemo(akun) {
-    setEmail(akun.email);
-    setPassword("password");
-    setError(null);
-    setFieldErrors({});
-  }
-
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-b from-surface to-surface-container-low">
       <div
@@ -66,7 +49,7 @@ export default function Login() {
       <div aria-hidden="true" className="fixed -top-40 -left-40 w-96 h-96 rounded-full bg-aksen-container blur-3xl pointer-events-none" />
       <div aria-hidden="true" className="fixed -bottom-40 -right-40 w-96 h-96 rounded-full bg-surface-container-high/60 blur-3xl pointer-events-none" />
 
-      <main className="relative flex-1 flex flex-col items-center justify-center px-space-md py-space-xl gap-space-lg">
+      <main className="relative flex-1 flex flex-col items-center justify-center px-space-md py-space-xl">
         <div className="w-full max-w-[460px] bg-surface-container-lowest rounded-2xl border border-outline-variant/50 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.18)] p-space-lg sm:p-9">
           <div className="text-center mb-space-xl">
             <Merek tengah />
@@ -129,28 +112,6 @@ export default function Login() {
             </p>
           </div>
         </div>
-
-        {import.meta.env.DEV && (
-          <div className="w-full max-w-[460px] rounded-xl border border-outline-variant/60 bg-surface-container-lowest/80 p-space-md space-y-space-sm">
-            <div className="flex items-center justify-between gap-space-sm">
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Akun demo (development)</span>
-              <span className="font-body-sm text-body-sm text-outline">password: password</span>
-            </div>
-            <div className="grid grid-cols-1 gap-1">
-              {AKUN_DEMO.map((akun) => (
-                <button
-                  key={akun.email}
-                  type="button"
-                  onClick={() => pakaiAkunDemo(akun)}
-                  className="flex items-center justify-between gap-space-sm px-space-sm py-1.5 rounded-lg hover:bg-surface-container-low transition-colors text-left"
-                >
-                  <span className="font-body-md text-body-md text-on-surface truncate">{akun.email}</span>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant shrink-0">{ROLE_LABEL[akun.role]}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       <footer className="relative w-full px-space-lg py-space-lg text-center border-t border-outline-variant/40 bg-surface-container-lowest/40 backdrop-blur-sm">
