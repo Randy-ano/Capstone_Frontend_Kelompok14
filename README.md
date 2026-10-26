@@ -22,7 +22,7 @@ Alamat API default `http://localhost:8000/api/v1`. Untuk mengubahnya, salin `.en
 
 ## Akun demo
 
-Dari seeder backend, password semuanya `password`. Saat `npm run dev`, daftar akun ini juga tampil di halaman login.
+Dari seeder backend, password semuanya `password`. Daftar ini tidak ditampilkan di halaman Masuk; ketik email dan password secara manual.
 
 | Email | Role |
 |---|---|
