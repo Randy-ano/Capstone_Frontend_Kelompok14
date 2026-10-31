@@ -1,6 +1,6 @@
 // Client REST API backend Intellisys (Laravel, prefix /api/v1, auth Bearer token Sanctum).
 
-const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL ?? "/api/v1").replace(/\/$/, "");
 const TOKEN_KEY = "intellisys_token";
 
 export class ApiError extends Error {
