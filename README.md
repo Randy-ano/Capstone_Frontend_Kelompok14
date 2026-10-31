@@ -18,7 +18,20 @@ npm run dev
 
 Buka http://localhost:5173 (pakai `localhost`, bukan `127.0.0.1`, agar sesuai pengaturan CORS backend).
 
-Alamat API default `http://localhost:8000/api/v1`. Untuk mengubahnya, salin `.env.example` menjadi `.env` lalu isi `VITE_API_URL`.
+Alamat API default `/api/v1`, diteruskan proxy Vite ke `http://localhost:8000`. Untuk mengubahnya, salin `.env.example` menjadi `.env` lalu isi `VITE_API_URL`.
+
+## Membagikan demo lewat Cloudflare Tunnel
+
+1. Jalankan backend dan frontend seperti biasa.
+2. Install `cloudflared`, lalu jalankan:
+
+   ```
+   cloudflared tunnel --url http://localhost:5173
+   ```
+
+3. Bagikan link `https://....trycloudflare.com` yang muncul.
+
+Jika memakai file `.env`, `VITE_API_URL` harus `/api/v1`; alamat absolut ke `localhost:8000` tidak berfungsi lewat link tunnel. Link hanya aktif selama laptop, kedua server, dan `cloudflared` menyala.
 
 ## Akun demo
 
