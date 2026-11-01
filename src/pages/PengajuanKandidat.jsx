@@ -5,7 +5,7 @@ import { ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
-import { BadgeTahapPengajuan, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
+import { BadgeTahapPengajuan, STATUS_TAMPIL, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
 const PER_PAGE = 10;
@@ -16,7 +16,7 @@ const KETERANGAN = {
   [ROLE.ACCOUNT_MANAGER]: "Ajukan kandidat yang lolos screening ke klien, jadwalkan interview dan tandai selesai, lalu pantau hingga evaluasi.",
 };
 
-// Halaman Pengajuan Kandidat (FR-10, 11, 12, 17): AM mengajukan, HR Client meninjau/interview/evaluasi, TS membuat placement.
+// Halaman Pengajuan Kandidat (FR-10, 11, 12, 17): AM mengajukan, HR Client meninjau/interview/evaluasi, TS membuat penempatan.
 export default function PengajuanKandidat() {
   const { user } = useAuth();
   const [cari, setCari] = useState("");
@@ -78,7 +78,7 @@ export default function PengajuanKandidat() {
           )
         }
       >
-        {KETERANGAN[user.role] ?? "Kandidat yang diajukan ke klien beserta proses interview, evaluasi, dan placement."}
+        {KETERANGAN[user.role] ?? "Kandidat yang diajukan ke klien beserta proses interview, evaluasi, dan penempatan."}
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
@@ -86,14 +86,14 @@ export default function PengajuanKandidat() {
           <KotakCari value={cari} onChange={setCari} placeholder="Cari nama kandidat atau posisi..." />
           <PilihFilter
             ikon="filter_alt"
-            label="Status pengajuan"
+            label="Status"
             value={status}
             onChange={(n) => {
               setStatus(n);
               setPage(1);
             }}
             semua="Semua Status"
-            opsi={Object.entries(STATUS_PENGAJUAN).map(([v, s]) => [v, s.label])}
+            opsi={Object.entries(STATUS_TAMPIL).map(([v, s]) => [v, s.label])}
           />
           {adaFilter && (
             <button

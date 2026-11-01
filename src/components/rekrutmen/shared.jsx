@@ -2,10 +2,13 @@
 import { ROLE } from "../../auth/roles";
 import { Badge, NADA } from "../ui";
 
-export const STATUS_PENGAJUAN = {
+// Nilai status_tampil dari backend (juga nilai filter status GET /pengajuan); label sama dengan label_status_tampil.
+export const STATUS_TAMPIL = {
   diajukan: { label: "Menunggu Tinjauan", className: NADA.menunggu },
   lanjut_interview: { label: "Lanjut Interview", className: NADA.proses },
-  ditolak: { label: "Ditolak Klien", className: NADA.bahaya },
+  diterima: { label: "Diterima", className: NADA.sukses },
+  ditempatkan: { label: "Ditempatkan", className: NADA.sukses },
+  ditolak: { label: "Ditolak", className: NADA.bahaya },
 };
 
 export const STATUS_INTERVIEW = {
@@ -31,16 +34,13 @@ function BadgeDari({ peta, nilai }) {
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
-export const PengajuanBadge = ({ status }) => <BadgeDari peta={STATUS_PENGAJUAN} nilai={status} />;
 export const InterviewBadge = ({ status }) => <BadgeDari peta={STATUS_INTERVIEW} nilai={status} />;
 export const EvaluasiBadge = ({ status }) => <BadgeDari peta={STATUS_EVALUASI} nilai={status} />;
 export const PlacementBadge = ({ status }) => <BadgeDari peta={STATUS_PLACEMENT} nilai={status} />;
 
-// Badge pengajuan mengikuti tahap terakhir yang sudah ada di data, agar tidak bertentangan dengan kolom tahap.
+// Status & label dihitung backend (status_tampil), sama dengan yang dipakai filter.
 export function BadgeTahapPengajuan({ pengajuan: p }) {
-  if (p.id_placement) return <Badge className={NADA.sukses}>Ditempatkan</Badge>;
-  if (p.evaluasi) return <EvaluasiBadge status={p.evaluasi.status_evaluasi} />;
-  return <PengajuanBadge status={p.status_pengajuan} />;
+  return <Badge className={STATUS_TAMPIL[p.status_tampil]?.className ?? NADA.netral}>{p.label_status_tampil}</Badge>;
 }
 
 // Tahap terkini pengajuan untuk kolom tabel: menggabungkan status pengajuan, evaluasi, dan placement.
@@ -48,7 +48,7 @@ export function tahapPengajuan(p) {
   if (p.id_placement) return { label: "Ditempatkan", ikon: "assignment_ind" };
   if (p.status_pengajuan === "ditolak") return { label: "Ditolak klien", ikon: "person_remove" };
   if (p.evaluasi?.status_evaluasi === "ditolak") return { label: "Tidak lolos evaluasi", ikon: "person_remove" };
-  if (p.evaluasi?.status_evaluasi === "diterima") return { label: "Diterima, menunggu placement", ikon: "how_to_reg" };
+  if (p.evaluasi?.status_evaluasi === "diterima") return { label: "Diterima, menunggu penempatan", ikon: "how_to_reg" };
   if (p.status_pengajuan === "lanjut_interview") return { label: `Interview (${p.jumlah_interview ?? 0} jadwal)`, ikon: "event_available" };
   return { label: "Menunggu tinjauan klien", ikon: "hourglass_top" };
 }

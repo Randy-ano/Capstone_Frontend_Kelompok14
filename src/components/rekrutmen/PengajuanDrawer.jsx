@@ -467,11 +467,11 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
 
   if (p.id_placement) {
     return (
-      <Bagian icon="assignment_ind" judul="Placement">
+      <Bagian icon="assignment_ind" judul="Penempatan">
         <p className="font-body-md text-body-md text-on-surface">Kandidat sudah ditempatkan.</p>
         <Link to={`/penugasan-penempatan?placement=${p.id_placement}`} className={`${tombolKedua} w-fit`}>
           <span aria-hidden="true" className="material-symbols-outlined text-[18px]">open_in_new</span>
-          Lihat Placement
+          Lihat Penempatan
         </Link>
       </Bagian>
     );
@@ -479,7 +479,7 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
   if (!(bolehPlacement(user) && p.evaluasi?.status_evaluasi === "diterima" && jobBerjalan)) return null;
 
   return (
-    <Bagian icon="assignment_ind" judul="Buat Placement">
+    <Bagian icon="assignment_ind" judul="Buat Penempatan">
       {error && !e("tanggal_mulai") && !e("tanggal_selesai") && <Pesan>{errorField(error, "id_evaluasi") ?? error.message}</Pesan>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <Field label="Posisi penempatan" error={e("posisi_penempatan")} className="sm:col-span-2">
@@ -507,7 +507,7 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
           }
           className={tombolUtama}
         >
-          <Proses aktif={kirim}>Buat Placement</Proses>
+          <Proses aktif={kirim}>Buat Penempatan</Proses>
         </button>
       </div>
     </Bagian>

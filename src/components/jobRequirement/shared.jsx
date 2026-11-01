@@ -22,7 +22,7 @@ export const TAHAPAN = {
   diajukan: { label: "Diajukan ke klien", ikon: "send" },
   interview: { label: "Interview", ikon: "event_available" },
   evaluasi: { label: "Evaluasi", ikon: "rate_review" },
-  placement: { label: "Placement", ikon: "assignment_ind" },
+  placement: { label: "Penempatan", ikon: "assignment_ind" },
   ditolak: { label: "Kandidat ditolak", ikon: "person_remove" },
 };
 
