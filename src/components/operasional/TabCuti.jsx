@@ -56,7 +56,7 @@ export default function TabCuti({ user }) {
         />
         {talent && (
           <button type="button" onClick={() => setAjukan(true)} className={tombolHalaman}>
-            <span className="material-symbols-outlined text-[18px]">event_upcoming</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">event_upcoming</span>
             Ajukan Cuti
           </button>
         )}
@@ -164,17 +164,17 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
           ) : bolehPutuskan ? (
             <>
               <button type="button" onClick={() => setKonfirmasi("disetujui")} className={tombolUtama}>
-                <span className="material-symbols-outlined text-[18px]">check</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">check</span>
                 Setujui
               </button>
               <button type="button" onClick={() => setKonfirmasi("ditolak")} className="tombol-bahaya-garis">
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
                 Tolak
               </button>
             </>
           ) : (
             <button type="button" onClick={() => setKonfirmasi("batal")} className="tombol-bahaya-garis">
-              <span className="material-symbols-outlined text-[18px]">event_busy</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">event_busy</span>
               Batalkan
             </button>
           )}

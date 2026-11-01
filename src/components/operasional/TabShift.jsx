@@ -68,14 +68,14 @@ export default function TabShift({ user }) {
     <div className="flex flex-col gap-space-md">
       <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => geser(-1)} title="Bulan sebelumnya" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+          <button type="button" onClick={() => geser(-1)} title="Bulan sebelumnya" aria-label="Bulan sebelumnya" className="tombol-ikon -mr-2">
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_left</span>
           </button>
           <span className="min-w-[140px] text-center font-title-sm text-title-sm text-on-surface">
             {BULAN[bulan.getMonth()]} {bulan.getFullYear()}
           </span>
-          <button type="button" onClick={() => geser(1)} title="Bulan berikutnya" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+          <button type="button" onClick={() => geser(1)} title="Bulan berikutnya" aria-label="Bulan berikutnya" className="tombol-ikon -mr-2">
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_right</span>
           </button>
         </div>
         {kelola && placement && (
@@ -93,7 +93,7 @@ export default function TabShift({ user }) {
         )}
         {kelola && (
           <button type="button" onClick={() => setAtur(true)} className={`${tombolHalaman} sm:ml-auto`}>
-            <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">edit_calendar</span>
             Atur Shift
           </button>
         )}
@@ -179,11 +179,11 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
             {mode === "" && (
               <>
                 <button type="button" onClick={() => setMode("ubah")} className="tombol-kedua">
-                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
                   Ubah
                 </button>
                 <button type="button" onClick={() => setMode("hapus")} className="tombol-bahaya-garis">
-                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
                   Hapus
                 </button>
               </>

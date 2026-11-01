@@ -54,7 +54,7 @@ export default function PengaturanAkun() {
           aria-label={terlihat ? "Sembunyikan password" : "Tampilkan password"}
           className="absolute inset-y-0 right-0 w-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface"
         >
-          <span className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
         </button>
       </div>
       {errorField(error, field) ? (

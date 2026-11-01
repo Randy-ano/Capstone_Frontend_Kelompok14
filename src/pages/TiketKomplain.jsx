@@ -61,7 +61,7 @@ export default function TiketKomplain() {
         aksi={
           hr && (
             <button type="button" onClick={() => setBuat(true)} className={tombolHalaman}>
-              <span className="material-symbols-outlined text-[18px]">add_comment</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_comment</span>
               Buat Laporan
             </button>
           )
@@ -283,7 +283,7 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
 
       <section className="kartu p-space-md space-y-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
           Tindak Lanjut
         </h3>
         {l.tindak_lanjut.oleh ? (

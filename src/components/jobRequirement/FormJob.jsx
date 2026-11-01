@@ -25,8 +25,8 @@ function ChipBaru({ children, onHapus, disabled }) {
     <span className="inline-flex items-center gap-1 max-w-full pl-2 pr-0.5 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
       <span className="truncate">{children}</span>
       <span className="px-1 rounded bg-surface-container-lowest/70 font-label-sm text-label-sm">baru</span>
-      <button type="button" onClick={onHapus} disabled={disabled} title={`Hapus ${children}`} className="p-0.5 rounded hover:bg-surface-container-lowest/70 disabled:opacity-50">
-        <span className="material-symbols-outlined text-[16px] leading-none">close</span>
+      <button type="button" onClick={onHapus} disabled={disabled} title={`Hapus ${children}`} aria-label={`Hapus ${children}`} className="p-0.5 rounded hover:bg-surface-container-lowest/70 disabled:opacity-50">
+        <span aria-hidden="true" className="material-symbols-outlined text-[16px] leading-none">close</span>
       </button>
     </span>
   );

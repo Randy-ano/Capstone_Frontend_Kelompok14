@@ -72,13 +72,13 @@ export default function Dokumen() {
           <div className="flex flex-col md:flex-row gap-space-sm">
             {user.role === ROLE.ACCOUNT_MANAGER && (
               <button type="button" onClick={() => setModal("generate")} className="tombol-kedua">
-                <span className="material-symbols-outlined text-[18px]">note_add</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">note_add</span>
                 Buat dari Template
               </button>
             )}
             {BOLEH_UNGGAH.includes(user.role) && (
               <button type="button" onClick={() => setModal("unggah")} className="tombol-utama">
-                <span className="material-symbols-outlined text-[18px]">upload_file</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">upload_file</span>
                 Unggah Dokumen
               </button>
             )}
@@ -101,7 +101,7 @@ export default function Dokumen() {
               perluTtd ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface ring-1 ring-inset ring-outline-variant hover:bg-surface-container-low"
             }`}
           >
-            <span className="material-symbols-outlined text-[18px]">draw</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">draw</span>
             Perlu Tanda Tangan Saya
             {jumlahTtd > 0 && <span className={`px-1.5 rounded-full font-label-sm text-label-sm ${perluTtd ? "bg-on-primary text-primary" : "bg-error text-on-error"}`}>{jumlahTtd}</span>}
           </button>
@@ -123,7 +123,7 @@ export default function Dokumen() {
                   <tr key={d.id_dokumen} onClick={() => setDipilih(d)} className="hover:bg-surface-container-low cursor-pointer align-top">
                     <Sel peran="judul">
                       <button type="button" onClick={(e) => (e.stopPropagation(), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
-                        <span className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
+                        <span aria-hidden="true" className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
                         <span className="min-w-0">
                           <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary break-all">{d.nama_file}</span>
                           <span className="block font-body-sm text-body-sm text-on-surface-variant">{j.label}</span>
@@ -148,7 +148,7 @@ export default function Dokumen() {
                       )}
                       {d.aksi.perlu_tanda_tangan_saya && (
                         <span className="mt-1 flex items-center gap-1 font-label-sm text-label-sm text-warning">
-                          <span className="material-symbols-outlined text-[14px]">draw</span>
+                          <span aria-hidden="true" className="material-symbols-outlined text-[14px]">draw</span>
                           Menunggu tanda tangan Anda
                         </span>
                       )}

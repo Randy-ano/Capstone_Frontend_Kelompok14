@@ -6,7 +6,7 @@ export default function AksesDitolak() {
     <div className="px-space-lg py-space-xl">
       <div className="kartu p-space-xl flex flex-col items-center text-center gap-space-md max-w-xl mx-auto">
         <div className="w-14 h-14 rounded-xl bg-error-container flex items-center justify-center text-error">
-          <span className="material-symbols-outlined text-[32px]">lock</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[32px]">lock</span>
         </div>
         <div className="space-y-1">
           <h1 className="font-headline-sm text-headline-sm text-on-surface">Akses Ditolak</h1>
@@ -16,7 +16,7 @@ export default function AksesDitolak() {
           to="/dashboard-rekapitulasi"
           className="tombol-utama"
         >
-          <span className="material-symbols-outlined text-[18px]">grid_view</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px]">grid_view</span>
           Kembali ke Dashboard
         </Link>
       </div>

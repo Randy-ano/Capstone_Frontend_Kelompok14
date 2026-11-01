@@ -25,7 +25,7 @@
      teks = aksi ringan (reset filter, lihat detail), ikon = tombol berisi ikon saja. Tinggi minimal 40px agar mudah disentuh. */
   .tombol {
     @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition duration-150 enabled:active:scale-[0.98]
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
+      disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .tombol-utama {
     @apply tombol bg-primary text-on-primary shadow-sm hover:bg-primary-container;
@@ -44,7 +44,7 @@
   }
   .tombol-ikon {
     @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition duration-150 enabled:active:scale-95 hover:bg-surface-container hover:text-on-surface
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50;
+      disabled:opacity-50;
   }
 
   /* Kartu/panel putih dengan sudut, bayangan, dan garis tepi yang sama. */
@@ -224,6 +224,26 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Garis fokus keyboard yang sama di semua elemen interaktif. !important agar menang atas focus:outline-none.
+   Panel dialog (tabindex -1) menerima fokus lewat skrip dan tidak perlu garis. Input teks sudah punya tepi, garisnya menempel. */
+:focus-visible:not([tabindex="-1"]) {
+  outline: 2px solid theme("colors.primary") !important;
+  outline-offset: 2px !important;
+}
+input:focus-visible:not([tabindex="-1"]),
+select:focus-visible:not([tabindex="-1"]),
+textarea:focus-visible:not([tabindex="-1"]) {
+  outline-offset: 0 !important;
+}
+[tabindex="-1"]:focus {
+  outline: none;
+}
+/* Pilihan berupa label dengan input tersembunyi (status ketersediaan, hari shift). */
+label:has(> input.sr-only:focus-visible) {
+  outline: 2px solid theme("colors.primary");
+  outline-offset: 2px;
 }
 
 /* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */

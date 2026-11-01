@@ -131,7 +131,7 @@ export default function TalentPool() {
             />
             {adaFilter && (
               <button type="button" onClick={resetFilter} className="tombol-teks">
-                <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
                 Reset
               </button>
             )}
@@ -146,10 +146,11 @@ export default function TalentPool() {
                   type="button"
                   onClick={() => ubahFilter(setKompetensi)(kompetensi.filter((v) => v !== id))}
                   title="Hapus filter"
+                  aria-label={`Hapus filter ${namaKompetensi(id)}`}
                   className="inline-flex items-center gap-0.5 min-h-[32px] pl-2.5 pr-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-md text-label-md hover:bg-primary-fixed-dim"
                 >
                   {namaKompetensi(id)}
-                  <span className="material-symbols-outlined text-[16px]">close</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">close</span>
                 </button>
               ))}
             </div>

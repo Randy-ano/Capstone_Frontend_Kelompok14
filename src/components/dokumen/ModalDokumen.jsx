@@ -67,7 +67,7 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
       {error && <Pesan>{error.message}</Pesan>}
       {user.role === ROLE.TALENT && (
         <p className="flex items-start gap-space-sm rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm text-on-surface-variant">
-          <span className="material-symbols-outlined text-[18px] text-primary">info</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">info</span>
           Dokumen yang Anda unggah langsung menunggu tanda tangan Anda sendiri; penandatangan tidak perlu dipilih.
         </p>
       )}
@@ -250,7 +250,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
           ))}
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => setItems((l) => [...l, { ...ITEM_KOSONG }])} disabled={items.length >= 30} className="tombol-teks">
-              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
               Tambah item
             </button>
             <span className="font-title-sm text-title-sm text-on-surface">Total {formatRupiahInput(total)}</span>

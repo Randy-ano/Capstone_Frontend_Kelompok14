@@ -67,7 +67,7 @@ export default function MasterDataSkill() {
             onClick={() => setForm({ kompetensi: null })}
             className="tombol-utama w-full md:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_circle</span>
             Tambah Kompetensi
           </button>
         }
@@ -99,7 +99,7 @@ export default function MasterDataSkill() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
@@ -179,7 +179,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
         ) : (
           <div className="flex items-center justify-end gap-1">
             <button type="button" onClick={onUbah} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[16px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
             <button
@@ -189,7 +189,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
               title={dipakai ? "Masih dipakai talent atau permintaan kebutuhan, tidak dapat dihapus" : "Hapus kompetensi"}
               className="tombol-bahaya-garis"
             >
-              <span className="material-symbols-outlined text-[16px]">delete</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
               Hapus
             </button>
           </div>

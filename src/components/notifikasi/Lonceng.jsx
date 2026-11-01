@@ -40,7 +40,11 @@ export default function Lonceng() {
       .then((res) => setDaftar(res.data))
       .catch((err) => setError(err.message));
     const tutup = (e) => !ref.current?.contains(e.target) && setBuka(false);
-    const esc = (e) => e.key === "Escape" && setBuka(false);
+    const esc = (e) => {
+      if (e.key !== "Escape") return;
+      setBuka(false);
+      ref.current?.querySelector("button")?.focus();
+    };
     document.addEventListener("mousedown", tutup);
     document.addEventListener("keydown", esc);
     return () => {
@@ -80,7 +84,7 @@ export default function Lonceng() {
         aria-label={jumlah ? `Notifikasi, ${jumlah} belum dibaca` : "Notifikasi"}
         className="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
       >
-        <span className="material-symbols-outlined text-[22px]">notifications</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-[22px]">notifications</span>
         {jumlah > 0 && (
           <span className="absolute top-1 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center font-bold">
             {jumlah > 99 ? "99+" : jumlah}
@@ -118,7 +122,7 @@ export default function Lonceng() {
                   className={`w-full text-left flex gap-space-sm px-space-md py-space-sm hover:bg-surface-container-low ${n.status_baca ? "" : "bg-primary-fixed/30"}`}
                 >
                   <span className="w-8 h-8 shrink-0 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[18px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
+                    <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-body-sm text-body-sm ${n.status_baca ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>{n.pesan}</span>
@@ -127,7 +131,7 @@ export default function Lonceng() {
                       {n.kanal === "email" && " · email"}
                     </span>
                   </span>
-                  {!n.status_baca && <span className="w-2 h-2 mt-1.5 shrink-0 rounded-full bg-primary" aria-label="Belum dibaca" />}
+                  {!n.status_baca && <span className="w-2 h-2 mt-1.5 shrink-0 rounded-full bg-primary" role="img" aria-label="Belum dibaca" />}
                 </button>
               </li>
             ))}

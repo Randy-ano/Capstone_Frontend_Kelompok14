@@ -52,7 +52,7 @@ export default function MonitoringKinerja() {
         aksi={
           manager && (
             <button type="button" onClick={() => setCatat(true)} className={tombolHalaman}>
-              <span className="material-symbols-outlined text-[18px]">add_notes</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_notes</span>
               Catat Monitoring
             </button>
           )

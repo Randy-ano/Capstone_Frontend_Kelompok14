@@ -124,7 +124,7 @@ export default function PipelineRekrutmen() {
           <PilihFilter ikon="business" label="Klien" value={klien} onChange={ubahFilter(setKlien)} semua="Semua Klien" opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])} />
           {adaFilter && (
             <button type="button" onClick={resetFilter} className="tombol-teks">
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
@@ -204,7 +204,7 @@ function BarisPipeline({ job, onOpen }) {
       <Sel label="Progres Terakhir">
         {log ? (
           <div className="flex items-start gap-space-sm">
-            <span className="material-symbols-outlined text-[18px] text-primary">{tahapan.ikon}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahapan.ikon}</span>
             <div>
               <span className="block font-label-md text-label-md text-on-surface">{tahapan.label}</span>
               <span className="block font-body-sm text-body-sm text-on-surface-variant">

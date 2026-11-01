@@ -72,7 +72,7 @@ export default function PengajuanKandidat() {
               onClick={() => setAjukan(true)}
               className="tombol-utama w-full md:w-auto"
             >
-              <span className="material-symbols-outlined text-[18px]">send</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">send</span>
               Ajukan Kandidat
             </button>
           )
@@ -105,7 +105,7 @@ export default function PengajuanKandidat() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
@@ -148,7 +148,7 @@ export default function PengajuanKandidat() {
                   </Sel>
                   <Sel peran="setengah" label="Tahap Saat Ini">
                     <span className="flex items-center gap-1 text-on-surface">
-                      <span className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
+                      <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
                       {tahap.label}
                     </span>
                   </Sel>

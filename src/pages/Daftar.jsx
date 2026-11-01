@@ -241,13 +241,13 @@ export default function Daftar() {
         )}
 
         <div className="flex items-start gap-space-sm p-space-md rounded-xl border border-primary-fixed bg-surface-container-low">
-          <span className="material-symbols-outlined text-[20px] text-aksen">info</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px] text-aksen">info</span>
           <p className="font-body-md text-body-md text-on-surface-variant">{infoJenis}</p>
         </div>
 
         <TombolUtama memproses={submitting}>
           Daftar Akun
-          <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px]">arrow_forward</span>
         </TombolUtama>
       </form>
 

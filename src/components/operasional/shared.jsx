@@ -42,7 +42,7 @@ export function ShiftBadge({ jenis }) {
   const s = JENIS_SHIFT[jenis] ?? { label: jenis, ikon: "schedule", className: NADA.netral };
   return (
     <Badge className={`gap-1 ${s.className}`}>
-      <span className="material-symbols-outlined text-[14px]">{s.ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{s.ikon}</span>
       {s.label}
     </Badge>
   );
@@ -52,7 +52,7 @@ export function StatusApproval({ label, approval }) {
   const s = STATUS_APPROVAL[approval.status] ?? STATUS_APPROVAL.menunggu;
   return (
     <span className={`flex items-center gap-1 font-body-sm text-body-sm ${s.className}`}>
-      <span className="material-symbols-outlined text-[16px]">{s.ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{s.ikon}</span>
       <span>
         {label}: {s.label}
         {approval.oleh && <span className="text-on-surface-variant"> ({approval.oleh})</span>}

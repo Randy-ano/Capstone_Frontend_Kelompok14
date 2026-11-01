@@ -38,7 +38,7 @@ function Bagian({ icon, judul, aksi, children }) {
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
           {judul}
         </h3>
         {aksi}
@@ -176,7 +176,7 @@ function Tinjau({ p, onBerhasil }) {
             <Proses aktif={kirim} ikon="event_available">Lanjut Interview</Proses>
           </button>
           <button type="button" onClick={() => setKonfirmasi(true)} disabled={kirim} className="tombol-bahaya-garis">
-            <span className="material-symbols-outlined text-[18px]">person_remove</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">person_remove</span>
             Tolak
           </button>
         </div>
@@ -197,7 +197,7 @@ function Interviews({ p, user, terbuka, onBerhasil }) {
       aksi={
         atur && !tambah && (
           <button type="button" onClick={() => setTambah(true)} className={tombolKedua}>
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
             Jadwalkan
           </button>
         )
@@ -265,15 +265,15 @@ function ItemInterview({ iv, ronde, atur, onBerhasil }) {
             title={sudahTiba ? "" : "Interview belum berlangsung"}
             className="tombol-kedua"
           >
-            <span className="material-symbols-outlined text-[16px]">task_alt</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[16px]">task_alt</span>
             Tandai Selesai
           </button>
           <button type="button" onClick={() => setMode("ulang")} disabled={kirim} className="tombol-kedua">
-            <span className="material-symbols-outlined text-[16px]">edit_calendar</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit_calendar</span>
             Jadwal Ulang
           </button>
           <button type="button" onClick={() => setMode("batal")} disabled={kirim} className="tombol-bahaya-garis">
-            <span className="material-symbols-outlined text-[16px]">event_busy</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[16px]">event_busy</span>
             Batalkan
           </button>
         </div>
@@ -471,7 +471,7 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
       <Bagian icon="assignment_ind" judul="Placement">
         <p className="font-body-md text-body-md text-on-surface">Kandidat sudah ditempatkan.</p>
         <Link to={`/penugasan-penempatan?placement=${p.id_placement}`} className={`${tombolKedua} w-fit`}>
-          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px]">open_in_new</span>
           Lihat Placement
         </Link>
       </Bagian>

@@ -70,7 +70,7 @@ export default function Notifikasi() {
         aksi={
           jumlah > 0 && (
             <button type="button" onClick={bacaSemua} className="tombol-utama w-full md:w-auto">
-              <span className="material-symbols-outlined text-[18px]">done_all</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">done_all</span>
               Tandai Semua Dibaca ({jumlah})
             </button>
           )
@@ -105,7 +105,7 @@ export default function Notifikasi() {
               <li key={n.id_notifikasi}>
                 <button type="button" onClick={() => buka(n)} className={`w-full text-left flex gap-space-md px-space-md py-space-md hover:bg-surface-container-low ${n.status_baca ? "" : "bg-primary-fixed/30"}`}>
                   <span className="w-10 h-10 shrink-0 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[20px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
+                    <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-body-md text-body-md ${n.status_baca ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>{n.pesan}</span>
@@ -114,7 +114,7 @@ export default function Notifikasi() {
                       {n.kanal === "email" && " · dikirim juga lewat email"}
                     </span>
                   </span>
-                  {!n.status_baca && <span className="w-2.5 h-2.5 mt-2 shrink-0 rounded-full bg-primary" aria-label="Belum dibaca" />}
+                  {!n.status_baca && <span className="w-2.5 h-2.5 mt-2 shrink-0 rounded-full bg-primary" role="img" aria-label="Belum dibaca" />}
                 </button>
               </li>
             ))}

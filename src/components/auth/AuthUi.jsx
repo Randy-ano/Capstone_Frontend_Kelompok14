@@ -13,7 +13,7 @@ export function useJudulTab(judul) {
 export function Merek({ tengah = false }) {
   return (
     <div className={`flex flex-col gap-2 ${tengah ? "items-center" : "items-start"}`}>
-      <img alt="Intellisys" className="h-10 sm:h-12 w-auto object-contain" src={logo} />
+      <img alt="Logo Intellisys" className="h-10 sm:h-12 w-auto object-contain" src={logo} />
       <span className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-on-surface-variant">Talent Hub</span>
     </div>
   );
@@ -49,7 +49,7 @@ export function Isian({ label, wajib, error, children }) {
 export function IkonKiri({ ikon }) {
   return (
     <span className="absolute inset-y-0 left-0 w-11 flex items-center justify-center pointer-events-none text-outline">
-      <span className="material-symbols-outlined text-[20px]">{ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{ikon}</span>
     </span>
   );
 }
@@ -65,7 +65,7 @@ export function InputSandi({ error, terlihat, onToggle, ikon, ...props }) {
         aria-label={terlihat ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
         className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-outline hover:text-on-surface"
       >
-        <span className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
       </button>
     </div>
   );
@@ -75,7 +75,7 @@ export function PesanError({ children }) {
   if (!children) return null;
   return (
     <div role="alert" className="flex items-start gap-space-sm p-space-sm rounded-lg bg-error-container text-on-error-container font-body-md text-body-md">
-      <span className="material-symbols-outlined text-[20px]">error</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[20px]">error</span>
       <span>{children}</span>
     </div>
   );
@@ -88,7 +88,7 @@ export function TombolUtama({ memproses, children }) {
       disabled={memproses}
       className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-aksen text-on-primary hover:bg-aksen-hover font-title-md text-title-md transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
     >
-      {memproses && <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>}
+      {memproses && <span aria-hidden="true" className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>}
       {memproses ? "Memproses..." : children}
     </button>
   );

@@ -29,7 +29,7 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
       <section className="kartu p-space-md space-y-space-sm">
         <div className="flex items-start gap-space-sm">
           <span className="w-10 h-10 shrink-0 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
-            <span className="material-symbols-outlined text-[22px]">{jenis.ikon}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[22px]">{jenis.ikon}</span>
           </span>
           <div className="min-w-0 flex-1">
             <div className="font-title-sm text-title-sm text-on-surface break-all">{d.nama_file}</div>
@@ -50,7 +50,7 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
 
       <section className="kartu p-space-md space-y-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">draw</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">draw</span>
           Penandatangan
         </h3>
         {d.penandatangan.length === 0 ? (
@@ -69,7 +69,7 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
                   </div>
                   <div className={`flex flex-col items-end font-body-sm text-body-sm ${s.className}`}>
                     <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[16px]">{s.ikon}</span>
+                      <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{s.ikon}</span>
                       {s.label}
                     </span>
                     {p.tanggal_ttd && <span className="text-on-surface-variant">{formatTanggalWaktu(p.tanggal_ttd)}</span>}
@@ -233,7 +233,7 @@ function TandaTangan({ dokumen, onBerhasil }) {
   return (
     <section className="kartu p-space-md space-y-space-sm ring-2 ring-primary-container">
       <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-        <span className="material-symbols-outlined text-primary text-[20px]">signature</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">signature</span>
         Tanda Tangan Anda
       </h3>
       {error && <Pesan>{errorField(error, "file_tanda_tangan") ?? errorField(error, "keputusan") ?? error.message}</Pesan>}

@@ -27,10 +27,11 @@ export default {
         "surface-bright": "#faf9f9",
         "error": "#ba1a1a",
         "inverse-on-surface": "#f4f0ef",
-        "outline": "#7d7576",
+        // outline, warning, on-tertiary-container dipakai sebagai warna teks kecil: minimal 4.5:1 terhadap semua latar surface.
+        "outline": "#6b6465",
         "on-secondary-fixed-variant": "#4a4444",
         "background": "#faf9f9",
-        "on-tertiary-container": "#1f8a5a",
+        "on-tertiary-container": "#17754b",
         "surface-variant": "#e8e5e5",
         "on-secondary-container": "#625b5b",
         "tertiary-fixed": "#d3f3e2",
@@ -58,7 +59,7 @@ export default {
         "primary-container": "#9a1416",
         "surface-tint": "#9a1416",
         // Nada status (lihat NADA di src/components/ui.jsx): kuning = menunggu, biru = diproses/informasi.
-        "warning": "#a06c00",
+        "warning": "#856000",
         "warning-container": "#fdf0c8",
         "on-warning-container": "#6b4e00",
         "info": "#2f5bb5",

@@ -84,7 +84,7 @@ function Bagian({ ikon, judul, keterangan, aksi, children }) {
       <div className="flex items-start justify-between gap-space-sm">
         <div>
           <h2 className="flex items-center gap-space-sm font-title-md text-title-md text-on-surface">
-            <span className="material-symbols-outlined text-primary text-[22px]">{ikon}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px]">{ikon}</span>
             {judul}
           </h2>
           {keterangan && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">{keterangan}</p>}
@@ -423,7 +423,7 @@ const Kosong = ({ children }) => <KeadaanKosong ringkas>{children}</KeadaanKoson
 function TombolTambah({ onClick }) {
   return (
     <button type="button" onClick={onClick} className="tombol-teks shrink-0">
-      <span className="material-symbols-outlined text-[18px]">add</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
       Tambah
     </button>
   );
@@ -435,7 +435,7 @@ function KartuBaris({ judul, onHapus, children }) {
       <div className="flex items-center justify-between">
         <span className="font-label-md text-label-md text-on-surface-variant">{judul}</span>
         <button type="button" onClick={onHapus} title="Hapus baris" className="tombol-bahaya-garis px-3">
-          <span className="material-symbols-outlined text-[16px]">delete</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
           Hapus
         </button>
       </div>
@@ -458,7 +458,7 @@ function StatusProfil({ profil }) {
         lengkap ? "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25" : "bg-warning-container text-on-warning-container ring-warning/25"
       }`}
     >
-      <span className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
       <div className="flex-1 min-w-0">
         <div className="font-title-md text-title-md">{lengkap ? "Profil lengkap" : "Profil belum lengkap"}</div>
         <div className="font-body-sm text-body-sm">
@@ -470,7 +470,7 @@ function StatusProfil({ profil }) {
       <ul className="flex flex-col gap-0.5 shrink-0">
         {syarat.map(([label, ok]) => (
           <li key={label} className="flex items-center gap-1 font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[18px]">{ok ? "check_circle" : "radio_button_unchecked"}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{ok ? "check_circle" : "radio_button_unchecked"}</span>
             {label}
           </li>
         ))}

@@ -79,7 +79,7 @@ export function TagChip({ children }) {
 export function Pesan({ children }) {
   return (
     <div role="alert" className="flex items-start gap-space-sm px-space-md py-3 rounded-xl ring-1 ring-inset font-body-md text-body-md bg-error-container text-on-error-container ring-error/25">
-      <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[20px] shrink-0">error</span>
       <span className="min-w-0 break-words pt-px">{children}</span>
     </div>
   );
@@ -152,7 +152,7 @@ export function KeadaanKosong({ ikon = "inbox", children, aksi, ringkas = false 
   return (
     <div className={`flex flex-col items-center justify-center text-center gap-space-sm px-space-md ${ringkas ? "py-space-lg" : "py-space-xl"}`}>
       <span className={`flex items-center justify-center rounded-full bg-surface-container text-outline ${ringkas ? "w-10 h-10" : "w-14 h-14"}`}>
-        <span className={`material-symbols-outlined ${ringkas ? "text-[22px]" : "text-[28px]"}`}>{ikon}</span>
+        <span aria-hidden="true" className={`material-symbols-outlined ${ringkas ? "text-[22px]" : "text-[28px]"}`}>{ikon}</span>
       </span>
       <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">{children}</p>
       {aksi}
@@ -212,7 +212,7 @@ export function KepalaHalaman({ ikon, kategori, judul, children, aksi }) {
     <div className="px-space-md sm:px-space-xl pt-space-lg pb-space-sm flex flex-col md:flex-row md:items-end justify-between gap-space-md">
       <div className="min-w-0 space-y-1">
         <div className="flex items-center gap-space-xs text-primary font-label-sm text-label-sm tracking-wider uppercase">
-          <span className="material-symbols-outlined text-[16px]">{ikon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{ikon}</span>
           <span>{kategori}</span>
         </div>
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile sm:font-headline-lg sm:text-headline-lg text-on-surface tracking-tight">{judul}</h1>
@@ -237,7 +237,7 @@ export function KartuRingkasan({ label, nilai, ikon, warna = "text-primary", ket
     >
       <div className="flex items-start justify-between gap-space-sm text-on-surface-variant">
         <span className="font-label-lg text-label-lg">{label}</span>
-        <span className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-surface-container-low material-symbols-outlined text-[20px] ${warna}`}>{ikon}</span>
+        <span aria-hidden="true" className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-surface-container-low material-symbols-outlined text-[20px] ${warna}`}>{ikon}</span>
       </div>
       <div className="mt-auto pt-space-sm font-headline-lg text-headline-lg text-on-surface tabular-nums">{nilai ?? "–"}</div>
       {keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{keterangan}</div>}
@@ -249,13 +249,14 @@ export function KartuRingkasan({ label, nilai, ikon, warna = "text-primary", ket
 export function KotakCari({ value, onChange, placeholder }) {
   return (
     <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
-      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+      <span aria-hidden="true" className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
       <input
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         maxLength={255}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="input pl-9"
       />
     </div>
@@ -265,7 +266,7 @@ export function KotakCari({ value, onChange, placeholder }) {
 export function PilihFilter({ ikon, label, value, onChange, opsi, semua }) {
   return (
     <div className="flex items-center gap-1.5 min-h-[40px] bg-surface-container-lowest ring-1 ring-inset ring-outline-variant focus-within:ring-2 focus-within:ring-primary/60 px-2 rounded-lg w-full sm:w-auto">
-      <span className="material-symbols-outlined text-outline text-[18px] ml-1">{ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-outline text-[18px] ml-1">{ikon}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -311,8 +312,8 @@ export function Pagination({ meta, onPage, satuan = "data" }) {
         Menampilkan <strong>{meta.from}</strong>–<strong>{meta.to}</strong> dari <strong>{meta.total}</strong> {satuan}
       </span>
       <nav className="flex items-center gap-1" aria-label="Halaman">
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang <= 1} onClick={() => onPage(sekarang - 1)} title="Sebelumnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_left</span>
+        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang <= 1} onClick={() => onPage(sekarang - 1)} title="Sebelumnya" aria-label="Halaman sebelumnya">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] align-middle">chevron_left</span>
         </button>
         {nomorHalaman(sekarang, terakhir).map((n, i) =>
           n === "…" ? (
@@ -331,8 +332,8 @@ export function Pagination({ meta, onPage, satuan = "data" }) {
             </button>
           ),
         )}
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang >= terakhir} onClick={() => onPage(sekarang + 1)} title="Berikutnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_right</span>
+        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang >= terakhir} onClick={() => onPage(sekarang + 1)} title="Berikutnya" aria-label="Halaman berikutnya">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] align-middle">chevron_right</span>
         </button>
       </nav>
     </div>

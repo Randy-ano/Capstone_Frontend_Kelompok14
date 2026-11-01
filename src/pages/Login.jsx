@@ -98,7 +98,7 @@ export default function Login() {
             <div className="pt-space-sm">
               <TombolUtama memproses={submitting}>
                 Masuk ke Platform
-                <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[20px]">arrow_forward</span>
               </TombolUtama>
             </div>
           </form>

@@ -64,7 +64,7 @@ function Bagian({ icon, judul, aksi, children }) {
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
           {judul}
         </h3>
         {aksi}
@@ -172,7 +172,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
         <div className="flex flex-wrap gap-space-sm">
           {cariKandidat && (
             <Link to={`/rekomendasi-kandidat?job=${job.id_job_req}`} className="tombol-utama">
-              <span className="material-symbols-outlined text-[18px]">person_search</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">person_search</span>
               Cari Kandidat
             </Link>
           )}
@@ -183,13 +183,13 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
           )}
           {bisaUbah && (
             <button type="button" onClick={onEdit} disabled={!!kirim} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[18px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">edit</span>
               Ubah
             </button>
           )}
           {bisaBatal && (
             <button type="button" onClick={() => setKonfirmasi(true)} disabled={!!kirim} className="tombol-bahaya-garis">
-              <span className="material-symbols-outlined text-[18px]">cancel</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">cancel</span>
               Batalkan
             </button>
           )}
@@ -267,7 +267,7 @@ function LogProgres({ items }) {
                     log.status_tahapan === "ditolak" ? "bg-error-container text-on-error-container" : "bg-primary-fixed text-on-primary-fixed-variant"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">{t.ikon}</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{t.ikon}</span>
                 </span>
                 <div className="flex flex-wrap items-center gap-x-space-sm gap-y-1">
                   <span className="font-title-sm text-title-sm text-on-surface">{t.label}</span>

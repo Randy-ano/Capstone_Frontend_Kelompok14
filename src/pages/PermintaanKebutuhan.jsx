@@ -135,7 +135,7 @@ export default function PermintaanKebutuhan() {
               onClick={() => setForm({ job: null })}
               className="tombol-utama w-full md:w-auto"
             >
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_circle</span>
               Buat Permintaan
             </button>
           )
@@ -162,7 +162,7 @@ export default function PermintaanKebutuhan() {
           )}
           {adaFilter && (
             <button type="button" onClick={resetFilter} className="tombol-teks">
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}

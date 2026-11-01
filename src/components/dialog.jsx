@@ -56,7 +56,7 @@ export function useDialog(panelRef, { aktif = true, sibuk = false, onClose }) {
 function TombolTutup({ onClose, sibuk }) {
   return (
     <button type="button" onClick={onClose} disabled={sibuk} aria-label="Tutup" title="Tutup" className="tombol-ikon -mr-2">
-      <span className="material-symbols-outlined text-[22px]">close</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[22px]">close</span>
     </button>
   );
 }

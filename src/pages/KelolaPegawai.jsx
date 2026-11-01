@@ -71,7 +71,7 @@ export default function KelolaPegawai() {
             onClick={() => setForm({ pegawai: null })}
             className="tombol-utama w-full md:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">person_add</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">person_add</span>
             Tambah Pegawai
           </button>
         }
@@ -103,7 +103,7 @@ export default function KelolaPegawai() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
@@ -189,7 +189,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
         ) : (
           <div className="flex items-center justify-end gap-1">
             <button type="button" onClick={onUbah} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[16px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
             {!diriSendiri && (
@@ -198,7 +198,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
                 onClick={() => setKonfirmasi(true)}
                 className={aktif ? "tombol-bahaya-garis" : "tombol-kedua"}
               >
-                <span className="material-symbols-outlined text-[16px]">{aktif ? "block" : "check_circle"}</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{aktif ? "block" : "check_circle"}</span>
                 {aktif ? "Nonaktifkan" : "Aktifkan"}
               </button>
             )}

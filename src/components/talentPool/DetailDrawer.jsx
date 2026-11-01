@@ -58,7 +58,7 @@ function Bagian({ icon, judul, aksi, children }) {
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
           {judul}
         </h3>
         {aksi}
@@ -163,7 +163,7 @@ function Profil({ detail }) {
               rel="noreferrer"
               className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline"
             >
-              <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">open_in_new</span>
               {label}
             </a>
           ))}

@@ -118,7 +118,7 @@ function Bagian({ ikon, judul, info, children }) {
     <section className="kartu overflow-hidden">
       <div className="p-space-md bg-surface-container-low flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-2 font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
           {judul}
         </h3>
         {info}
@@ -233,13 +233,13 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
       <div className="flex flex-wrap items-center gap-1">
         {k.kompetensi_cocok.map((nama) => (
           <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[14px]">check</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">check</span>
             {nama}
           </span>
         ))}
         {k.kompetensi_kurang.map((nama) => (
           <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg ring-1 ring-outline-variant text-outline font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[14px]">close</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">close</span>
             {nama}
           </span>
         ))}
@@ -261,6 +261,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
             onChange={(e) => setCatatan(e.target.value)}
             maxLength={2000}
             placeholder="Catatan screening (opsional)"
+            aria-label="Catatan screening"
             className="input py-2"
           />
           <div className="flex flex-wrap justify-end gap-space-sm">
@@ -279,7 +280,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
             onClick={() => setBuka(true)}
             className="tombol-utama"
           >
-            <span className="material-symbols-outlined text-[18px]">fact_check</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">fact_check</span>
             Screening
           </button>
         </div>
@@ -397,6 +398,7 @@ function ItemScreening({ screening: s, onSaved }) {
             onChange={(e) => setCatatan(e.target.value)}
             maxLength={2000}
             placeholder="Catatan screening"
+            aria-label="Catatan screening"
             className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
           />
           <div className="flex justify-end gap-space-sm">

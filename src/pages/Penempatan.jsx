@@ -101,7 +101,7 @@ export default function Penempatan() {
                   tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px]">{t.ikon}</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{t.ikon}</span>
                 {t.label}
               </button>
             ))}
