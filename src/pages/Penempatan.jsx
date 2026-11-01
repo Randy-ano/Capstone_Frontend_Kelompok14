@@ -3,8 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, useTunda, Proses } from "../components/ui";
 import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
+import { useToast } from "../components/toast";
+import { Laci } from "../components/dialog";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 
 const PER_PAGE = 10;
@@ -99,7 +101,7 @@ export default function Penempatan() {
                   tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px]">{t.ikon}</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{t.ikon}</span>
                 {t.label}
               </button>
             ))}
@@ -141,52 +143,39 @@ export default function Penempatan() {
             {error && <Pesan>{error}</Pesan>}
 
             <div className="kartu overflow-hidden">
-              <div className="overflow-x-auto w-full">
-                <table className={`tabel min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-                  <thead>
-                    <tr>
-                      <th>Talent</th>
-                      <th>Posisi</th>
-                      <th>Klien</th>
-                      <th>Periode</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {!hasil && memuat && <BarisMemuat kolom={5} />}
-                    {hasil?.data.length === 0 && (
-                      <BarisKosong kolom={5} ikon="assignment_ind">
-                        {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
-                      </BarisKosong>
-                    )}
-                    {hasil?.data.map((pl) => (
-                      <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                        <td>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              buka(pl.id_placement);
-                            }}
-                            className="text-left group"
-                          >
-                            <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
-                            <span className="block font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</span>
-                          </button>
-                        </td>
-                        <td className="text-on-surface">{pl.posisi_penempatan}</td>
-                        <td className="text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
-                        <td className="whitespace-nowrap text-on-surface-variant">
-                          {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
-                        </td>
-                        <td>
-                          <PlacementBadge status={pl.status_placement} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <TabelKartu kolom={["Talent", "Posisi", "Klien", "Periode", "Status"]} className="md:min-w-[780px]" redup={memuat && hasil}>
+                {!hasil && memuat && <BarisMemuat kolom={5} />}
+                {hasil?.data.length === 0 && (
+                  <BarisKosong kolom={5} ikon="assignment_ind">
+                    {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
+                  </BarisKosong>
+                )}
+                {hasil?.data.map((pl) => (
+                  <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                    <Sel peran="judul">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          buka(pl.id_placement);
+                        }}
+                        className="text-left group max-w-full"
+                      >
+                        <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
+                        <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{pl.talent.email}</span>
+                      </button>
+                    </Sel>
+                    <Sel peran="setengah" label="Posisi" className="text-on-surface">{pl.posisi_penempatan}</Sel>
+                    <Sel peran="setengah" label="Klien" className="text-on-surface-variant">{pl.klien.nama_perusahaan}</Sel>
+                    <Sel label="Periode" className="whitespace-nowrap text-on-surface-variant">
+                      {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
+                    </Sel>
+                    <Sel peran="status">
+                      <PlacementBadge status={pl.status_placement} />
+                    </Sel>
+                  </tr>
+                ))}
+              </TabelKartu>
               {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="penempatan" />}
             </div>
           </>
@@ -201,7 +190,7 @@ export default function Penempatan() {
 function PlacementDrawer({ id, user, onClose, onChanged }) {
   const [pl, setPl] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -215,12 +204,6 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
     };
   }, [id]);
 
-  useEffect(() => {
-    const esc = (event) => event.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   const ringkasan = pl?.ringkasan && [
     ["Cuti", pl.ringkasan.jumlah_cuti],
     ["Shift", pl.ringkasan.jumlah_shift],
@@ -229,71 +212,59 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail penempatan">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Penempatan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !pl && <Memuat>Memuat detail...</Memuat>}
-          {pl && (
-            <>
-              <section className="kartu p-space-md space-y-space-sm">
-                <div className="flex items-start justify-between gap-space-sm">
-                  <div className="min-w-0">
-                    <div className="font-title-md text-title-md text-on-surface">{pl.talent.nama_lengkap}</div>
-                    <div className="font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</div>
-                  </div>
-                  <PlacementBadge status={pl.status_placement} />
+    <Laci judul="Detail Penempatan" label="Detail penempatan" lebar="max-w-lg" onClose={onClose}>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !pl && <Memuat>Memuat detail...</Memuat>}
+      {pl && (
+        <>
+          <section className="kartu p-space-md space-y-space-sm">
+            <div className="flex items-start justify-between gap-space-sm">
+              <div className="min-w-0">
+                <div className="font-title-md text-title-md text-on-surface">{pl.talent.nama_lengkap}</div>
+                <div className="font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</div>
+              </div>
+              <PlacementBadge status={pl.status_placement} />
+            </div>
+            <dl className="grid grid-cols-2 gap-x-space-md gap-y-space-sm">
+              {[
+                ["Posisi", pl.posisi_penempatan],
+                ["Klien", pl.klien.nama_perusahaan],
+                ["Mulai", formatTanggal(pl.tanggal_mulai)],
+                ["Selesai", pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "Belum ditentukan"],
+              ].map(([label, isi]) => (
+                <div key={label} className="min-w-0">
+                  <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{label}</dt>
+                  <dd className="font-body-md text-body-md text-on-surface break-words">{isi}</dd>
                 </div>
-                <dl className="grid grid-cols-2 gap-x-space-md gap-y-space-sm">
-                  {[
-                    ["Posisi", pl.posisi_penempatan],
-                    ["Klien", pl.klien.nama_perusahaan],
-                    ["Mulai", formatTanggal(pl.tanggal_mulai)],
-                    ["Selesai", pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "Belum ditentukan"],
-                  ].map(([label, isi]) => (
-                    <div key={label} className="min-w-0">
-                      <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{label}</dt>
-                      <dd className="font-body-md text-body-md text-on-surface break-words">{isi}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
-              {ringkasan && (
-                <section className="kartu p-space-md space-y-space-sm">
-                  <h3 className="font-title-sm text-title-sm text-on-surface">Ringkasan Operasional</h3>
-                  <div className="grid grid-cols-4 gap-space-sm">
-                    {ringkasan.map(([label, nilai]) => (
-                      <div key={label} className="bg-surface-container-low rounded-lg p-space-sm text-center">
-                        <div className="font-title-md text-title-md text-on-surface">{nilai}</div>
-                        <div className="font-label-sm text-label-sm text-on-surface-variant">{label}</div>
-                      </div>
-                    ))}
+              ))}
+            </dl>
+          </section>
+          {ringkasan && (
+            <section className="kartu p-space-md space-y-space-sm">
+              <h3 className="font-title-sm text-title-sm text-on-surface">Ringkasan Operasional</h3>
+              <div className="grid grid-cols-4 gap-space-sm">
+                {ringkasan.map(([label, nilai]) => (
+                  <div key={label} className="bg-surface-container-low rounded-lg p-space-sm text-center">
+                    <div className="font-title-md text-title-md text-on-surface">{nilai}</div>
+                    <div className="font-label-sm text-label-sm text-on-surface-variant">{label}</div>
                   </div>
-                </section>
-              )}
-              {bolehAkhiriPlacement(user) && pl.status_placement === "aktif" && (
-                <AkhiriPlacement
-                  pl={pl}
-                  onBerhasil={(data, pesan) => {
-                    setPl(data);
-                    setSukses(pesan);
-                    onChanged();
-                  }}
-                />
-              )}
-            </>
+                ))}
+              </div>
+            </section>
           )}
-        </div>
-      </div>
-    </div>
+          {bolehAkhiriPlacement(user) && pl.status_placement === "aktif" && (
+            <AkhiriPlacement
+              pl={pl}
+              onBerhasil={(data, pesan) => {
+                setPl(data);
+                toast.sukses(pesan);
+                onChanged();
+              }}
+            />
+          )}
+        </>
+      )}
+    </Laci>
   );
 }
 
@@ -351,7 +322,7 @@ function AkhiriPlacement({ pl, onBerhasil }) {
           disabled={!status || kirim}
           className="tombol-bahaya"
         >
-          {kirim ? "Menyimpan..." : "Akhiri Penempatan"}
+          <Proses aktif={kirim}>Akhiri Penempatan</Proses>
         </button>
       </div>
     </section>

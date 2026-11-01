@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { Badge, NADA } from "../ui";
+import { Modal as ModalDasar } from "../dialog";
 
 export const STATUS_CUTI = {
   menunggu: { label: "Menunggu", className: NADA.menunggu },
@@ -41,7 +42,7 @@ export function ShiftBadge({ jenis }) {
   const s = JENIS_SHIFT[jenis] ?? { label: jenis, ikon: "schedule", className: NADA.netral };
   return (
     <Badge className={`gap-1 ${s.className}`}>
-      <span className="material-symbols-outlined text-[14px]">{s.ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{s.ikon}</span>
       {s.label}
     </Badge>
   );
@@ -51,7 +52,7 @@ export function StatusApproval({ label, approval }) {
   const s = STATUS_APPROVAL[approval.status] ?? STATUS_APPROVAL.menunggu;
   return (
     <span className={`flex items-center gap-1 font-body-sm text-body-sm ${s.className}`}>
-      <span className="material-symbols-outlined text-[16px]">{s.ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{s.ikon}</span>
       <span>
         {label}: {s.label}
         {approval.oleh && <span className="text-on-surface-variant"> ({approval.oleh})</span>}
@@ -78,40 +79,25 @@ export function Field({ label, wajib, error, keterangan, className = "", childre
   );
 }
 
-// Modal form; di HP muncul dari bawah selebar layar. Escape menutup modal (kecuali sedang menyimpan).
+// Modal form dengan tombol Batal + aksi. Escape menutup modal (kecuali sedang menyimpan).
 export function Modal({ judul, sibuk, onClose, onSubmit, aksi, children }) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={judul}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !sibuk && onClose()} />
-      <form
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            e.stopPropagation();
-            if (!sibuk) onClose();
-          }
-        }}
-        className="relative w-full sm:max-w-lg max-h-[95vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{judul}</h2>
-          <button type="button" onClick={onClose} disabled={sibuk} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">{children}</div>
-        <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <ModalDasar
+      judul={judul}
+      sibuk={sibuk}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={sibuk} className="tombol-kedua">
             Batal
           </button>
           {aksi}
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </ModalDasar>
   );
 }
 

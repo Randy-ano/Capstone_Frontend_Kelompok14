@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, Proses } from "../ui";
+import { useToast, useToastGagal } from "../toast";
 import {
   Field,
   JENIS_SHIFT,
@@ -20,7 +21,9 @@ const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "
 // Tab Shift (FR-15, R22): HR Client & Manager mengatur (input massal), talent melihat shift miliknya.
 export default function TabShift({ user }) {
   const kelola = [ROLE.HR_CLIENT, ROLE.MANAGER].includes(user.role);
-  const { daftar: placement } = usePlacement(kelola ? "aktif" : "");
+  const { daftar: placement, error: errorPlacement } = usePlacement(kelola ? "aktif" : "");
+  useToastGagal(errorPlacement);
+  const toast = useToast();
   const [bulan, setBulan] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -30,7 +33,6 @@ export default function TabShift({ user }) {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
   const [atur, setAtur] = useState(false);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function TabShift({ user }) {
     setPage(1);
   };
   const berhasil = (pesan) => {
-    setSukses(pesan);
+    toast.sukses(pesan);
     setError("");
     setVersi((v) => v + 1);
   };
@@ -66,14 +68,14 @@ export default function TabShift({ user }) {
     <div className="flex flex-col gap-space-md">
       <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => geser(-1)} title="Bulan sebelumnya" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+          <button type="button" onClick={() => geser(-1)} title="Bulan sebelumnya" aria-label="Bulan sebelumnya" className="tombol-ikon -mr-2">
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_left</span>
           </button>
           <span className="min-w-[140px] text-center font-title-sm text-title-sm text-on-surface">
             {BULAN[bulan.getMonth()]} {bulan.getFullYear()}
           </span>
-          <button type="button" onClick={() => geser(1)} title="Bulan berikutnya" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+          <button type="button" onClick={() => geser(1)} title="Bulan berikutnya" aria-label="Bulan berikutnya" className="tombol-ikon -mr-2">
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">chevron_right</span>
           </button>
         </div>
         {kelola && placement && (
@@ -90,15 +92,14 @@ export default function TabShift({ user }) {
           />
         )}
         {kelola && (
-          <button type="button" onClick={() => (setSukses(""), setAtur(true))} className={`${tombolHalaman} sm:ml-auto`}>
-            <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
+          <button type="button" onClick={() => setAtur(true)} className={`${tombolHalaman} sm:ml-auto`}>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">edit_calendar</span>
             Atur Shift
           </button>
         )}
       </div>
 
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
       <div className="kartu overflow-hidden">
         {!hasil && !error && <Memuat>Memuat shift...</Memuat>}
@@ -106,25 +107,11 @@ export default function TabShift({ user }) {
           <KeadaanKosong ikon="calendar_month">Belum ada shift pada bulan ini.</KeadaanKosong>
         )}
         {hasil?.data.length > 0 && (
-          <div className="overflow-x-auto w-full">
-            <table className="tabel min-w-[640px] text-left border-collapse">
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  {user.role !== ROLE.TALENT && <th>Talent</th>}
-                  <th>Shift</th>
-                  <th>Keterangan</th>
-                  <th>Diatur oleh</th>
-                  {kelola && <th className="aksi">Aksi</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {hasil.data.map((s) => (
-                  <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Tanggal", user.role !== ROLE.TALENT && "Talent", "Shift", "Keterangan", "Diatur oleh", kelola && { label: "Aksi", className: "aksi" }]} className="md:min-w-[640px]">
+            {hasil.data.map((s) => (
+              <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={setError} />
+            ))}
+          </TabelKartu>
         )}
         {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="shift" />}
       </div>
@@ -164,14 +151,14 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
 
   return (
     <tr className={s.tanggal_shift === hariIni ? "bg-primary-fixed/30" : ""}>
-      <td className="whitespace-nowrap">
-        <span className="text-on-surface">
+      <Sel peran="judul" className="whitespace-nowrap">
+        <span className="text-on-surface max-md:font-title-sm max-md:text-title-sm">
           {namaHari(s.tanggal_shift)}, {formatTanggal(s.tanggal_shift)}
         </span>
         {s.tanggal_shift === hariIni && <span className="ml-2 font-label-sm text-label-sm text-primary">Hari ini</span>}
-      </td>
-      {user.role !== ROLE.TALENT && <td className="text-on-surface">{s.placement.talent.nama_lengkap}</td>}
-      <td>
+      </Sel>
+      {user.role !== ROLE.TALENT && <Sel label="Talent" className="text-on-surface">{s.placement.talent.nama_lengkap}</Sel>}
+      <Sel peran="status">
         {mode === "ubah" ? (
           <select value={jenis} onChange={(e) => setJenis(e.target.value)} aria-label="Jenis shift" className="h-9 px-2 rounded-lg bg-surface-container-low font-label-md text-label-md">
             {Object.entries(JENIS_SHIFT).map(([v, j]) => (
@@ -183,20 +170,20 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
         ) : (
           <ShiftBadge jenis={s.jenis_shift} />
         )}
-      </td>
-      <td className="text-on-surface-variant">{s.keterangan ?? "-"}</td>
-      <td className="text-on-surface-variant">{s.diatur_oleh ?? "-"}</td>
+      </Sel>
+      <Sel peran="setengah" label="Keterangan" className="text-on-surface-variant">{s.keterangan ?? "-"}</Sel>
+      <Sel peran="setengah" label="Diatur oleh" className="text-on-surface-variant">{s.diatur_oleh ?? "-"}</Sel>
       {kelola && (
-        <td>
+        <Sel peran="aksi">
           <div className="flex justify-end gap-1">
             {mode === "" && (
               <>
                 <button type="button" onClick={() => setMode("ubah")} className="tombol-kedua">
-                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
                   Ubah
                 </button>
                 <button type="button" onClick={() => setMode("hapus")} className="tombol-bahaya-garis">
-                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
                   Hapus
                 </button>
               </>
@@ -212,12 +199,12 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
                   onClick={() => (mode === "ubah" ? aksi("PUT", { jenis_shift: jenis }) : aksi("DELETE"))}
                   className={mode === "hapus" ? "tombol-bahaya" : "tombol-utama"}
                 >
-                  {kirim ? "Memproses..." : mode === "hapus" ? "Ya, Hapus" : "Simpan"}
+                  <Proses aktif={kirim}>{mode === "hapus" ? "Ya, Hapus" : "Simpan"}</Proses>
                 </button>
               </>
             )}
           </div>
-        </td>
+        </Sel>
       )}
     </tr>
   );
@@ -282,7 +269,7 @@ function ModalAturShift({ placement, awalPlacement, onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim} className="tombol-utama">
-          {kirim ? "Menyimpan..." : `Simpan ${tanggal.length} Shift`}
+          <Proses aktif={kirim}>{`Simpan ${tanggal.length} Shift`}</Proses>
         </button>
       }
     >

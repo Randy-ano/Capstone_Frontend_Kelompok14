@@ -68,12 +68,12 @@ export default function FilterKompetensi({
           penuh ? "" : "sm:w-auto"
         } ${error ? "!ring-2 !ring-error" : ""}`}
       >
-        <span className="material-symbols-outlined text-outline text-[18px]">psychology</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-outline text-[18px]">psychology</span>
         <span className="flex-1 text-left">{label}</span>
         {nilai.length > 0 && (
           <span className="px-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm">{nilai.length}</span>
         )}
-        <span className="material-symbols-outlined text-outline text-[18px]">{open ? "expand_less" : "expand_more"}</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-outline text-[18px]">{open ? "expand_less" : "expand_more"}</span>
       </button>
 
       {open && (
@@ -102,7 +102,7 @@ export default function FilterKompetensi({
                   onClick={tambah}
                   className="w-full min-h-[40px] flex items-start gap-space-sm px-space-md py-2 text-left font-body-md text-body-md text-primary hover:bg-surface-container-low"
                 >
-                  <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[20px]">add_circle</span>
                   <span className="flex-1 break-words">
                     Tambah "<strong>{teks}</strong>" sebagai kompetensi baru
                   </span>

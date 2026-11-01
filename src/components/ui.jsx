@@ -1,5 +1,5 @@
 // Komponen & format kecil yang dipakai banyak halaman.
-import { useEffect, useState } from "react";
+import { Children, useEffect, useState } from "react";
 
 const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
@@ -75,20 +75,31 @@ export function TagChip({ children }) {
   );
 }
 
-// Kotak pesan: error backend ditampilkan apa adanya di dalam kotak ini; jenis lain untuk pesan sukses.
-export function Pesan({ jenis = "error", children }) {
-  const gaya =
-    jenis === "error"
-      ? "bg-error-container text-on-error-container ring-error/25"
-      : "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25";
+// Kotak error: pesan backend ditampilkan apa adanya di dalam kotak ini. Pesan sukses memakai toast (components/toast.jsx).
+export function Pesan({ children }) {
   return (
-    <div
-      role={jenis === "error" ? "alert" : "status"}
-      className={`flex items-start gap-space-sm px-space-md py-3 rounded-xl ring-1 ring-inset font-body-md text-body-md ${gaya}`}
-    >
-      <span className="material-symbols-outlined text-[20px] shrink-0">{jenis === "error" ? "error" : "check_circle"}</span>
+    <div role="alert" className="flex items-start gap-space-sm px-space-md py-3 rounded-xl ring-1 ring-inset font-body-md text-body-md bg-error-container text-on-error-container ring-error/25">
+      <span aria-hidden="true" className="material-symbols-outlined text-[20px] shrink-0">error</span>
       <span className="min-w-0 break-words pt-px">{children}</span>
     </div>
+  );
+}
+
+// Isi tombol aksi: saat `aktif`, spinner + "Memproses..." (tombolnya sendiri tetap diberi disabled); selain itu ikon opsional + label.
+export function Proses({ aktif, ikon, children }) {
+  if (aktif) {
+    return (
+      <>
+        <span aria-hidden="true" className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+        Memproses...
+      </>
+    );
+  }
+  return (
+    <>
+      {ikon && <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{ikon}</span>}
+      {children}
+    </>
   );
 }
 
@@ -122,6 +133,17 @@ export function Memuat({ children = "Memuat...", baris = 3 }) {
   );
 }
 
+// Placeholder saat berkas halaman (React.lazy) sedang diunduh.
+export function MemuatHalaman() {
+  return (
+    <div className="px-space-md sm:px-space-xl pt-space-lg">
+      <div className="kartu p-space-lg">
+        <Memuat baris={5}>Memuat halaman...</Memuat>
+      </div>
+    </div>
+  );
+}
+
 // Baris tabel placeholder selama data pertama dimuat.
 export function BarisMemuat({ kolom, baris = 5 }) {
   return Array.from({ length: baris }, (_, i) => (
@@ -141,22 +163,76 @@ export function KeadaanKosong({ ikon = "inbox", children, aksi, ringkas = false 
   return (
     <div className={`flex flex-col items-center justify-center text-center gap-space-sm px-space-md ${ringkas ? "py-space-lg" : "py-space-xl"}`}>
       <span className={`flex items-center justify-center rounded-full bg-surface-container text-outline ${ringkas ? "w-10 h-10" : "w-14 h-14"}`}>
-        <span className={`material-symbols-outlined ${ringkas ? "text-[22px]" : "text-[28px]"}`}>{ikon}</span>
+        <span aria-hidden="true" className={`material-symbols-outlined ${ringkas ? "text-[22px]" : "text-[28px]"}`}>{ikon}</span>
       </span>
-      <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">{children}</p>
+      <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">{teksUtuh(children)}</p>
       {aksi}
     </div>
+  );
+}
+
+// Tabel daftar: di layar >= 768px tampil sebagai tabel biasa, di bawahnya tiap baris menjadi kartu (lihat .tabel-kartu di index.css).
+// Barisnya tetap satu DOM yang sama, jadi aksi & state baris tidak perlu ditulis dua kali.
+// `kolom`: judul kolom (string atau { label, className }; nilai falsy dilewati). Lebar minimum desktop lewat `className`, mis. "md:min-w-[880px]".
+export function TabelKartu({ kolom, className = "", redup = false, children }) {
+  return (
+    <div className="overflow-x-auto w-full">
+      <table className={`tabel tabel-kartu text-left border-collapse transition-opacity ${redup ? "opacity-60" : ""} ${className}`}>
+        <thead>
+          <tr>
+            {kolom.filter(Boolean).map((k) => {
+              const { label, className: kelas } = typeof k === "string" ? { label: k } : k;
+              return (
+                <th key={label} className={kelas}>
+                  {label}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+// Sel TabelKartu. Di mode kartu: peran "judul" = baris atas kiri, "status" = badge kanan atas, "aksi" = tombol di bawah,
+// "setengah" = setengah lebar kartu, tanpa peran = selebar kartu. `label` tampil di atas isi sel saat mode kartu.
+export function Sel({ peran, label, children, ...props }) {
+  return (
+    <td data-kartu={peran} data-label={label} {...props}>
+      {children}
+    </td>
   );
 }
 
 // KeadaanKosong di dalam tabel (satu baris selebar semua kolom).
 export function BarisKosong({ kolom, ikon, children }) {
   return (
-    <tr>
+    <tr data-kosong>
       <td colSpan={kolom} className="!p-0">
         <KeadaanKosong ikon={ikon}>{children}</KeadaanKosong>
       </td>
     </tr>
+  );
+}
+
+// Browser boleh memutus baris setelah tanda hubung ("CV-" / "nya", "sama-" / "sama"), dan CSS hyphens tidak mencegahnya.
+// Kata yang mengandung tanda hubung dibungkus nowrap; bagian isi yang bukan teks dibiarkan.
+const KATA_BERHUBUNG = /(\S*\p{L}-\p{L}\S*)/gu;
+export function teksUtuh(isi) {
+  return Children.map(isi, (bagian) =>
+    typeof bagian !== "string"
+      ? bagian
+      : bagian.split(KATA_BERHUBUNG).map((teks, i) =>
+          i % 2 ? (
+            <span key={i} className="whitespace-nowrap">
+              {teks}
+            </span>
+          ) : (
+            teks
+          ),
+        ),
   );
 }
 
@@ -166,11 +242,11 @@ export function KepalaHalaman({ ikon, kategori, judul, children, aksi }) {
     <div className="px-space-md sm:px-space-xl pt-space-lg pb-space-sm flex flex-col md:flex-row md:items-end justify-between gap-space-md">
       <div className="min-w-0 space-y-1">
         <div className="flex items-center gap-space-xs text-primary font-label-sm text-label-sm tracking-wider uppercase">
-          <span className="material-symbols-outlined text-[16px]">{ikon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{ikon}</span>
           <span>{kategori}</span>
         </div>
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile sm:font-headline-lg sm:text-headline-lg text-on-surface tracking-tight">{judul}</h1>
-        {children && <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">{children}</p>}
+        {children && <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">{teksUtuh(children)}</p>}
       </div>
       {aksi && <div className="shrink-0 w-full md:w-auto">{aksi}</div>}
     </div>
@@ -185,13 +261,13 @@ export function KartuRingkasan({ label, nilai, ikon, warna = "text-primary", ket
       type={onClick ? "button" : undefined}
       onClick={onClick}
       aria-pressed={onClick ? !!aktif : undefined}
-      className={`h-full flex flex-col text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm ring-inset transition-all ${onClick ? "hover:shadow-md" : ""} ${
+      className={`h-full flex flex-col text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm ring-inset transition-all duration-200 ${onClick ? "hover:shadow-md" : ""} ${
         aktif ? "ring-2 ring-primary" : "ring-1 ring-surface-container-high"
       }`}
     >
       <div className="flex items-start justify-between gap-space-sm text-on-surface-variant">
         <span className="font-label-lg text-label-lg">{label}</span>
-        <span className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-surface-container-low material-symbols-outlined text-[20px] ${warna}`}>{ikon}</span>
+        <span aria-hidden="true" className={`w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-surface-container-low material-symbols-outlined text-[20px] ${warna}`}>{ikon}</span>
       </div>
       <div className="mt-auto pt-space-sm font-headline-lg text-headline-lg text-on-surface tabular-nums">{nilai ?? "–"}</div>
       {keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{keterangan}</div>}
@@ -203,13 +279,14 @@ export function KartuRingkasan({ label, nilai, ikon, warna = "text-primary", ket
 export function KotakCari({ value, onChange, placeholder }) {
   return (
     <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
-      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+      <span aria-hidden="true" className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
       <input
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         maxLength={255}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="input pl-9"
       />
     </div>
@@ -219,7 +296,7 @@ export function KotakCari({ value, onChange, placeholder }) {
 export function PilihFilter({ ikon, label, value, onChange, opsi, semua }) {
   return (
     <div className="flex items-center gap-1.5 min-h-[40px] bg-surface-container-lowest ring-1 ring-inset ring-outline-variant focus-within:ring-2 focus-within:ring-primary/60 px-2 rounded-lg w-full sm:w-auto">
-      <span className="material-symbols-outlined text-outline text-[18px] ml-1">{ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-outline text-[18px] ml-1">{ikon}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -265,8 +342,8 @@ export function Pagination({ meta, onPage, satuan = "data" }) {
         Menampilkan <strong>{meta.from}</strong>–<strong>{meta.to}</strong> dari <strong>{meta.total}</strong> {satuan}
       </span>
       <nav className="flex items-center gap-1" aria-label="Halaman">
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang <= 1} onClick={() => onPage(sekarang - 1)} title="Sebelumnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_left</span>
+        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang <= 1} onClick={() => onPage(sekarang - 1)} title="Sebelumnya" aria-label="Halaman sebelumnya">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] align-middle">chevron_left</span>
         </button>
         {nomorHalaman(sekarang, terakhir).map((n, i) =>
           n === "…" ? (
@@ -285,8 +362,8 @@ export function Pagination({ meta, onPage, satuan = "data" }) {
             </button>
           ),
         )}
-        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang >= terakhir} onClick={() => onPage(sekarang + 1)} title="Berikutnya">
-          <span className="material-symbols-outlined text-[18px] align-middle">chevron_right</span>
+        <button type="button" className={`${tombol} hover:bg-surface-container`} disabled={sekarang >= terakhir} onClick={() => onPage(sekarang + 1)} title="Berikutnya" aria-label="Halaman berikutnya">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] align-middle">chevron_right</span>
         </button>
       </nav>
     </div>

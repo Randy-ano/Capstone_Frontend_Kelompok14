@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { KeadaanKosong, KepalaHalaman, Memuat, Pagination, Pesan, formatTanggalWaktu } from "../components/ui";
+import { useToast } from "../components/toast";
 import { infoTipe, waktuRelatif } from "../components/notifikasi/shared";
 
 const FILTER = [
@@ -21,7 +22,7 @@ export default function Notifikasi() {
   const [hasil, setHasil] = useState(null);
   const [jumlah, setJumlah] = useState(0);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -44,7 +45,7 @@ export default function Notifikasi() {
   }, [status, page, versi]);
 
   async function buka(n) {
-    if (!n.status_baca) await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch(() => {});
+    if (!n.status_baca) await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch((err) => toast.gagal(err.message));
     const tujuan = infoTipe(n.tipe_notifikasi, user.role).path;
     if (tujuan) navigate(tujuan);
     else setVersi((v) => v + 1);
@@ -53,7 +54,7 @@ export default function Notifikasi() {
   async function bacaSemua() {
     try {
       const res = await api("/notifikasi/baca-semua", { method: "PATCH" });
-      setSukses(res.message);
+      toast.sukses(res.message);
       setVersi((v) => v + 1);
     } catch (err) {
       setError(err.message);
@@ -69,7 +70,7 @@ export default function Notifikasi() {
         aksi={
           jumlah > 0 && (
             <button type="button" onClick={bacaSemua} className="tombol-utama w-full md:w-auto">
-              <span className="material-symbols-outlined text-[18px]">done_all</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">done_all</span>
               Tandai Semua Dibaca ({jumlah})
             </button>
           )
@@ -95,7 +96,6 @@ export default function Notifikasi() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat notifikasi...</Memuat>}
@@ -105,7 +105,7 @@ export default function Notifikasi() {
               <li key={n.id_notifikasi}>
                 <button type="button" onClick={() => buka(n)} className={`w-full text-left flex gap-space-md px-space-md py-space-md hover:bg-surface-container-low ${n.status_baca ? "" : "bg-primary-fixed/30"}`}>
                   <span className="w-10 h-10 shrink-0 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[20px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
+                    <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-body-md text-body-md ${n.status_baca ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>{n.pesan}</span>
@@ -114,7 +114,7 @@ export default function Notifikasi() {
                       {n.kanal === "email" && " · dikirim juga lewat email"}
                     </span>
                   </span>
-                  {!n.status_baca && <span className="w-2.5 h-2.5 mt-2 shrink-0 rounded-full bg-primary" aria-label="Belum dibaca" />}
+                  {!n.status_baca && <span className="w-2.5 h-2.5 mt-2 shrink-0 rounded-full bg-primary" role="img" aria-label="Belum dibaca" />}
                 </button>
               </li>
             ))}

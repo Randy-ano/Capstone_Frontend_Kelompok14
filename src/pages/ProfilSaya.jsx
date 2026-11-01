@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField, Proses } from "../components/ui";
+import { useToast } from "../components/toast";
 import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 
@@ -83,7 +84,7 @@ function Bagian({ ikon, judul, keterangan, aksi, children }) {
       <div className="flex items-start justify-between gap-space-sm">
         <div>
           <h2 className="flex items-center gap-space-sm font-title-md text-title-md text-on-surface">
-            <span className="material-symbols-outlined text-primary text-[22px]">{ikon}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-primary text-[22px]">{ikon}</span>
             {judul}
           </h2>
           {keterangan && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">{keterangan}</p>}
@@ -104,7 +105,7 @@ export default function ProfilSaya() {
   const [opsiKompetensi, setOpsiKompetensi] = useState([]);
   const [errorMuat, setErrorMuat] = useState("");
   const [error, setError] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [simpan, setSimpan] = useState(false);
 
   useEffect(() => {
@@ -149,7 +150,6 @@ export default function ProfilSaya() {
   async function handleSimpan() {
     setSimpan(true);
     setError(null);
-    setSukses("");
     try {
       let res = await api("/talent/profil", { method: "PUT", body: keBody(form) });
       const pesan = [res.message];
@@ -159,7 +159,7 @@ export default function ProfilSaya() {
       }
       setProfil(res.data);
       setForm(keForm(res.data));
-      setSukses(pesan.join(" "));
+      toast.sukses(pesan.join(" "));
       muatUlangUser().catch(() => {});
     } catch (err) {
       setError(err);
@@ -184,7 +184,6 @@ export default function ProfilSaya() {
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <StatusProfil profil={profil} />
         {error && <Pesan>{error.message}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <Bagian ikon="person" judul="Data Pribadi">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
@@ -411,7 +410,7 @@ export default function ProfilSaya() {
             Batalkan Perubahan
           </button>
           <button type="button" onClick={handleSimpan} disabled={simpan} className="tombol-utama">
-            {simpan ? "Menyimpan..." : "Simpan Perubahan"}
+            <Proses aktif={simpan}>Simpan Perubahan</Proses>
           </button>
         </div>
       )}
@@ -424,7 +423,7 @@ const Kosong = ({ children }) => <KeadaanKosong ringkas>{children}</KeadaanKoson
 function TombolTambah({ onClick }) {
   return (
     <button type="button" onClick={onClick} className="tombol-teks shrink-0">
-      <span className="material-symbols-outlined text-[18px]">add</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
       Tambah
     </button>
   );
@@ -436,7 +435,7 @@ function KartuBaris({ judul, onHapus, children }) {
       <div className="flex items-center justify-between">
         <span className="font-label-md text-label-md text-on-surface-variant">{judul}</span>
         <button type="button" onClick={onHapus} title="Hapus baris" className="tombol-bahaya-garis px-3">
-          <span className="material-symbols-outlined text-[16px]">delete</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
           Hapus
         </button>
       </div>
@@ -459,7 +458,7 @@ function StatusProfil({ profil }) {
         lengkap ? "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25" : "bg-warning-container text-on-warning-container ring-warning/25"
       }`}
     >
-      <span className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
       <div className="flex-1 min-w-0">
         <div className="font-title-md text-title-md">{lengkap ? "Profil lengkap" : "Profil belum lengkap"}</div>
         <div className="font-body-sm text-body-sm">
@@ -471,7 +470,7 @@ function StatusProfil({ profil }) {
       <ul className="flex flex-col gap-0.5 shrink-0">
         {syarat.map(([label, ok]) => (
           <li key={label} className="flex items-center gap-1 font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[18px]">{ok ? "check_circle" : "radio_button_unchecked"}</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{ok ? "check_circle" : "radio_button_unchecked"}</span>
             {label}
           </li>
         ))}
@@ -484,16 +483,15 @@ function StatusProfil({ profil }) {
 function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
   const [proses, setProses] = useState("");
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const lengkap = profil.status_kelengkapan === "lengkap";
 
   async function generate() {
     setProses("generate");
     setError("");
-    setSukses("");
     try {
       const res = await api("/talent/cv/generate", { method: "POST" });
-      setSukses(res.message);
+      toast.sukses(res.message);
       onCvDibuat(res.data);
     } catch (err) {
       setError(errorField(err, "profil") ?? err.message);
@@ -532,7 +530,6 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
   return (
     <Bagian ikon="picture_as_pdf" judul="CV" keterangan="CV dibuat otomatis dari data profil Anda dan dapat dilihat oleh tim PT Intellisys.">
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       <div className="flex flex-col sm:flex-row sm:items-center gap-space-sm">
         <span className="font-body-md text-body-md text-on-surface-variant sm:mr-auto">{keterangan}</span>
         <button
@@ -541,8 +538,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           disabled={!profil.ada_cv || !!proses}
           className="tombol-kedua"
         >
-          <span className="material-symbols-outlined text-[18px]">visibility</span>
-          {proses === "lihat" ? "Membuka..." : "Lihat CV"}
+          <Proses aktif={proses === "lihat"} ikon="visibility">Lihat CV</Proses>
         </button>
         <button
           type="button"
@@ -550,8 +546,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           disabled={adaPerubahan || !lengkap || !!proses}
           className="tombol-utama"
         >
-          <span className="material-symbols-outlined text-[18px]">description</span>
-          {proses === "generate" ? "Membuat..." : profil.ada_cv ? "Buat Ulang CV" : "Buat CV"}
+          <Proses aktif={proses === "generate"} ikon="description">{profil.ada_cv ? "Buat Ulang CV" : "Buat CV"}</Proses>
         </button>
       </div>
     </Bagian>

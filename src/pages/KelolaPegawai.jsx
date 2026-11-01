@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE_LABEL } from "../auth/roles";
-import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
+import { Modal } from "../components/dialog";
+import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
 
 const PER_PAGE = 15;
 const OPSI_ROLE = INTERNAL.map((r) => [r, ROLE_LABEL[r]]);
@@ -20,7 +22,7 @@ export default function KelolaPegawai() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [form, setForm] = useState(null); // null | { pegawai: null } (tambah) | { pegawai } (ubah)
 
   useEffect(() => setPage(1), [search]);
@@ -53,7 +55,7 @@ export default function KelolaPegawai() {
   function berhasil(pesan) {
     setForm(null);
     setError("");
-    setSukses(pesan);
+    toast.sukses(pesan);
     muatUlang();
   }
 
@@ -66,13 +68,10 @@ export default function KelolaPegawai() {
         aksi={
           <button
             type="button"
-            onClick={() => {
-              setSukses("");
-              setForm({ pegawai: null });
-            }}
+            onClick={() => setForm({ pegawai: null })}
             className="tombol-utama w-full md:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">person_add</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">person_add</span>
             Tambah Pegawai
           </button>
         }
@@ -104,54 +103,33 @@ export default function KelolaPegawai() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[760px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>No. Telepon</th>
-                  <th>Status</th>
-                  <th className="aksi">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={6} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={6} ikon="manage_accounts">
-                    {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((p) => (
-                  <BarisPegawai
-                    key={p.id_pegawai}
-                    pegawai={p}
-                    diriSendiri={p.akun.id_user === user.id_user}
-                    onUbah={() => {
-                      setSukses("");
-                      setForm({ pegawai: p });
-                    }}
-                    onStatus={berhasil}
-                    onError={(pesan) => {
-                      setSukses("");
-                      setError(pesan);
-                    }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Nama", "Email", "Role", "No. Telepon", "Status", { label: "Aksi", className: "aksi" }]} className="md:min-w-[760px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={6} ikon="manage_accounts">
+                {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((p) => (
+              <BarisPegawai
+                key={p.id_pegawai}
+                pegawai={p}
+                diriSendiri={p.akun.id_user === user.id_user}
+                onUbah={() => setForm({ pegawai: p })}
+                onStatus={berhasil}
+                onError={setError}
+              />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pegawai" />}
         </div>
       </div>
@@ -183,21 +161,21 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td>
+      <Sel peran="judul">
         <span className="block font-title-sm text-title-sm text-on-surface">
           {p.nama_pegawai} {diriSendiri && <span className="font-label-sm text-label-sm text-primary">(Anda)</span>}
         </span>
         <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.jabatan}</span>
-      </td>
-      <td className="text-on-surface-variant">{p.akun.email}</td>
-      <td>
+      </Sel>
+      <Sel label="Email" className="text-on-surface-variant break-all">{p.akun.email}</Sel>
+      <Sel peran="setengah" label="Role">
         <Badge className="bg-secondary-container text-on-secondary-fixed">{ROLE_LABEL[p.akun.role] ?? p.akun.role}</Badge>
-      </td>
-      <td className="text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</td>
-      <td>
+      </Sel>
+      <Sel peran="setengah" label="No. Telepon" className="text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</Sel>
+      <Sel peran="status">
         <Badge className={aktif ? "bg-tertiary-fixed text-on-tertiary-fixed-variant" : "bg-error-container text-on-error-container"}>{aktif ? "Aktif" : "Nonaktif"}</Badge>
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="aksi">
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">{aktif ? "Nonaktifkan?" : "Aktifkan?"}</span>
@@ -205,13 +183,13 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
               Tidak
             </button>
             <button type="button" onClick={ubahStatus} disabled={kirim} className={aktif ? "tombol-bahaya" : "tombol-utama"}>
-              {kirim ? "Menyimpan..." : "Ya"}
+              <Proses aktif={kirim}>Ya</Proses>
             </button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-1">
             <button type="button" onClick={onUbah} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[16px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
             {!diriSendiri && (
@@ -220,13 +198,13 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
                 onClick={() => setKonfirmasi(true)}
                 className={aktif ? "tombol-bahaya-garis" : "tombol-kedua"}
               >
-                <span className="material-symbols-outlined text-[16px]">{aktif ? "block" : "check_circle"}</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{aktif ? "block" : "check_circle"}</span>
                 {aktif ? "Nonaktifkan" : "Aktifkan"}
               </button>
             )}
           </div>
         )}
-      </td>
+      </Sel>
     </tr>
   );
 }
@@ -297,63 +275,52 @@ function FormPegawai({ pegawai, onClose, onSaved }) {
   const e = (field) => errorField(error, field);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah pegawai" : "Tambah pegawai"}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && !kirim) onClose();
-        }}
-        className="relative w-full sm:max-w-xl max-h-[95vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Pegawai" : "Tambah Pegawai"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error.message}</Pesan>}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-            <Field label="Nama pegawai" wajib error={e("nama_pegawai")}>
-              <input autoFocus value={form.nama_pegawai} onChange={set("nama_pegawai")} maxLength={255} className={inputClass(e("nama_pegawai"))} />
-            </Field>
-            <Field label="Jabatan" wajib error={e("jabatan")}>
-              <input value={form.jabatan} onChange={set("jabatan")} maxLength={255} placeholder="Contoh: Talent Support" className={inputClass(e("jabatan"))} />
-            </Field>
-            <Field label="Email" wajib error={e("email")}>
-              <input type="email" value={form.email} onChange={set("email")} maxLength={255} placeholder="nama@intellisys.test" className={inputClass(e("email"))} />
-            </Field>
-            <Field label="Role" wajib error={e("role")}>
-              <select value={form.role} onChange={set("role")} className={inputClass(e("role"))}>
-                <option value="">Pilih role...</option>
-                {OPSI_ROLE.map(([nilai, label]) => (
-                  <option key={nilai} value={nilai}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="No. telepon" error={e("no_telepon")}>
-              <input value={form.no_telepon} onChange={set("no_telepon")} maxLength={30} placeholder="0812-..." className={inputClass(e("no_telepon"))} />
-            </Field>
-            <Field label="Password" wajib={!ubah} error={e("password")} keterangan={ubah ? "Kosongkan jika tidak diubah. Minimal 8 karakter." : "Minimal 8 karakter."}>
-              <input type="password" value={form.password} onChange={set("password")} autoComplete="new-password" className={inputClass(e("password"))} />
-            </Field>
-          </div>
-        </div>
-
-        <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <Modal
+      judul={ubah ? "Ubah Pegawai" : "Tambah Pegawai"}
+      label={ubah ? "Ubah pegawai" : "Tambah pegawai"}
+      lebar="sm:max-w-xl"
+      sibuk={kirim}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
           <button type="submit" disabled={kirim} className="tombol-utama">
-            {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah Pegawai"}
+            <Proses aktif={kirim}>{ubah ? "Simpan Perubahan" : "Tambah Pegawai"}</Proses>
           </button>
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {error && <Pesan>{error.message}</Pesan>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+        <Field label="Nama pegawai" wajib error={e("nama_pegawai")}>
+          <input autoFocus value={form.nama_pegawai} onChange={set("nama_pegawai")} maxLength={255} className={inputClass(e("nama_pegawai"))} />
+        </Field>
+        <Field label="Jabatan" wajib error={e("jabatan")}>
+          <input value={form.jabatan} onChange={set("jabatan")} maxLength={255} placeholder="Contoh: Talent Support" className={inputClass(e("jabatan"))} />
+        </Field>
+        <Field label="Email" wajib error={e("email")}>
+          <input type="email" value={form.email} onChange={set("email")} maxLength={255} placeholder="nama@intellisys.test" className={inputClass(e("email"))} />
+        </Field>
+        <Field label="Role" wajib error={e("role")}>
+          <select value={form.role} onChange={set("role")} className={inputClass(e("role"))}>
+            <option value="">Pilih role...</option>
+            {OPSI_ROLE.map(([nilai, label]) => (
+              <option key={nilai} value={nilai}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="No. telepon" error={e("no_telepon")}>
+          <input value={form.no_telepon} onChange={set("no_telepon")} maxLength={30} placeholder="0812-..." className={inputClass(e("no_telepon"))} />
+        </Field>
+        <Field label="Password" wajib={!ubah} error={e("password")} keterangan={ubah ? "Kosongkan jika tidak diubah. Minimal 8 karakter." : "Minimal 8 karakter."}>
+          <input type="password" value={form.password} onChange={set("password")} autoComplete="new-password" className={inputClass(e("password"))} />
+        </Field>
+      </div>
+    </Modal>
   );
 }

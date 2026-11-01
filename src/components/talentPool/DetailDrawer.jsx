@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
-import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag } from "../ui";
+import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag, Proses } from "../ui";
+import { useToast } from "../toast";
+import { Laci } from "../dialog";
 import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
 
 // Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
@@ -21,57 +23,33 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
     };
   }, [id]);
 
-  useEffect(() => {
-    const esc = (event) => event.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   function handleUpdated(data) {
     setDetail(data);
     onUpdated();
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail talent">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Talent</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            title="Tutup"
-            className="tombol-ikon -mr-2"
-          >
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !detail && (
-            <Memuat>Memuat detail...</Memuat>
-          )}
-          {detail && (
-            <>
-              <Profil detail={detail} />
-              {bolehUbah && <FormUbah detail={detail} onUpdated={handleUpdated} />}
-              <RiwayatPendidikan items={detail.talent.riwayat_pendidikan} />
-              <PengalamanKerja items={detail.talent.riwayat_pengalaman_kerja} lama={detail.talent.lama_pengalaman_tahun} />
-              {detail.talent.sertifikat.length > 0 && <Sertifikat items={detail.talent.sertifikat} />}
-              <RiwayatScreening items={detail.riwayat_screening} />
-            </>
-          )}
-        </div>
-
-        {detail && (
-          <div className="shrink-0 px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high">
-            <TombolCv id={detail.id_talent_pool} adaCv={detail.talent.ada_cv} nama={detail.talent.nama_lengkap} />
-          </div>
-        )}
-      </div>
-    </div>
+    <Laci
+      judul="Detail Talent"
+      label="Detail talent"
+      onClose={onClose}
+      kaki={detail && <TombolCv id={detail.id_talent_pool} adaCv={detail.talent.ada_cv} nama={detail.talent.nama_lengkap} />}
+    >
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !detail && (
+        <Memuat>Memuat detail...</Memuat>
+      )}
+      {detail && (
+        <>
+          <Profil detail={detail} />
+          {bolehUbah && <FormUbah detail={detail} onUpdated={handleUpdated} />}
+          <RiwayatPendidikan items={detail.talent.riwayat_pendidikan} />
+          <PengalamanKerja items={detail.talent.riwayat_pengalaman_kerja} lama={detail.talent.lama_pengalaman_tahun} />
+          {detail.talent.sertifikat.length > 0 && <Sertifikat items={detail.talent.sertifikat} />}
+          <RiwayatScreening items={detail.riwayat_screening} />
+        </>
+      )}
+    </Laci>
   );
 }
 
@@ -80,7 +58,7 @@ function Bagian({ icon, judul, aksi, children }) {
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
           {judul}
         </h3>
         {aksi}
@@ -185,7 +163,7 @@ function Profil({ detail }) {
               rel="noreferrer"
               className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline"
             >
-              <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">open_in_new</span>
               {label}
             </a>
           ))}
@@ -200,7 +178,7 @@ function FormUbah({ detail, onUpdated }) {
   const [tag, setTag] = useState(detail.tag_keahlian ?? "");
   const [simpan, setSimpan] = useState(false);
   const [error, setError] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const tagBaru = tag.trim() || null;
   const berubah = { status: status !== detail.status_ketersediaan, tag: tagBaru !== (detail.tag_keahlian ?? null) };
@@ -213,10 +191,9 @@ function FormUbah({ detail, onUpdated }) {
 
     setSimpan(true);
     setError(null);
-    setSukses("");
     try {
       const res = await api(`/talent-pool/${detail.id_talent_pool}`, { method: "PATCH", body });
-      setSukses(res.message);
+      toast.sukses(res.message);
       onUpdated(res.data);
     } catch (err) {
       setError(err);
@@ -231,7 +208,6 @@ function FormUbah({ detail, onUpdated }) {
     <Bagian icon="edit_note" judul="Kelola Talent Pool">
       <form onSubmit={handleSubmit} className="space-y-space-sm" noValidate>
         {error && <Pesan>{error.message}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <fieldset>
           <legend className="font-label-md text-label-md text-on-surface mb-1">Status ketersediaan</legend>
@@ -272,8 +248,7 @@ function FormUbah({ detail, onUpdated }) {
             disabled={simpan || (!berubah.status && !berubah.tag)}
             className="tombol-utama"
           >
-            <span className="material-symbols-outlined text-[18px]">save</span>
-            {simpan ? "Menyimpan..." : "Simpan Perubahan"}
+            <Proses aktif={simpan} ikon="save">Simpan Perubahan</Proses>
           </button>
         </div>
       </form>
@@ -421,8 +396,7 @@ function TombolCv({ id, adaCv, nama }) {
           disabled={!adaCv || memuat}
           className="tombol-utama shrink-0"
         >
-          <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-          {memuat ? "Membuka..." : "Lihat CV"}
+          <Proses aktif={memuat} ikon="picture_as_pdf">Lihat CV</Proses>
         </button>
       </div>
     </div>

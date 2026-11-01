@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, Proses, teksUtuh } from "../ui";
+import { useToast } from "../toast";
 import { hariIni } from "../rekrutmen/shared";
 import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombolHalaman, tombolUtama, usePlacement } from "./shared";
 
@@ -13,7 +14,7 @@ export default function TabCuti({ user }) {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [ajukan, setAjukan] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,8 @@ export default function TabCuti({ user }) {
   }, [status, page, versi]);
 
   const berhasil = (pesan) => {
-    setSukses(pesan);
+    setError("");
+    toast.sukses(pesan);
     setVersi((v) => v + 1);
   };
 
@@ -53,15 +55,14 @@ export default function TabCuti({ user }) {
           opsi={Object.entries(STATUS_CUTI).map(([v, s]) => [v, s.label])}
         />
         {talent && (
-          <button type="button" onClick={() => (setSukses(""), setAjukan(true))} className={tombolHalaman}>
-            <span className="material-symbols-outlined text-[18px]">event_upcoming</span>
+          <button type="button" onClick={() => setAjukan(true)} className={tombolHalaman}>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">event_upcoming</span>
             Ajukan Cuti
           </button>
         )}
       </div>
 
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       {!hasil && !error && <Memuat>Memuat pengajuan cuti...</Memuat>}
       {hasil?.data.length === 0 && (
         <div className="kartu">
@@ -73,7 +74,7 @@ export default function TabCuti({ user }) {
 
       <ul className="flex flex-col gap-space-sm">
         {hasil?.data.map((c) => (
-          <ItemCuti key={c.id_cuti} cuti={c} user={user} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
+          <ItemCuti key={c.id_cuti} cuti={c} user={user} onBerhasil={berhasil} onError={setError} />
         ))}
       </ul>
       {hasil && hasil.meta.total > 0 && (
@@ -117,7 +118,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
   }
 
   return (
-    <li className="kartu p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
+    <li className="kartu-item p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-space-sm">
           <span className="font-title-sm text-title-sm text-on-surface">
@@ -157,23 +158,23 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
                 }
                 className={konfirmasi === "disetujui" ? "tombol-utama" : "tombol-bahaya"}
               >
-                {kirim ? "Memproses..." : "Ya"}
+                <Proses aktif={kirim}>Ya</Proses>
               </button>
             </>
           ) : bolehPutuskan ? (
             <>
               <button type="button" onClick={() => setKonfirmasi("disetujui")} className={tombolUtama}>
-                <span className="material-symbols-outlined text-[18px]">check</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">check</span>
                 Setujui
               </button>
               <button type="button" onClick={() => setKonfirmasi("ditolak")} className="tombol-bahaya-garis">
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
                 Tolak
               </button>
             </>
           ) : (
             <button type="button" onClick={() => setKonfirmasi("batal")} className="tombol-bahaya-garis">
-              <span className="material-symbols-outlined text-[18px]">event_busy</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">event_busy</span>
               Batalkan
             </button>
           )}
@@ -227,7 +228,7 @@ function ModalAjukanCuti({ onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim || daftar?.length === 0} className="tombol-utama">
-          {kirim ? "Mengirim..." : "Kirim Pengajuan"}
+          <Proses aktif={kirim}>Kirim Pengajuan</Proses>
         </button>
       }
     >
@@ -255,7 +256,7 @@ function ModalAjukanCuti({ onClose, onBerhasil }) {
       <Field label="Alasan cuti" wajib error={e("alasan_cuti")}>
         <textarea rows={3} value={form.alasan_cuti} onChange={set("alasan_cuti")} maxLength={2000} className={`${inputClass(e("alasan_cuti"))} h-auto py-2`} />
       </Field>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Cuti disetujui setelah HR klien dan Manager PT Intellisys sama-sama menyetujui.</p>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">{teksUtuh("Cuti disetujui setelah HR klien dan Manager PT Intellisys sama-sama menyetujui.")}</p>
     </Modal>
   );
 }

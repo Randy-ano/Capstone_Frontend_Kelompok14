@@ -2,7 +2,8 @@ import { useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser } from "../auth/roles";
-import { KepalaHalaman, Pesan, errorField } from "../components/ui";
+import { KepalaHalaman, Pesan, Proses, errorField } from "../components/ui";
+import { useToast } from "../components/toast";
 
 const FORM_KOSONG = { password_lama: "", password: "", password_confirmation: "" };
 
@@ -16,7 +17,7 @@ export default function PengaturanAkun() {
   const [terlihat, setTerlihat] = useState(false);
   const [kirim, setKirim] = useState(false);
   const [error, setError] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const ubah = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -24,10 +25,9 @@ export default function PengaturanAkun() {
     event.preventDefault();
     setKirim(true);
     setError(null);
-    setSukses("");
     try {
       const res = await api("/auth/password", { method: "PUT", body: form });
-      setSukses(res.message);
+      toast.sukses(res.message);
       setForm(FORM_KOSONG);
     } catch (err) {
       setError(err);
@@ -54,7 +54,7 @@ export default function PengaturanAkun() {
           aria-label={terlihat ? "Sembunyikan password" : "Tampilkan password"}
           className="absolute inset-y-0 right-0 w-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface"
         >
-          <span className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{terlihat ? "visibility_off" : "visibility"}</span>
         </button>
       </div>
       {errorField(error, field) ? (
@@ -98,7 +98,6 @@ export default function PengaturanAkun() {
               Setelah password diganti, sesi di perangkat lain otomatis keluar. Sesi di perangkat ini tetap aktif.
             </p>
           </div>
-          {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
           {error && !error.errors && <Pesan>{error.message}</Pesan>}
           {isian("password_lama", "Password lama", null, "current-password")}
           {isian("password", "Password baru", "Minimal 8 karakter dan berbeda dari password lama.", "new-password")}
@@ -109,8 +108,7 @@ export default function PengaturanAkun() {
               disabled={kirim}
               className="tombol-utama"
             >
-              <span className="material-symbols-outlined text-[18px]">{kirim ? "progress_activity" : "lock_reset"}</span>
-              {kirim ? "Menyimpan..." : "Simpan Password"}
+              <Proses aktif={kirim} ikon="lock_reset">Simpan Password</Proses>
             </button>
           </div>
         </form>

@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
-import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
+import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda, Proses } from "../components/ui";
+import { useToast } from "../components/toast";
+import { Modal } from "../components/dialog";
+import { BadgeTahapPengajuan, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
 const PER_PAGE = 10;
@@ -26,7 +28,7 @@ export default function PengajuanKandidat() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [dipilih, setDipilih] = useState(null);
   const [ajukan, setAjukan] = useState(false);
 
@@ -67,13 +69,10 @@ export default function PengajuanKandidat() {
           user.role === ROLE.ACCOUNT_MANAGER && (
             <button
               type="button"
-              onClick={() => {
-                setSukses("");
-                setAjukan(true);
-              }}
+              onClick={() => setAjukan(true)}
               className="tombol-utama w-full md:w-auto"
             >
-              <span className="material-symbols-outlined text-[18px]">send</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">send</span>
               Ajukan Kandidat
             </button>
           )
@@ -106,74 +105,60 @@ export default function PengajuanKandidat() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[860px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Kandidat</th>
-                  <th>Posisi & Klien</th>
-                  <th>Diajukan</th>
-                  <th>Tahap Saat Ini</th>
-                  <th>Status</th>
+          <TabelKartu kolom={["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]} className="md:min-w-[860px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={5} ikon="send">
+                {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((p) => {
+              const tahap = tahapPengajuan(p);
+              return (
+                <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                  <Sel peran="judul">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDipilih(p.id_pengajuan);
+                      }}
+                      className="text-left group"
+                    >
+                      <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{p.talent.nama_lengkap}</span>
+                      <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
+                    </button>
+                  </Sel>
+                  <Sel label="Posisi & Klien">
+                    <span className="block text-on-surface">{p.job_requirement.posisi}</span>
+                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
+                  </Sel>
+                  <Sel peran="setengah" label="Diajukan" className="whitespace-nowrap">
+                    <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
+                    {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
+                  </Sel>
+                  <Sel peran="setengah" label="Tahap Saat Ini">
+                    <span className="flex items-center gap-1 text-on-surface">
+                      <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
+                      {tahap.label}
+                    </span>
+                  </Sel>
+                  <Sel peran="status">
+                    <BadgeTahapPengajuan pengajuan={p} />
+                  </Sel>
                 </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="send">
-                    {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((p) => {
-                  const tahap = tahapPengajuan(p);
-                  return (
-                    <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                      <td>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDipilih(p.id_pengajuan);
-                          }}
-                          className="text-left group"
-                        >
-                          <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{p.talent.nama_lengkap}</span>
-                          <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
-                        </button>
-                      </td>
-                      <td>
-                        <span className="block text-on-surface">{p.job_requirement.posisi}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
-                      </td>
-                      <td className="whitespace-nowrap">
-                        <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
-                        {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
-                      </td>
-                      <td>
-                        <span className="flex items-center gap-1 text-on-surface">
-                          <span className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
-                          {tahap.label}
-                        </span>
-                      </td>
-                      <td>
-                        <PengajuanBadge status={p.status_pengajuan} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              );
+            })}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pengajuan" />}
         </div>
       </div>
@@ -184,7 +169,7 @@ export default function PengajuanKandidat() {
           onClose={() => setAjukan(false)}
           onBerhasil={(pesan, id) => {
             setAjukan(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
             setDipilih(id);
           }}
@@ -219,50 +204,32 @@ function ModalAjukan({ onClose, onBerhasil }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Ajukan kandidat"
-      onKeyDown={(e) => e.key === "Escape" && !kirim && onClose()}
-    >
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <div className="relative w-full sm:max-w-2xl max-h-[90vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">Ajukan Kandidat ke Klien</h2>
-          <button type="button" autoFocus onClick={onClose} disabled={!!kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-sm">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !daftar && <Memuat />}
-          {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
-          <ul className="divide-y divide-surface-container-high">
-            {daftar?.map((s) => (
-              <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
-                <div className="min-w-0 flex-1">
-                  <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">
-                    {s.job_requirement.posisi} · {s.job_requirement.klien.nama_perusahaan} · Skor {formatAngka(s.skor_kecocokan, 2)}
-                  </div>
-                  {s.catatan_screening && <div className="font-body-sm text-body-sm text-outline">“{s.catatan_screening}”</div>}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => ajukan(s)}
-                  disabled={!!kirim}
-                  className="tombol-utama shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">send</span>
-                  {kirim === s.id_screening ? "Mengajukan..." : "Ajukan"}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+    <Modal judul="Ajukan Kandidat ke Klien" label="Ajukan kandidat" lebar="sm:max-w-2xl" sibuk={!!kirim} onClose={onClose}>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !daftar && <Memuat />}
+      {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
+      <ul className="divide-y divide-surface-container-high">
+        {daftar?.map((s) => (
+          <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
+            <div className="min-w-0 flex-1">
+              <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
+              <div className="font-body-sm text-body-sm text-on-surface-variant">
+                {s.job_requirement.posisi} · {s.job_requirement.klien.nama_perusahaan} · Skor {formatAngka(s.skor_kecocokan, 2)}
+              </div>
+              {s.catatan_screening && <div className="font-body-sm text-body-sm text-outline">“{s.catatan_screening}”</div>}
+            </div>
+            <button
+              type="button"
+              onClick={() => ajukan(s)}
+              disabled={!!kirim}
+              className="tombol-utama shrink-0"
+            >
+              <Proses aktif={kirim === s.id_screening} ikon="send">Ajukan</Proses>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Modal>
   );
 }

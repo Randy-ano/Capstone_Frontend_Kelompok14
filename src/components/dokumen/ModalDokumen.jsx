@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
-import { Pesan, errorField } from "../ui";
+import { Pesan, errorField, Proses } from "../ui";
+import { useToast, useToastGagal } from "../toast";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
 
@@ -20,19 +21,24 @@ function useForm(awal) {
 
 function useKlien(aktif) {
   const [daftar, setDaftar] = useState(null);
+  const toast = useToast();
   useEffect(() => {
     if (!aktif) return;
     api("/klien?per_page=100")
       .then((res) => setDaftar(res.data))
-      .catch(() => setDaftar([]));
-  }, [aktif]);
+      .catch((err) => {
+        setDaftar([]);
+        toast.gagal(err.message);
+      });
+  }, [aktif, toast]);
   return daftar;
 }
 
 // R25: unggah file (pdf/doc/docx/png/jpg, maks 5 MB).
 export function ModalUnggah({ user, onClose, onBerhasil }) {
   const internal = INTERNAL.includes(user.role);
-  const { daftar: placement } = usePlacement("");
+  const { daftar: placement, error: errorPlacement } = usePlacement("");
+  useToastGagal(errorPlacement);
   const klien = useKlien(internal);
   const { form, error, setError, set, e } = useForm({ jenis_dokumen: "", id_placement: "", id_klien: "" });
   const [file, setFile] = useState(null);
@@ -57,11 +63,11 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
   }
 
   return (
-    <Modal judul="Unggah Dokumen" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}>{kirim ? "Mengunggah..." : "Unggah"}</button>}>
+    <Modal judul="Unggah Dokumen" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}><Proses aktif={kirim}>Unggah</Proses></button>}>
       {error && <Pesan>{error.message}</Pesan>}
       {user.role === ROLE.TALENT && (
         <p className="flex items-start gap-space-sm rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm text-on-surface-variant">
-          <span className="material-symbols-outlined text-[18px] text-primary">info</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">info</span>
           Dokumen yang Anda unggah langsung menunggu tanda tangan Anda sendiri; penandatangan tidak perlu dipilih.
         </p>
       )}
@@ -173,7 +179,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
   }
 
   return (
-    <Modal judul="Buat Dokumen dari Template" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}>{kirim ? "Membuat PDF..." : "Buat Dokumen"}</button>}>
+    <Modal judul="Buat Dokumen dari Template" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}><Proses aktif={kirim}>Buat Dokumen</Proses></button>}>
       {error && <Pesan>{error.message}</Pesan>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <Field label="Jenis" wajib error={e("jenis_dokumen")}>
@@ -244,7 +250,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
           ))}
           <div className="flex items-center justify-between">
             <button type="button" onClick={() => setItems((l) => [...l, { ...ITEM_KOSONG }])} disabled={items.length >= 30} className="tombol-teks">
-              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
               Tambah item
             </button>
             <span className="font-title-sm text-title-sm text-on-surface">Total {formatRupiahInput(total)}</span>

@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, Sel, TabelKartu, errorField, formatTanggal, formatTanggalWaktu, useTunda, Proses } from "../components/ui";
+import { useToast } from "../components/toast";
+import { Laci } from "../components/dialog";
 import { Field, LaporanBadge, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
 const KARTU = [
@@ -23,7 +25,7 @@ export default function TiketKomplain() {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [buat, setBuat] = useState(false);
   const [dipilih, setDipilih] = useState(null);
 
@@ -58,8 +60,8 @@ export default function TiketKomplain() {
         judul="Tiket Komplain Klien"
         aksi={
           hr && (
-            <button type="button" onClick={() => (setSukses(""), setBuat(true))} className={tombolHalaman}>
-              <span className="material-symbols-outlined text-[18px]">add_comment</span>
+            <button type="button" onClick={() => setBuat(true)} className={tombolHalaman}>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_comment</span>
               Buat Laporan
             </button>
           )
@@ -93,7 +95,6 @@ export default function TiketKomplain() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat tiket...</Memuat>}
@@ -103,50 +104,37 @@ export default function TiketKomplain() {
             </KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
-            <div className="overflow-x-auto w-full">
-              <table className="tabel min-w-[760px] text-left border-collapse">
-                <thead>
-                  <tr>
-                    <th>Laporan</th>
-                    <th>Talent</th>
-                    <th>Dilaporkan</th>
-                    <th>Ditindaklanjuti</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hasil.data.map((l) => (
-                    <tr key={l.id_laporan} onClick={() => setDipilih(l)} className="hover:bg-surface-container-low cursor-pointer align-top">
-                      <td className="max-w-[320px]">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDipilih(l);
-                          }}
-                          className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary"
-                        >
-                          {l.judul_laporan}
-                        </button>
-                        <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{l.deskripsi_keluhan}</p>
-                      </td>
-                      <td>
-                        <span className="block text-on-surface">{l.placement.talent.nama_lengkap}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{l.placement.klien.nama_perusahaan}</span>
-                      </td>
-                      <td className="whitespace-nowrap">
-                        <span className="block text-on-surface-variant">{formatTanggal(l.tanggal_laporan)}</span>
-                        {l.pelapor && <span className="block font-body-sm text-body-sm text-outline">oleh {l.pelapor.nama_hr}</span>}
-                      </td>
-                      <td className="text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</td>
-                      <td>
-                        <LaporanBadge status={l.status_laporan} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TabelKartu kolom={["Laporan", "Talent", "Dilaporkan", "Ditindaklanjuti", "Status"]} className="md:min-w-[760px]">
+              {hasil.data.map((l) => (
+                <tr key={l.id_laporan} onClick={() => setDipilih(l)} className="hover:bg-surface-container-low cursor-pointer align-top">
+                  <Sel peran="judul" className="max-w-[320px]">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDipilih(l);
+                      }}
+                      className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary"
+                    >
+                      {l.judul_laporan}
+                    </button>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{l.deskripsi_keluhan}</p>
+                  </Sel>
+                  <Sel peran="setengah" label="Talent">
+                    <span className="block text-on-surface">{l.placement.talent.nama_lengkap}</span>
+                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{l.placement.klien.nama_perusahaan}</span>
+                  </Sel>
+                  <Sel peran="setengah" label="Dilaporkan" className="whitespace-nowrap">
+                    <span className="block text-on-surface-variant">{formatTanggal(l.tanggal_laporan)}</span>
+                    {l.pelapor && <span className="block font-body-sm text-body-sm text-outline">oleh {l.pelapor.nama_hr}</span>}
+                  </Sel>
+                  <Sel label="Ditindaklanjuti" className="text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</Sel>
+                  <Sel peran="status">
+                    <LaporanBadge status={l.status_laporan} />
+                  </Sel>
+                </tr>
+              ))}
+            </TabelKartu>
           )}
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="tiket" />}
         </div>
@@ -157,7 +145,7 @@ export default function TiketKomplain() {
           onClose={() => setBuat(false)}
           onBerhasil={(pesan) => {
             setBuat(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
           }}
         />
@@ -169,7 +157,7 @@ export default function TiketKomplain() {
           onClose={() => setDipilih(null)}
           onBerhasil={(data, pesan) => {
             setDipilih(data);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
           }}
         />
@@ -216,7 +204,7 @@ function ModalBuat({ onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim} className="tombol-utama">
-          {kirim ? "Mengirim..." : "Kirim Laporan"}
+          <Proses aktif={kirim}>Kirim Laporan</Proses>
         </button>
       }
     >
@@ -249,12 +237,6 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
   const [kirim, setKirim] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const esc = (ev) => ev.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   async function simpan() {
     setKirim(true);
     setError(null);
@@ -272,97 +254,86 @@ function DrawerTiket({ laporan: l, user, onClose, onBerhasil }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail tiket">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Tiket</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
+    <Laci judul="Detail Tiket" label="Detail tiket" lebar="max-w-lg" onClose={onClose}>
+      <section className="kartu p-space-md space-y-space-sm">
+        <div className="flex items-start justify-between gap-space-sm">
+          <h3 className="font-title-md text-title-md text-on-surface">{l.judul_laporan}</h3>
+          <LaporanBadge status={l.status_laporan} />
         </div>
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          <section className="kartu p-space-md space-y-space-sm">
-            <div className="flex items-start justify-between gap-space-sm">
-              <h3 className="font-title-md text-title-md text-on-surface">{l.judul_laporan}</h3>
-              <LaporanBadge status={l.status_laporan} />
+        <p className="font-body-md text-body-md text-on-surface whitespace-pre-line">{l.deskripsi_keluhan}</p>
+        <dl className="grid grid-cols-2 gap-space-sm pt-space-xs font-body-sm text-body-sm">
+          <div>
+            <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Talent</dt>
+            <dd className="text-on-surface">{l.placement.talent.nama_lengkap}</dd>
+          </div>
+          <div>
+            <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Klien</dt>
+            <dd className="text-on-surface">{l.placement.klien.nama_perusahaan}</dd>
+          </div>
+          <div>
+            <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Pelapor</dt>
+            <dd className="text-on-surface">{l.pelapor?.nama_hr ?? "-"}</dd>
+          </div>
+          <div>
+            <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Dilaporkan</dt>
+            <dd className="text-on-surface">{formatTanggalWaktu(l.tanggal_laporan)}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="kartu p-space-md space-y-space-sm">
+        <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
+          Tindak Lanjut
+        </h3>
+        {l.tindak_lanjut.oleh ? (
+          <div className="space-y-1">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              {l.tindak_lanjut.oleh} · {formatTanggalWaktu(l.tindak_lanjut.tanggal)}
+            </p>
+            {l.tindak_lanjut.hasil && <p className="font-body-md text-body-md text-on-surface whitespace-pre-line">{l.tindak_lanjut.hasil}</p>}
+          </div>
+        ) : (
+          <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ditindaklanjuti.</p>
+        )}
+
+        {bolehTindak && (
+          <div className="bg-surface-container-low rounded-lg p-space-sm space-y-space-sm">
+            {error && <Pesan>{errorField(error, "status_laporan") ?? error.message}</Pesan>}
+            <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Status laporan">
+              {[
+                ["diproses", "Diproses"],
+                ["selesai", "Selesai"],
+              ].map(([v, label]) => (
+                <button
+                  key={v}
+                  type="button"
+                  role="radio"
+                  aria-checked={status === v}
+                  onClick={() => (setStatus(v), setError(null))}
+                  className={`h-10 rounded-lg font-label-md text-label-md ${status === v ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            <p className="font-body-md text-body-md text-on-surface whitespace-pre-line">{l.deskripsi_keluhan}</p>
-            <dl className="grid grid-cols-2 gap-space-sm pt-space-xs font-body-sm text-body-sm">
-              <div>
-                <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Talent</dt>
-                <dd className="text-on-surface">{l.placement.talent.nama_lengkap}</dd>
-              </div>
-              <div>
-                <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Klien</dt>
-                <dd className="text-on-surface">{l.placement.klien.nama_perusahaan}</dd>
-              </div>
-              <div>
-                <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Pelapor</dt>
-                <dd className="text-on-surface">{l.pelapor?.nama_hr ?? "-"}</dd>
-              </div>
-              <div>
-                <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Dilaporkan</dt>
-                <dd className="text-on-surface">{formatTanggalWaktu(l.tanggal_laporan)}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="kartu p-space-md space-y-space-sm">
-            <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-              <span className="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
-              Tindak Lanjut
-            </h3>
-            {l.tindak_lanjut.oleh ? (
-              <div className="space-y-1">
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  {l.tindak_lanjut.oleh} · {formatTanggalWaktu(l.tindak_lanjut.tanggal)}
-                </p>
-                {l.tindak_lanjut.hasil && <p className="font-body-md text-body-md text-on-surface whitespace-pre-line">{l.tindak_lanjut.hasil}</p>}
-              </div>
-            ) : (
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ditindaklanjuti.</p>
-            )}
-
-            {bolehTindak && (
-              <div className="bg-surface-container-low rounded-lg p-space-sm space-y-space-sm">
-                {error && <Pesan>{errorField(error, "status_laporan") ?? error.message}</Pesan>}
-                <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Status laporan">
-                  {[
-                    ["diproses", "Diproses"],
-                    ["selesai", "Selesai"],
-                  ].map(([v, label]) => (
-                    <button
-                      key={v}
-                      type="button"
-                      role="radio"
-                      aria-checked={status === v}
-                      onClick={() => (setStatus(v), setError(null))}
-                      className={`h-10 rounded-lg font-label-md text-label-md ${status === v ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <Field label="Hasil tindak lanjut" wajib={status === "selesai"} error={errorField(error, "hasil_tindak_lanjut")}>
-                  <textarea
-                    rows={4}
-                    value={hasil}
-                    onChange={(ev) => (setHasil(ev.target.value), setError(null))}
-                    maxLength={5000}
-                    className={`${inputClass(errorField(error, "hasil_tindak_lanjut"))} h-auto py-2`}
-                  />
-                </Field>
-                <div className="flex justify-end">
-                  <button type="button" onClick={simpan} disabled={kirim} className="tombol-utama">
-                    {kirim ? "Menyimpan..." : "Simpan Tindak Lanjut"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      </div>
-    </div>
+            <Field label="Hasil tindak lanjut" wajib={status === "selesai"} error={errorField(error, "hasil_tindak_lanjut")}>
+              <textarea
+                rows={4}
+                value={hasil}
+                onChange={(ev) => (setHasil(ev.target.value), setError(null))}
+                maxLength={5000}
+                className={`${inputClass(errorField(error, "hasil_tindak_lanjut"))} h-auto py-2`}
+              />
+            </Field>
+            <div className="flex justify-end">
+              <button type="button" onClick={simpan} disabled={kirim} className="tombol-utama">
+                <Proses aktif={kirim}>Simpan Tindak Lanjut</Proses>
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+    </Laci>
   );
 }

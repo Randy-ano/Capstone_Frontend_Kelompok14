@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag, Proses } from "../components/ui";
+import { useToast } from "../components/toast";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
@@ -14,7 +15,7 @@ export default function RekomendasiKandidat() {
   const [opsiJob, setOpsiJob] = useState(null);
   const [errorJob, setErrorJob] = useState("");
   const [versi, setVersi] = useState(0);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     api("/job-requirements?per_page=100")
@@ -26,7 +27,6 @@ export default function RekomendasiKandidat() {
   const muatUlang = useCallback(() => setVersi((v) => v + 1), []);
 
   function pilihJob(id) {
-    setSukses("");
     setParams(id ? { job: id } : {});
   }
 
@@ -65,20 +65,19 @@ export default function RekomendasiKandidat() {
         {job && (
           <>
             <RingkasanJob job={job} />
-            {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
               <div className="xl:col-span-7">
                 <DaftarKandidat
                   key={`${job.id_job_req}-${versi}`}
                   job={job}
                   onScreening={(pesan) => {
-                    setSukses(pesan);
+                    toast.sukses(pesan);
                     muatUlang();
                   }}
                 />
               </div>
               <div className="xl:col-span-5">
-                <SudahScreening key={`${job.id_job_req}-${versi}`} job={job} onUbah={setSukses} />
+                <SudahScreening key={`${job.id_job_req}-${versi}`} job={job} onUbah={toast.sukses} />
               </div>
             </div>
           </>
@@ -119,7 +118,7 @@ function Bagian({ ikon, judul, info, children }) {
     <section className="kartu overflow-hidden">
       <div className="p-space-md bg-surface-container-low flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-2 font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{ikon}</span>
           {judul}
         </h3>
         {info}
@@ -234,13 +233,13 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
       <div className="flex flex-wrap items-center gap-1">
         {k.kompetensi_cocok.map((nama) => (
           <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[14px]">check</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">check</span>
             {nama}
           </span>
         ))}
         {k.kompetensi_kurang.map((nama) => (
           <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg ring-1 ring-outline-variant text-outline font-label-md text-label-md">
-            <span className="material-symbols-outlined text-[14px]">close</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">close</span>
             {nama}
           </span>
         ))}
@@ -262,6 +261,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
             onChange={(e) => setCatatan(e.target.value)}
             maxLength={2000}
             placeholder="Catatan screening (opsional)"
+            aria-label="Catatan screening"
             className="input py-2"
           />
           <div className="flex flex-wrap justify-end gap-space-sm">
@@ -269,7 +269,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
               Batal
             </button>
             <button type="button" onClick={screening} disabled={kirim} className="tombol-utama">
-              {kirim ? "Memproses..." : "Konfirmasi Screening"}
+              <Proses aktif={kirim}>Konfirmasi Screening</Proses>
             </button>
           </div>
         </div>
@@ -280,7 +280,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
             onClick={() => setBuka(true)}
             className="tombol-utama"
           >
-            <span className="material-symbols-outlined text-[18px]">fact_check</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">fact_check</span>
             Screening
           </button>
         </div>
@@ -398,6 +398,7 @@ function ItemScreening({ screening: s, onSaved }) {
             onChange={(e) => setCatatan(e.target.value)}
             maxLength={2000}
             placeholder="Catatan screening"
+            aria-label="Catatan screening"
             className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
           />
           <div className="flex justify-end gap-space-sm">
@@ -420,7 +421,7 @@ function ItemScreening({ screening: s, onSaved }) {
               disabled={kirim || (hasil === s.hasil_screening && (catatan.trim() || null) === (s.catatan_screening ?? null))}
               className="tombol-utama"
             >
-              {kirim ? "Menyimpan..." : "Simpan"}
+              <Proses aktif={kirim}>Simpan</Proses>
             </button>
           </div>
         </div>

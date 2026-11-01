@@ -43,7 +43,7 @@ export function SlaBadge({ indikator }) {
   const s = INDIKATOR_SLA[indikator] ?? { label: indikator, ikon: "help", className: NADA.netral };
   return (
     <Badge className={`gap-1 ${s.className}`}>
-      <span className="material-symbols-outlined text-[14px]">{s.ikon}</span>
+      <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{s.ikon}</span>
       {s.label}
     </Badge>
   );

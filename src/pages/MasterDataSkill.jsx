@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
+import { Modal } from "../components/dialog";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
 
 const PER_PAGE = 15;
 
@@ -16,7 +18,7 @@ export default function MasterDataSkill() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [form, setForm] = useState(null); // null | { kompetensi: null } (tambah) | { kompetensi } (ubah)
 
   useEffect(() => setPage(1), [search]);
@@ -49,7 +51,7 @@ export default function MasterDataSkill() {
 
   function tersimpan(pesan) {
     setForm(null);
-    setSukses(pesan);
+    toast.sukses(pesan);
     muatUlang();
   }
 
@@ -62,13 +64,10 @@ export default function MasterDataSkill() {
         aksi={
           <button
             type="button"
-            onClick={() => {
-              setSukses("");
-              setForm({ kompetensi: null });
-            }}
+            onClick={() => setForm({ kompetensi: null })}
             className="tombol-utama w-full md:w-auto"
           >
-            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_circle</span>
             Tambah Kompetensi
           </button>
         }
@@ -100,55 +99,39 @@ export default function MasterDataSkill() {
               }}
               className="tombol-teks"
             >
-              <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
               Reset
             </button>
           )}
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[640px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Nama Kompetensi</th>
-                  <th>Kategori</th>
-                  <th className="angka">Dipakai Talent</th>
-                  <th className="angka">Dipakai Permintaan</th>
-                  <th className="aksi">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="psychology">
-                    {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((k) => (
-                  <BarisKompetensi
-                    key={k.id_kompetensi}
-                    kompetensi={k}
-                    onUbah={() => {
-                      setSukses("");
-                      setForm({ kompetensi: k });
-                    }}
-                    onTerhapus={(pesan) => {
-                      setSukses(pesan);
-                      muatUlang();
-                    }}
-                    onError={(pesan) => {
-                      setSukses("");
-                      setError(pesan);
-                    }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu
+            kolom={["Nama Kompetensi", "Kategori", { label: "Dipakai Talent", className: "angka" }, { label: "Dipakai Permintaan", className: "angka" }, { label: "Aksi", className: "aksi" }]}
+            className="md:min-w-[640px]"
+            redup={memuat && hasil}
+          >
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={5} ikon="psychology">
+                {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((k) => (
+              <BarisKompetensi
+                key={k.id_kompetensi}
+                kompetensi={k}
+                onUbah={() => setForm({ kompetensi: k })}
+                onTerhapus={(pesan) => {
+                  toast.sukses(pesan);
+                  muatUlang();
+                }}
+                onError={setError}
+              />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="kompetensi" />}
         </div>
       </div>
@@ -178,11 +161,11 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td className="font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</td>
-      <td className="text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</td>
-      <td className="angka">{k.jumlah_talent}</td>
-      <td className="angka">{k.jumlah_job_requirement}</td>
-      <td>
+      <Sel peran="judul" className="font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</Sel>
+      <Sel label="Kategori" className="text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</Sel>
+      <Sel peran="setengah" label="Dipakai Talent" className="angka">{k.jumlah_talent}</Sel>
+      <Sel peran="setengah" label="Dipakai Permintaan" className="angka">{k.jumlah_job_requirement}</Sel>
+      <Sel peran="aksi">
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">Hapus?</span>
@@ -190,13 +173,13 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
               Tidak
             </button>
             <button type="button" onClick={handleHapus} disabled={hapus} className="tombol-bahaya">
-              {hapus ? "Menghapus..." : "Ya, Hapus"}
+              <Proses aktif={hapus}>Ya, Hapus</Proses>
             </button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-1">
             <button type="button" onClick={onUbah} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[16px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
               Ubah
             </button>
             <button
@@ -206,12 +189,12 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
               title={dipakai ? "Masih dipakai talent atau permintaan kebutuhan, tidak dapat dihapus" : "Hapus kompetensi"}
               className="tombol-bahaya-garis"
             >
-              <span className="material-symbols-outlined text-[16px]">delete</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
               Hapus
             </button>
           </div>
         )}
-      </td>
+      </Sel>
     </tr>
   );
 }
@@ -250,58 +233,47 @@ function FormKompetensi({ kompetensi, opsiKategori, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah kompetensi" : "Tambah kompetensi"}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && !kirim) onClose();
-        }}
-        className="relative w-full sm:max-w-md bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Kompetensi" : "Tambah Kompetensi"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="p-space-md sm:p-space-lg space-y-space-md">
-          {error && !e("nama_kompetensi") && !e("kategori") && <Pesan>{error.message}</Pesan>}
-          {ubah && kompetensi.jumlah_talent + kompetensi.jumlah_job_requirement > 0 && (
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Dipakai {kompetensi.jumlah_talent} talent dan {kompetensi.jumlah_job_requirement} permintaan; perubahan nama langsung berlaku di semuanya.
-            </p>
-          )}
-          <label className="block space-y-1">
-            <span className="font-label-md text-label-md text-on-surface">
-              Nama kompetensi <span className="text-error">*</span>
-            </span>
-            <input autoFocus value={nama} onChange={ubahField(setNama)} maxLength={100} placeholder="Contoh: Golang" className={inputClass(e("nama_kompetensi"))} />
-            {e("nama_kompetensi") && <span className="block font-body-sm text-body-sm text-error">{e("nama_kompetensi")}</span>}
-          </label>
-          <label className="block space-y-1">
-            <span className="font-label-md text-label-md text-on-surface">Kategori</span>
-            <input list="opsi-kategori" value={kategori} onChange={ubahField(setKategori)} maxLength={100} placeholder="Pilih atau ketik kategori baru" className={inputClass(e("kategori"))} />
-            <datalist id="opsi-kategori">
-              {opsiKategori.map((k) => (
-                <option key={k} value={k} />
-              ))}
-            </datalist>
-            {e("kategori") && <span className="block font-body-sm text-body-sm text-error">{e("kategori")}</span>}
-          </label>
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <Modal
+      judul={ubah ? "Ubah Kompetensi" : "Tambah Kompetensi"}
+      label={ubah ? "Ubah kompetensi" : "Tambah kompetensi"}
+      lebar="sm:max-w-md"
+      sibuk={kirim}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
           <button type="submit" disabled={kirim} className="tombol-utama">
-            {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah"}
+            <Proses aktif={kirim}>{ubah ? "Simpan Perubahan" : "Tambah"}</Proses>
           </button>
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {error && !e("nama_kompetensi") && !e("kategori") && <Pesan>{error.message}</Pesan>}
+      {ubah && kompetensi.jumlah_talent + kompetensi.jumlah_job_requirement > 0 && (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Dipakai {kompetensi.jumlah_talent} talent dan {kompetensi.jumlah_job_requirement} permintaan; perubahan nama langsung berlaku di semuanya.
+        </p>
+      )}
+      <label className="block space-y-1">
+        <span className="font-label-md text-label-md text-on-surface">
+          Nama kompetensi <span className="text-error">*</span>
+        </span>
+        <input autoFocus value={nama} onChange={ubahField(setNama)} maxLength={100} placeholder="Contoh: Golang" className={inputClass(e("nama_kompetensi"))} />
+        {e("nama_kompetensi") && <span className="block font-body-sm text-body-sm text-error">{e("nama_kompetensi")}</span>}
+      </label>
+      <label className="block space-y-1">
+        <span className="font-label-md text-label-md text-on-surface">Kategori</span>
+        <input list="opsi-kategori" value={kategori} onChange={ubahField(setKategori)} maxLength={100} placeholder="Pilih atau ketik kategori baru" className={inputClass(e("kategori"))} />
+        <datalist id="opsi-kategori">
+          {opsiKategori.map((k) => (
+            <option key={k} value={k} />
+          ))}
+        </datalist>
+        {e("kategori") && <span className="block font-body-sm text-body-sm text-error">{e("kategori")}</span>}
+      </label>
+    </Modal>
   );
 }

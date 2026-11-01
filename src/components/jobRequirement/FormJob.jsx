@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { Chip, Pesan, errorField } from "../ui";
+import { Chip, Pesan, errorField, Proses } from "../ui";
+import { Modal } from "../dialog";
 import FilterKompetensi, { kunciKompetensi } from "../talentPool/FilterKompetensi";
 
 const inputClass = (error) => `input ${error ? "input-error" : ""}`;
@@ -24,8 +25,8 @@ function ChipBaru({ children, onHapus, disabled }) {
     <span className="inline-flex items-center gap-1 max-w-full pl-2 pr-0.5 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
       <span className="truncate">{children}</span>
       <span className="px-1 rounded bg-surface-container-lowest/70 font-label-sm text-label-sm">baru</span>
-      <button type="button" onClick={onHapus} disabled={disabled} title={`Hapus ${children}`} className="p-0.5 rounded hover:bg-surface-container-lowest/70 disabled:opacity-50">
-        <span className="material-symbols-outlined text-[16px] leading-none">close</span>
+      <button type="button" onClick={onHapus} disabled={disabled} title={`Hapus ${children}`} aria-label={`Hapus ${children}`} className="p-0.5 rounded hover:bg-surface-container-lowest/70 disabled:opacity-50">
+        <span aria-hidden="true" className="material-symbols-outlined text-[16px] leading-none">close</span>
       </button>
     </span>
   );
@@ -137,120 +138,26 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah permintaan" : "Buat permintaan"}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          simpan(ubah ? undefined : "draft");
-        }}
-        // Escape menutup form saja, tidak ikut menutup drawer di belakangnya.
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.stopPropagation();
-            if (!kirim) onClose();
-          }
-        }}
-        className="relative w-full sm:max-w-2xl max-h-[95vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Permintaan Kebutuhan" : "Buat Permintaan Kebutuhan"}</h2>
-          <button type="button" onClick={onClose} disabled={!!kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error.message}</Pesan>}
-
-          {pilihKlien && (
-            <Field label="Klien" wajib error={e("id_klien")}>
-              <select value={form.id_klien} onChange={(ev) => set("id_klien")(ev.target.value)} className={inputClass(e("id_klien"))}>
-                <option value="">Pilih klien...</option>
-                {opsiKlien.map((k) => (
-                  <option key={k.id_klien} value={k.id_klien}>
-                    {k.nama_perusahaan}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-          {ubah && (
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Klien: <strong className="text-on-surface">{job.klien.nama_perusahaan}</strong> (tidak dapat diganti)
-            </p>
-          )}
-
-          <Field label="Posisi" wajib error={e("posisi")}>
-            <input autoFocus value={form.posisi} onChange={(ev) => set("posisi")(ev.target.value)} maxLength={255} placeholder="Contoh: Backend Developer" className={inputClass(e("posisi"))} />
-          </Field>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
-            <Field label="Jumlah kebutuhan" wajib error={e("jumlah_kebutuhan")}>
-              <input type="number" min={1} max={100} value={form.jumlah_kebutuhan} onChange={(ev) => set("jumlah_kebutuhan")(ev.target.value)} className={inputClass(e("jumlah_kebutuhan"))} />
-            </Field>
-            <Field label="Pengalaman minimal (tahun)" error={e("pengalaman_min")}>
-              <input type="number" min={0} max={50} value={form.pengalaman_min} onChange={(ev) => set("pengalaman_min")(ev.target.value)} className={inputClass(e("pengalaman_min"))} />
-            </Field>
-            <Field label="SLA deadline" wajib error={e("sla_deadline")}>
-              <input type="datetime-local" value={form.sla_deadline} onChange={(ev) => set("sla_deadline")(ev.target.value)} className={inputClass(e("sla_deadline"))} />
-            </Field>
-          </div>
-
-          <div className="space-y-1">
-            <span className="block font-label-md text-label-md text-on-surface">
-              Kompetensi dibutuhkan <span className="text-error">*</span>
-            </span>
-            <FilterKompetensi
-              opsi={opsiKompetensi}
-              nilai={form.kompetensi}
-              onChange={pilihKompetensi}
-              onTambah={tambahKompetensiBaru}
-              label={jumlahKompetensi ? `${jumlahKompetensi} kompetensi dipilih` : "Pilih kompetensi"}
-              keterangan="Rekomendasi kandidat dihitung dari kecocokan kompetensi ini. Belum ada di daftar? Ketik namanya untuk menambah kompetensi baru."
-              lebar="penuh"
-              error={Boolean(errorKompetensi)}
-            />
-            {jumlahKompetensi > 0 && (
-              <div className="flex flex-wrap gap-1 pt-1">
-                {form.kompetensi.map((id) => (
-                  <Chip key={id}>{namaKompetensi(id)}</Chip>
-                ))}
-                {form.kompetensi_baru.map((nama) => (
-                  <ChipBaru key={nama} onHapus={() => hapusKompetensiBaru(nama)} disabled={!!kirim}>
-                    {nama}
-                  </ChipBaru>
-                ))}
-              </div>
-            )}
-            {errorKompetensi && <span className="block font-body-sm text-body-sm text-error">{errorKompetensi}</span>}
-          </div>
-
-          <Field label="Kualifikasi" error={e("kualifikasi")}>
-            <textarea
-              rows={4}
-              value={form.kualifikasi}
-              onChange={(ev) => set("kualifikasi")(ev.target.value)}
-              maxLength={5000}
-              placeholder="Deskripsi tugas dan kualifikasi tambahan"
-              className={`${inputClass(e("kualifikasi"))} h-auto py-2`}
-            />
-          </Field>
-        </div>
-
-        <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <Modal
+      judul={ubah ? "Ubah Permintaan Kebutuhan" : "Buat Permintaan Kebutuhan"}
+      label={ubah ? "Ubah permintaan" : "Buat permintaan"}
+      lebar="sm:max-w-2xl"
+      sibuk={!!kirim}
+      onClose={onClose}
+      onSubmit={() => simpan(ubah ? undefined : "draft")}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={!!kirim} className="tombol-kedua">
             Batal
           </button>
           {ubah ? (
             <button type="submit" disabled={!!kirim} className="tombol-utama">
-              {kirim ? "Menyimpan..." : "Simpan Perubahan"}
+              <Proses aktif={kirim}>Simpan Perubahan</Proses>
             </button>
           ) : (
             <>
               <button type="submit" disabled={!!kirim} className="tombol-kedua">
-                {kirim === "draft" ? "Menyimpan..." : "Simpan Draft"}
+                <Proses aktif={kirim === "draft"}>Simpan Draft</Proses>
               </button>
               <button
                 type="button"
@@ -258,12 +165,88 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
                 disabled={!!kirim}
                 className="tombol-utama"
               >
-                {kirim === "diajukan" ? "Mengajukan..." : "Simpan & Ajukan"}
+                <Proses aktif={kirim === "diajukan"}>Simpan & Ajukan</Proses>
               </button>
             </>
           )}
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {error && <Pesan>{error.message}</Pesan>}
+
+      {pilihKlien && (
+        <Field label="Klien" wajib error={e("id_klien")}>
+          <select value={form.id_klien} onChange={(ev) => set("id_klien")(ev.target.value)} className={inputClass(e("id_klien"))}>
+            <option value="">Pilih klien...</option>
+            {opsiKlien.map((k) => (
+              <option key={k.id_klien} value={k.id_klien}>
+                {k.nama_perusahaan}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {ubah && (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Klien: <strong className="text-on-surface">{job.klien.nama_perusahaan}</strong> (tidak dapat diganti)
+        </p>
+      )}
+
+      <Field label="Posisi" wajib error={e("posisi")}>
+        <input autoFocus value={form.posisi} onChange={(ev) => set("posisi")(ev.target.value)} maxLength={255} placeholder="Contoh: Backend Developer" className={inputClass(e("posisi"))} />
+      </Field>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+        <Field label="Jumlah kebutuhan" wajib error={e("jumlah_kebutuhan")}>
+          <input type="number" min={1} max={100} value={form.jumlah_kebutuhan} onChange={(ev) => set("jumlah_kebutuhan")(ev.target.value)} className={inputClass(e("jumlah_kebutuhan"))} />
+        </Field>
+        <Field label="Pengalaman minimal (tahun)" error={e("pengalaman_min")}>
+          <input type="number" min={0} max={50} value={form.pengalaman_min} onChange={(ev) => set("pengalaman_min")(ev.target.value)} className={inputClass(e("pengalaman_min"))} />
+        </Field>
+        <Field label="SLA deadline" wajib error={e("sla_deadline")}>
+          <input type="datetime-local" value={form.sla_deadline} onChange={(ev) => set("sla_deadline")(ev.target.value)} className={inputClass(e("sla_deadline"))} />
+        </Field>
+      </div>
+
+      <div className="space-y-1">
+        <span className="block font-label-md text-label-md text-on-surface">
+          Kompetensi dibutuhkan <span className="text-error">*</span>
+        </span>
+        <FilterKompetensi
+          opsi={opsiKompetensi}
+          nilai={form.kompetensi}
+          onChange={pilihKompetensi}
+          onTambah={tambahKompetensiBaru}
+          label={jumlahKompetensi ? `${jumlahKompetensi} kompetensi dipilih` : "Pilih kompetensi"}
+          keterangan="Rekomendasi kandidat dihitung dari kecocokan kompetensi ini. Belum ada di daftar? Ketik namanya untuk menambah kompetensi baru."
+          lebar="penuh"
+          error={Boolean(errorKompetensi)}
+        />
+        {jumlahKompetensi > 0 && (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {form.kompetensi.map((id) => (
+              <Chip key={id}>{namaKompetensi(id)}</Chip>
+            ))}
+            {form.kompetensi_baru.map((nama) => (
+              <ChipBaru key={nama} onHapus={() => hapusKompetensiBaru(nama)} disabled={!!kirim}>
+                {nama}
+              </ChipBaru>
+            ))}
+          </div>
+        )}
+        {errorKompetensi && <span className="block font-body-sm text-body-sm text-error">{errorKompetensi}</span>}
+      </div>
+
+      <Field label="Kualifikasi" error={e("kualifikasi")}>
+        <textarea
+          rows={4}
+          value={form.kualifikasi}
+          onChange={(ev) => set("kualifikasi")(ev.target.value)}
+          maxLength={5000}
+          placeholder="Deskripsi tugas dan kualifikasi tambahan"
+          className={`${inputClass(e("kualifikasi"))} h-auto py-2`}
+        />
+      </Field>
+    </Modal>
   );
 }

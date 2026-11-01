@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda, Proses } from "../components/ui";
+import { useToast, useToastGagal } from "../components/toast";
 import { PlacementBadge } from "../components/rekrutmen/shared";
 import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
@@ -10,7 +11,9 @@ import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement }
 export default function MonitoringKinerja() {
   const { user } = useAuth();
   const manager = user.role === ROLE.MANAGER;
-  const { daftar: placement } = usePlacement("");
+  const { daftar: placement, error: errorPlacement } = usePlacement("");
+  useToastGagal(errorPlacement);
+  const toast = useToast();
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
   const [idPlacement, setIdPlacement] = useState("");
@@ -18,7 +21,6 @@ export default function MonitoringKinerja() {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
   const [catat, setCatat] = useState(false);
 
   useEffect(() => setPage(1), [search]);
@@ -49,8 +51,8 @@ export default function MonitoringKinerja() {
         judul="Monitoring Kinerja"
         aksi={
           manager && (
-            <button type="button" onClick={() => (setSukses(""), setCatat(true))} className={tombolHalaman}>
-              <span className="material-symbols-outlined text-[18px]">add_notes</span>
+            <button type="button" onClick={() => setCatat(true)} className={tombolHalaman}>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_notes</span>
               Catat Monitoring
             </button>
           )
@@ -78,7 +80,6 @@ export default function MonitoringKinerja() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
         {!hasil && !error && <Memuat>Memuat monitoring...</Memuat>}
         {hasil?.data.length === 0 && (
           <div className="kartu">
@@ -90,15 +91,15 @@ export default function MonitoringKinerja() {
 
         <ol className="flex flex-col gap-space-sm">
           {hasil?.data.map((m) => (
-            <li key={m.id_monitoring} className="kartu p-space-md space-y-space-sm">
-              <div className="flex flex-wrap items-start justify-between gap-space-sm">
+            <li key={m.id_monitoring} className="kartu-item p-space-md space-y-space-sm">
+              <div className="flex items-start justify-between gap-space-sm">
                 <div className="min-w-0">
                   <div className="font-title-sm text-title-sm text-on-surface">{m.placement.talent.nama_lengkap}</div>
                   <div className="font-body-sm text-body-sm text-on-surface-variant">
                     {m.placement.posisi_penempatan} · {m.placement.klien.nama_perusahaan}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
+                <div className="flex flex-col items-end gap-1 shrink-0">
                   <PlacementBadge status={m.placement.status_placement} />
                   <span className="font-label-sm text-label-sm text-on-surface-variant">{formatTanggalWaktu(m.tanggal_monitoring)}</span>
                 </div>
@@ -131,7 +132,7 @@ export default function MonitoringKinerja() {
           onClose={() => setCatat(false)}
           onBerhasil={(pesan) => {
             setCatat(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             setVersi((v) => v + 1);
           }}
         />
@@ -178,7 +179,7 @@ function ModalCatat({ placement, awal, onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim} className="tombol-utama">
-          {kirim ? "Menyimpan..." : "Simpan"}
+          <Proses aktif={kirim}>Simpan</Proses>
         </button>
       }
     >

@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
-import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu } from "../ui";
+import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu, Proses } from "../ui";
+import { useToast } from "../toast";
+import { Laci } from "../dialog";
 import { HasilBadge } from "../talentPool/shared";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola } from "./shared";
 
 // Panel samping detail job requirement + log progres (GET /job-requirements/{id}/progres).
-// `versi` berubah dari luar (mis. setelah form ubah disimpan) agar data dimuat ulang; `pesan` = pesan sukses dari form.
-export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, onEdit }) {
+// `versi` berubah dari luar (mis. setelah form ubah disimpan) agar data dimuat ulang.
+export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit }) {
   const [job, setJob] = useState(null);
   const [screening, setScreening] = useState(null);
   const [error, setError] = useState("");
@@ -31,48 +33,29 @@ export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, 
     };
   }, [id, internal, versi, muat]);
 
-  useEffect(() => {
-    const esc = (event) => event.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail permintaan kebutuhan">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Permintaan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {pesan && <Pesan jenis="sukses">{pesan}</Pesan>}
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !job && <Memuat>Memuat detail...</Memuat>}
-          {job && (
-            <>
-              <Ringkasan job={job} />
-              <Aksi
-                job={job}
-                user={user}
-                onEdit={() => onEdit(job)}
-                onUbahStatus={(data) => {
-                  setJob((j) => ({ ...j, ...data }));
-                  setMuat((m) => m + 1);
-                  onChanged();
-                }}
-              />
-              <RingkasanProgres ringkasan={job.ringkasan_progres} />
-              {internal && <KandidatScreening items={screening} />}
-              <LogProgres items={job.log_progres} />
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    <Laci judul="Detail Permintaan" label="Detail permintaan kebutuhan" onClose={onClose}>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !job && <Memuat>Memuat detail...</Memuat>}
+      {job && (
+        <>
+          <Ringkasan job={job} />
+          <Aksi
+            job={job}
+            user={user}
+            onEdit={() => onEdit(job)}
+            onUbahStatus={(data) => {
+              setJob((j) => ({ ...j, ...data }));
+              setMuat((m) => m + 1);
+              onChanged();
+            }}
+          />
+          <RingkasanProgres ringkasan={job.ringkasan_progres} />
+          {internal && <KandidatScreening items={screening} />}
+          <LogProgres items={job.log_progres} />
+        </>
+      )}
+    </Laci>
   );
 }
 
@@ -81,7 +64,7 @@ function Bagian({ icon, judul, aksi, children }) {
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
         <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-          <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+          <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
           {judul}
         </h3>
         {aksi}
@@ -142,7 +125,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   const [konfirmasi, setKonfirmasi] = useState(false);
   const [kirim, setKirim] = useState("");
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const kelola = bolehKelola(user);
   const bisaUbah = kelola && BISA_DIUBAH.includes(job.status_req);
@@ -150,15 +133,14 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   const bisaBatal = kelola && BISA_DIBATALKAN.includes(job.status_req);
   const cariKandidat = user.role === ROLE.TALENT_SUPPORT && TERBUKA.includes(job.status_req);
 
-  if (!bisaUbah && !bisaAjukan && !bisaBatal && !cariKandidat && !sukses) return null;
+  if (!bisaUbah && !bisaAjukan && !bisaBatal && !cariKandidat) return null;
 
   async function ubahStatus(status) {
     setKirim(status);
     setError("");
-    setSukses("");
     try {
       const res = await api(`/job-requirements/${job.id_job_req}/status`, { method: "PATCH", body: { status_req: status } });
-      setSukses(res.message);
+      toast.sukses(res.message);
       setKonfirmasi(false);
       onUbahStatus(res.data);
     } catch (err) {
@@ -172,7 +154,6 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   return (
     <div className="space-y-space-sm">
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       {konfirmasi ? (
         <div className="bg-error-container rounded-xl p-space-md space-y-space-sm">
           <p className="font-body-md text-body-md text-on-error-container">
@@ -183,7 +164,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
               Tidak
             </button>
             <button type="button" onClick={() => ubahStatus("dibatalkan")} disabled={!!kirim} className="tombol-bahaya">
-              {kirim ? "Membatalkan..." : "Ya, Batalkan"}
+              <Proses aktif={kirim}>Ya, Batalkan</Proses>
             </button>
           </div>
         </div>
@@ -191,25 +172,24 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
         <div className="flex flex-wrap gap-space-sm">
           {cariKandidat && (
             <Link to={`/rekomendasi-kandidat?job=${job.id_job_req}`} className="tombol-utama">
-              <span className="material-symbols-outlined text-[18px]">person_search</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">person_search</span>
               Cari Kandidat
             </Link>
           )}
           {bisaAjukan && (
             <button type="button" onClick={() => ubahStatus("diajukan")} disabled={!!kirim} className="tombol-utama">
-              <span className="material-symbols-outlined text-[18px]">send</span>
-              {kirim === "diajukan" ? "Mengajukan..." : "Ajukan"}
+              <Proses aktif={kirim === "diajukan"} ikon="send">Ajukan</Proses>
             </button>
           )}
           {bisaUbah && (
             <button type="button" onClick={onEdit} disabled={!!kirim} className="tombol-kedua">
-              <span className="material-symbols-outlined text-[18px]">edit</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">edit</span>
               Ubah
             </button>
           )}
           {bisaBatal && (
             <button type="button" onClick={() => setKonfirmasi(true)} disabled={!!kirim} className="tombol-bahaya-garis">
-              <span className="material-symbols-outlined text-[18px]">cancel</span>
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">cancel</span>
               Batalkan
             </button>
           )}
@@ -287,7 +267,7 @@ function LogProgres({ items }) {
                     log.status_tahapan === "ditolak" ? "bg-error-container text-on-error-container" : "bg-primary-fixed text-on-primary-fixed-variant"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">{t.ikon}</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[14px]">{t.ikon}</span>
                 </span>
                 <div className="flex flex-wrap items-center gap-x-space-sm gap-y-1">
                   <span className="font-title-sm text-title-sm text-on-surface">{t.label}</span>

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, formatTanggal, useTunda } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggal, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { JENIS_DOKUMEN, STATUS_DOKUMEN, StatusDokumenBadge } from "../components/dokumen/shared";
 import { ModalGenerate, ModalUnggah } from "../components/dokumen/ModalDokumen";
 import DokumenDrawer from "../components/dokumen/DokumenDrawer";
@@ -22,7 +23,7 @@ export default function Dokumen() {
   const [hasil, setHasil] = useState(null);
   const [jumlahTtd, setJumlahTtd] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [modal, setModal] = useState(""); // "" | "unggah" | "generate"
   const [dipilih, setDipilih] = useState(null);
 
@@ -54,7 +55,7 @@ export default function Dokumen() {
 
   function berhasil(data, pesan) {
     setModal("");
-    setSukses(pesan);
+    toast.sukses(pesan);
     setDipilih(data);
     setVersi((v) => v + 1);
   }
@@ -70,14 +71,14 @@ export default function Dokumen() {
         aksi={
           <div className="flex flex-col md:flex-row gap-space-sm">
             {user.role === ROLE.ACCOUNT_MANAGER && (
-              <button type="button" onClick={() => (setSukses(""), setModal("generate"))} className="tombol-kedua">
-                <span className="material-symbols-outlined text-[18px]">note_add</span>
+              <button type="button" onClick={() => setModal("generate")} className="tombol-kedua">
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">note_add</span>
                 Buat dari Template
               </button>
             )}
             {BOLEH_UNGGAH.includes(user.role) && (
-              <button type="button" onClick={() => (setSukses(""), setModal("unggah"))} className="tombol-utama">
-                <span className="material-symbols-outlined text-[18px]">upload_file</span>
+              <button type="button" onClick={() => setModal("unggah")} className="tombol-utama">
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">upload_file</span>
                 Unggah Dokumen
               </button>
             )}
@@ -100,14 +101,13 @@ export default function Dokumen() {
               perluTtd ? "bg-primary text-on-primary" : "bg-surface-container-lowest text-on-surface ring-1 ring-inset ring-outline-variant hover:bg-surface-container-low"
             }`}
           >
-            <span className="material-symbols-outlined text-[18px]">draw</span>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">draw</span>
             Perlu Tanda Tangan Saya
             {jumlahTtd > 0 && <span className={`px-1.5 rounded-full font-label-sm text-label-sm ${perluTtd ? "bg-on-primary text-primary" : "bg-error text-on-error"}`}>{jumlahTtd}</span>}
           </button>
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && !dipilih && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat dokumen...</Memuat>}
@@ -115,64 +115,51 @@ export default function Dokumen() {
             <KeadaanKosong ikon="description">{adaFilter ? "Tidak ada dokumen yang cocok dengan pencarian atau filter." : "Belum ada dokumen."}</KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
-            <div className="overflow-x-auto w-full">
-              <table className="tabel min-w-[820px] text-left border-collapse">
-                <thead>
-                  <tr>
-                    <th>Dokumen</th>
-                    <th>Klien / Talent</th>
-                    <th>Diunggah</th>
-                    <th>Tanda Tangan</th>
-                    <th>Status</th>
+            <TabelKartu kolom={["Dokumen", "Klien / Talent", "Diunggah", "Tanda Tangan", "Status"]} className="md:min-w-[820px]">
+              {hasil.data.map((d) => {
+                const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
+                const sudah = d.penandatangan.filter((p) => p.status_ttd === "ditandatangani").length;
+                return (
+                  <tr key={d.id_dokumen} onClick={() => setDipilih(d)} className="hover:bg-surface-container-low cursor-pointer align-top">
+                    <Sel peran="judul">
+                      <button type="button" onClick={(e) => (e.stopPropagation(), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
+                        <span aria-hidden="true" className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
+                        <span className="min-w-0">
+                          <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary break-all">{d.nama_file}</span>
+                          <span className="block font-body-sm text-body-sm text-on-surface-variant">{j.label}</span>
+                        </span>
+                      </button>
+                    </Sel>
+                    <Sel peran="setengah" label="Klien / Talent">
+                      <span className="block text-on-surface">{d.klien?.nama_perusahaan ?? "-"}</span>
+                      {d.talent && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
+                    </Sel>
+                    <Sel peran="setengah" label="Diunggah" className="whitespace-nowrap">
+                      <span className="block text-on-surface-variant">{formatTanggal(d.tanggal_unggah)}</span>
+                      {d.uploader && <span className="block font-body-sm text-body-sm text-outline">oleh {d.uploader.nama}</span>}
+                    </Sel>
+                    <Sel label="Tanda Tangan">
+                      {d.penandatangan.length ? (
+                        <span className="text-on-surface-variant">
+                          {sudah}/{d.penandatangan.length} menandatangani
+                        </span>
+                      ) : (
+                        <span className="text-outline">-</span>
+                      )}
+                      {d.aksi.perlu_tanda_tangan_saya && (
+                        <span className="mt-1 flex items-center gap-1 font-label-sm text-label-sm text-warning">
+                          <span aria-hidden="true" className="material-symbols-outlined text-[14px]">draw</span>
+                          Menunggu tanda tangan Anda
+                        </span>
+                      )}
+                    </Sel>
+                    <Sel peran="status">
+                      <StatusDokumenBadge status={d.status_dokumen} />
+                    </Sel>
                   </tr>
-                </thead>
-                <tbody>
-                  {hasil.data.map((d) => {
-                    const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
-                    const sudah = d.penandatangan.filter((p) => p.status_ttd === "ditandatangani").length;
-                    return (
-                      <tr key={d.id_dokumen} onClick={() => (setSukses(""), setDipilih(d))} className="hover:bg-surface-container-low cursor-pointer align-top">
-                        <td>
-                          <button type="button" onClick={(e) => (e.stopPropagation(), setSukses(""), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
-                            <span className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
-                            <span>
-                              <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary break-all">{d.nama_file}</span>
-                              <span className="block font-body-sm text-body-sm text-on-surface-variant">{j.label}</span>
-                            </span>
-                          </button>
-                        </td>
-                        <td>
-                          <span className="block text-on-surface">{d.klien?.nama_perusahaan ?? "-"}</span>
-                          {d.talent && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
-                        </td>
-                        <td className="whitespace-nowrap">
-                          <span className="block text-on-surface-variant">{formatTanggal(d.tanggal_unggah)}</span>
-                          {d.uploader && <span className="block font-body-sm text-body-sm text-outline">oleh {d.uploader.nama}</span>}
-                        </td>
-                        <td>
-                          {d.penandatangan.length ? (
-                            <span className="text-on-surface-variant">
-                              {sudah}/{d.penandatangan.length} menandatangani
-                            </span>
-                          ) : (
-                            <span className="text-outline">-</span>
-                          )}
-                          {d.aksi.perlu_tanda_tangan_saya && (
-                            <span className="mt-1 flex items-center gap-1 font-label-sm text-label-sm text-warning">
-                              <span className="material-symbols-outlined text-[14px]">draw</span>
-                              Menunggu tanda tangan Anda
-                            </span>
-                          )}
-                        </td>
-                        <td>
-                          <StatusDokumenBadge status={d.status_dokumen} />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                );
+              })}
+            </TabelKartu>
           )}
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="dokumen" />}
         </div>
@@ -184,8 +171,7 @@ export default function Dokumen() {
         <DokumenDrawer
           key={dipilih.id_dokumen + dipilih.status_dokumen + dipilih.penandatangan.length}
           dokumen={dipilih}
-          pesan={sukses}
-          onClose={() => (setDipilih(null), setSukses(""))}
+          onClose={() => setDipilih(null)}
           onBerhasil={berhasil}
         />
       )}

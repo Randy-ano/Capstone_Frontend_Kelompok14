@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 import { infoTipe, waktuRelatif } from "./shared";
 import { KeadaanKosong, Skeleton } from "../ui";
+import { useToast } from "../toast";
 
 const INTERVAL_MS = 60_000;
 
@@ -18,6 +19,7 @@ export default function Lonceng() {
   const [daftar, setDaftar] = useState(null);
   const [error, setError] = useState("");
   const ref = useRef(null);
+  const toast = useToast();
 
   const muatJumlah = useCallback(() => {
     api("/notifikasi/belum-dibaca/jumlah")
@@ -38,7 +40,11 @@ export default function Lonceng() {
       .then((res) => setDaftar(res.data))
       .catch((err) => setError(err.message));
     const tutup = (e) => !ref.current?.contains(e.target) && setBuka(false);
-    const esc = (e) => e.key === "Escape" && setBuka(false);
+    const esc = (e) => {
+      if (e.key !== "Escape") return;
+      setBuka(false);
+      ref.current?.querySelector("button")?.focus();
+    };
     document.addEventListener("mousedown", tutup);
     document.addEventListener("keydown", esc);
     return () => {
@@ -50,7 +56,7 @@ export default function Lonceng() {
   async function bukaNotifikasi(n) {
     setBuka(false);
     if (!n.status_baca) {
-      await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch(() => {});
+      await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch((err) => toast.gagal(err.message));
       muatJumlah();
     }
     const tujuan = infoTipe(n.tipe_notifikasi, user.role).path;
@@ -58,9 +64,14 @@ export default function Lonceng() {
   }
 
   async function bacaSemua() {
-    await api("/notifikasi/baca-semua", { method: "PATCH" }).catch(() => {});
-    setDaftar((l) => l?.map((n) => ({ ...n, status_baca: true })));
-    setJumlah(0);
+    try {
+      const res = await api("/notifikasi/baca-semua", { method: "PATCH" });
+      setDaftar((l) => l?.map((n) => ({ ...n, status_baca: true })));
+      setJumlah(0);
+      toast.sukses(res.message);
+    } catch (err) {
+      toast.gagal(err.message);
+    }
   }
 
   return (
@@ -73,7 +84,7 @@ export default function Lonceng() {
         aria-label={jumlah ? `Notifikasi, ${jumlah} belum dibaca` : "Notifikasi"}
         className="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
       >
-        <span className="material-symbols-outlined text-[22px]">notifications</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-[22px]">notifications</span>
         {jumlah > 0 && (
           <span className="absolute top-1 right-1 min-w-[1rem] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center font-bold">
             {jumlah > 99 ? "99+" : jumlah}
@@ -82,7 +93,7 @@ export default function Lonceng() {
       </button>
 
       {buka && (
-        <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto sm:mt-2 sm:w-96 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high z-50 overflow-hidden">
+        <div className="animasi-menu fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto sm:mt-2 sm:w-96 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high z-50 overflow-hidden">
           <div className="flex items-center justify-between px-space-md py-space-sm border-b border-surface-container-high">
             <span className="font-title-sm text-title-sm text-on-surface">Notifikasi</span>
             {jumlah > 0 && (
@@ -111,7 +122,7 @@ export default function Lonceng() {
                   className={`w-full text-left flex gap-space-sm px-space-md py-space-sm hover:bg-surface-container-low ${n.status_baca ? "" : "bg-primary-fixed/30"}`}
                 >
                   <span className="w-8 h-8 shrink-0 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[18px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
+                    <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{infoTipe(n.tipe_notifikasi, user.role).ikon}</span>
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block font-body-sm text-body-sm ${n.status_baca ? "text-on-surface-variant" : "text-on-surface font-medium"}`}>{n.pesan}</span>
@@ -120,7 +131,7 @@ export default function Lonceng() {
                       {n.kanal === "email" && " · email"}
                     </span>
                   </span>
-                  {!n.status_baca && <span className="w-2 h-2 mt-1.5 shrink-0 rounded-full bg-primary" aria-label="Belum dibaca" />}
+                  {!n.status_baca && <span className="w-2 h-2 mt-1.5 shrink-0 rounded-full bg-primary" role="img" aria-label="Belum dibaca" />}
                 </button>
               </li>
             ))}

@@ -24,8 +24,8 @@
   /* Tombol: utama = aksi utama halaman/form, kedua = aksi pendamping, bahaya = hapus/tolak/batalkan,
      teks = aksi ringan (reset filter, lihat detail), ikon = tombol berisi ikon saja. Tinggi minimal 40px agar mudah disentuh. */
   .tombol {
-    @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition-colors
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition duration-150 enabled:active:scale-[0.98]
+      disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .tombol-utama {
     @apply tombol bg-primary text-on-primary shadow-sm hover:bg-primary-container;
@@ -43,19 +43,23 @@
     @apply tombol px-3 text-primary hover:bg-primary-fixed;
   }
   .tombol-ikon {
-    @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50;
+    @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition duration-150 enabled:active:scale-95 hover:bg-surface-container hover:text-on-surface
+      disabled:opacity-50;
   }
 
   /* Kartu/panel putih dengan sudut, bayangan, dan garis tepi yang sama. */
   .kartu {
     @apply bg-surface-container-lowest rounded-xl shadow-sm ring-1 ring-surface-container-high;
   }
+  /* Kartu berisi satu item daftar: bayangan sedikit naik saat disorot. */
+  .kartu-item {
+    @apply kartu transition-shadow duration-200 hover:shadow-md;
+  }
 
   /* Isian form. Label di atas, error di bawah (lihat Field di operasional/shared.jsx). */
   .input {
     @apply w-full min-h-[40px] px-3 rounded-lg bg-surface-container-lowest ring-1 ring-inset ring-outline-variant font-body-md text-body-md text-on-surface
-      placeholder:text-outline transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/60 disabled:bg-surface-container-low disabled:text-on-surface-variant;
+      placeholder:text-outline transition-shadow duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 disabled:bg-surface-container-low disabled:text-on-surface-variant;
   }
   .input-error {
     @apply ring-2 ring-error focus:ring-error;
@@ -70,7 +74,10 @@
     @apply py-3 px-4 bg-surface-container-low text-on-surface-variant font-label-md text-label-md font-semibold uppercase tracking-wide whitespace-nowrap border-b border-surface-container-high;
   }
   .tabel :where(tbody tr) {
-    @apply border-b border-surface-container transition-colors;
+    @apply border-b border-surface-container transition-colors duration-150;
+  }
+  .tabel :where(tbody tr:not([data-kosong], [data-memuat])):hover {
+    @apply bg-surface-container-low;
   }
   .tabel :where(tbody tr:last-child) {
     @apply border-b-0;
@@ -84,6 +91,159 @@
   .tabel :where(.aksi) {
     @apply text-right whitespace-nowrap;
   }
+}
+
+/* Mode kartu TabelKartu (src/components/ui.jsx) untuk layar < 768px. */
+@layer components {
+  @media (max-width: 767.98px) {
+    .tabel-kartu,
+    .tabel-kartu > tbody {
+      display: block;
+      width: 100%;
+    }
+    .tabel-kartu > thead {
+      @apply sr-only;
+    }
+    .tabel-kartu > tbody {
+      @apply flex flex-col gap-space-sm p-space-sm bg-surface-container-low;
+    }
+    /* :where agar warna hover & sorot baris (utility) tetap menang. */
+    :where(.tabel-kartu > tbody > tr) {
+      @apply bg-surface-container-lowest;
+    }
+    .tabel-kartu > tbody > tr {
+      @apply flex flex-wrap items-start gap-x-space-md gap-y-3 p-space-md rounded-xl border-0 shadow-sm ring-1 ring-surface-container-high;
+    }
+    .tabel-kartu > tbody > tr > td {
+      @apply block min-w-0 p-0 text-left whitespace-normal break-words;
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+    .tabel-kartu > tbody > tr > td:empty {
+      display: none;
+    }
+    .tabel-kartu > tbody > tr > td[data-label]::before {
+      @apply block mb-0.5 font-label-sm text-label-sm text-outline uppercase tracking-wider;
+      content: attr(data-label);
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="judul"] {
+      flex: 1 1 0;
+      order: -3;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="status"] {
+      @apply ml-auto;
+      flex: 0 0 auto;
+      order: -2;
+    }
+    /* Pemisah tak terlihat: judul & badge selalu punya baris sendiri, sel setengah tidak ikut naik. */
+    .tabel-kartu > tbody > tr::after {
+      content: "";
+      flex: 0 0 100%;
+      order: -1;
+      margin-top: -0.75rem;
+    }
+    .tabel-kartu > tbody > tr[data-kosong]::after,
+    .tabel-kartu > tbody > tr[data-memuat]::after {
+      content: none;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="setengah"] {
+      flex: 0 0 calc(50% - 0.5rem);
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] {
+      @apply pt-3 border-t border-surface-container;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] > div {
+      @apply flex-wrap justify-start;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] button {
+      flex: 1 1 auto;
+    }
+    /* Baris "belum ada data" tanpa bingkai kartu. */
+    .tabel-kartu > tbody > tr[data-kosong] {
+      @apply p-0 bg-transparent shadow-none ring-0;
+    }
+  }
+}
+
+/* Animasi masuk: latar & menu memudar, drawer bergeser dari kanan, modal dari bawah (HP) atau memudar sambil membesar sedikit (desktop). */
+@keyframes pudar-masuk {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes geser-kanan {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes geser-bawah {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes naik-masuk {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+@keyframes muncul-masuk {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+.animasi-latar {
+  animation: pudar-masuk 200ms ease-out;
+}
+.animasi-laci {
+  animation: geser-kanan 200ms ease-out;
+}
+.animasi-modal {
+  animation: geser-bawah 200ms ease-out;
+}
+@media (min-width: 640px) {
+  .animasi-modal {
+    animation: muncul-masuk 150ms ease-out;
+  }
+}
+.animasi-toast {
+  animation: naik-masuk 200ms ease-out;
+}
+.animasi-menu {
+  animation: naik-masuk 150ms ease-out;
+}
+
+/* Pengguna yang meminta gerakan minimal: animasi & transisi dimatikan. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Garis fokus keyboard yang sama di semua elemen interaktif. !important agar menang atas focus:outline-none.
+   Panel dialog (tabindex -1) menerima fokus lewat skrip dan tidak perlu garis. Input teks sudah punya tepi, garisnya menempel. */
+:focus-visible:not([tabindex="-1"]) {
+  outline: 2px solid theme("colors.primary") !important;
+  outline-offset: 2px !important;
+}
+input:focus-visible:not([tabindex="-1"]),
+select:focus-visible:not([tabindex="-1"]),
+textarea:focus-visible:not([tabindex="-1"]) {
+  outline-offset: 0 !important;
+}
+[tabindex="-1"]:focus {
+  outline: none;
+}
+/* Pilihan berupa label dengan input tersembunyi (status ketersediaan, hari shift). */
+label:has(> input.sr-only:focus-visible) {
+  outline: 2px solid theme("colors.primary");
+  outline-offset: 2px;
 }
 
 /* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */

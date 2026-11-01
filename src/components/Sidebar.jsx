@@ -1,8 +1,10 @@
+import { useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser, initials } from "../auth/roles";
 import { navGroupsFor } from "../data/navigation";
 import logo from "../assets/logo-intellisys.png";
+import { useDialog } from "./dialog";
 
 const LINK_BASE = "relative flex items-center gap-space-sm min-h-[40px] px-space-sm py-2 rounded-lg font-body-md text-body-md transition-colors";
 // Menu aktif: latar marun muda + teks primer tebal + garis penanda di kiri.
@@ -14,25 +16,31 @@ export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
   const navGroups = navGroupsFor(user.role);
   const { nama } = displayUser(user);
+  // Di layar < lg sidebar berperilaku seperti drawer: Esc menutup, fokus kembali ke tombol menu.
+  const panel = useRef(null);
+  useDialog(panel, { aktif: open, onClose });
 
   return (
     <>
-      {open && <div className="fixed inset-0 z-50 bg-inverse-surface/40 lg:hidden" onClick={onClose} />}
+      {open && <div className="animasi-latar fixed inset-0 z-50 bg-inverse-surface/40 lg:hidden" onClick={onClose} />}
       <aside
-        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-surface-container-lowest border-r border-surface-container-high z-50 flex flex-col transition-transform duration-200 lg:translate-x-0 ${
-          open ? "translate-x-0 shadow-lg" : "-translate-x-full"
+        ref={panel}
+        tabIndex={-1}
+        // invisible saat tertutup agar tautan di luar layar tidak ikut terkena Tab.
+        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-surface-container-lowest border-r border-surface-container-high z-50 flex flex-col transition-[transform,visibility] duration-200 lg:translate-x-0 lg:visible ${
+          open ? "translate-x-0 shadow-lg" : "-translate-x-full invisible"
         }`}
       >
         <div className="px-space-lg pt-space-lg pb-space-md flex items-start justify-between gap-space-sm">
           <div className="min-w-0 space-y-2">
-            <img alt="Intellisys" className="h-9 w-auto object-contain" src={logo} />
+            <img alt="Logo Intellisys" className="h-9 w-auto object-contain" src={logo} />
             <div className="flex flex-col min-w-0">
               <span className="font-title-sm text-title-sm text-on-surface tracking-tight truncate">Intellisys Talent Hub</span>
               <span className="font-label-sm text-label-sm text-on-surface-variant truncate">PT Intellisys IT Outsourcing</span>
             </div>
           </div>
-          <button type="button" onClick={onClose} title="Tutup menu" className="lg:hidden -mr-2 w-10 h-10 shrink-0 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container">
-            <span className="material-symbols-outlined text-[22px]">close</span>
+          <button type="button" onClick={onClose} title="Tutup menu" aria-label="Tutup menu" className="lg:hidden -mr-2 w-10 h-10 shrink-0 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container">
+            <span aria-hidden="true" className="material-symbols-outlined text-[22px]">close</span>
           </button>
         </div>
 
@@ -43,7 +51,7 @@ export default function Sidebar({ open, onClose }) {
               <div className="space-y-0.5">
                 {group.items.map((item) => (
                   <NavLink key={item.path} to={item.path} className={({ isActive }) => `${LINK_BASE} ${isActive ? LINK_ACTIVE : LINK_IDLE}`}>
-                    <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                    <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{item.icon}</span>
                     <span>{item.label}</span>
                   </NavLink>
                 ))}
