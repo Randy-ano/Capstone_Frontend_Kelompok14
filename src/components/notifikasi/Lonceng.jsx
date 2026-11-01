@@ -4,6 +4,7 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../auth/AuthContext";
 import { infoTipe, waktuRelatif } from "./shared";
 import { KeadaanKosong, Skeleton } from "../ui";
+import { useToast } from "../toast";
 
 const INTERVAL_MS = 60_000;
 
@@ -18,6 +19,7 @@ export default function Lonceng() {
   const [daftar, setDaftar] = useState(null);
   const [error, setError] = useState("");
   const ref = useRef(null);
+  const toast = useToast();
 
   const muatJumlah = useCallback(() => {
     api("/notifikasi/belum-dibaca/jumlah")
@@ -50,7 +52,7 @@ export default function Lonceng() {
   async function bukaNotifikasi(n) {
     setBuka(false);
     if (!n.status_baca) {
-      await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch(() => {});
+      await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch((err) => toast.gagal(err.message));
       muatJumlah();
     }
     const tujuan = infoTipe(n.tipe_notifikasi, user.role).path;
@@ -58,9 +60,14 @@ export default function Lonceng() {
   }
 
   async function bacaSemua() {
-    await api("/notifikasi/baca-semua", { method: "PATCH" }).catch(() => {});
-    setDaftar((l) => l?.map((n) => ({ ...n, status_baca: true })));
-    setJumlah(0);
+    try {
+      const res = await api("/notifikasi/baca-semua", { method: "PATCH" });
+      setDaftar((l) => l?.map((n) => ({ ...n, status_baca: true })));
+      setJumlah(0);
+      toast.sukses(res.message);
+    } catch (err) {
+      toast.gagal(err.message);
+    }
   }
 
   return (

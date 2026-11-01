@@ -75,18 +75,11 @@ export function TagChip({ children }) {
   );
 }
 
-// Kotak pesan: error backend ditampilkan apa adanya di dalam kotak ini; jenis lain untuk pesan sukses.
-export function Pesan({ jenis = "error", children }) {
-  const gaya =
-    jenis === "error"
-      ? "bg-error-container text-on-error-container ring-error/25"
-      : "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25";
+// Kotak error: pesan backend ditampilkan apa adanya di dalam kotak ini. Pesan sukses memakai toast (components/toast.jsx).
+export function Pesan({ children }) {
   return (
-    <div
-      role={jenis === "error" ? "alert" : "status"}
-      className={`flex items-start gap-space-sm px-space-md py-3 rounded-xl ring-1 ring-inset font-body-md text-body-md ${gaya}`}
-    >
-      <span className="material-symbols-outlined text-[20px] shrink-0">{jenis === "error" ? "error" : "check_circle"}</span>
+    <div role="alert" className="flex items-start gap-space-sm px-space-md py-3 rounded-xl ring-1 ring-inset font-body-md text-body-md bg-error-container text-on-error-container ring-error/25">
+      <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
       <span className="min-w-0 break-words pt-px">{children}</span>
     </div>
   );

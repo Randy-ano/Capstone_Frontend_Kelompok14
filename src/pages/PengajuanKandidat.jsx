@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -26,7 +27,7 @@ export default function PengajuanKandidat() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [dipilih, setDipilih] = useState(null);
   const [ajukan, setAjukan] = useState(false);
 
@@ -67,10 +68,7 @@ export default function PengajuanKandidat() {
           user.role === ROLE.ACCOUNT_MANAGER && (
             <button
               type="button"
-              onClick={() => {
-                setSukses("");
-                setAjukan(true);
-              }}
+              onClick={() => setAjukan(true)}
               className="tombol-utama w-full md:w-auto"
             >
               <span className="material-symbols-outlined text-[18px]">send</span>
@@ -113,7 +111,6 @@ export default function PengajuanKandidat() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           <TabelKartu kolom={["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]} className="md:min-w-[860px]" redup={memuat && hasil}>
@@ -171,7 +168,7 @@ export default function PengajuanKandidat() {
           onClose={() => setAjukan(false)}
           onBerhasil={(pesan, id) => {
             setAjukan(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
             setDipilih(id);
           }}

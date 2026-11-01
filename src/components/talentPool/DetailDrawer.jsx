@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
 import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag } from "../ui";
+import { useToast } from "../toast";
 import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
 
 // Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
@@ -200,7 +201,7 @@ function FormUbah({ detail, onUpdated }) {
   const [tag, setTag] = useState(detail.tag_keahlian ?? "");
   const [simpan, setSimpan] = useState(false);
   const [error, setError] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const tagBaru = tag.trim() || null;
   const berubah = { status: status !== detail.status_ketersediaan, tag: tagBaru !== (detail.tag_keahlian ?? null) };
@@ -213,10 +214,9 @@ function FormUbah({ detail, onUpdated }) {
 
     setSimpan(true);
     setError(null);
-    setSukses("");
     try {
       const res = await api(`/talent-pool/${detail.id_talent_pool}`, { method: "PATCH", body });
-      setSukses(res.message);
+      toast.sukses(res.message);
       onUpdated(res.data);
     } catch (err) {
       setError(err);
@@ -231,7 +231,6 @@ function FormUbah({ detail, onUpdated }) {
     <Bagian icon="edit_note" judul="Kelola Talent Pool">
       <form onSubmit={handleSubmit} className="space-y-space-sm" noValidate>
         {error && <Pesan>{error.message}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <fieldset>
           <legend className="font-label-md text-label-md text-on-surface mb-1">Status ketersediaan</legend>

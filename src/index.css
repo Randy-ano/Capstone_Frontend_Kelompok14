@@ -158,6 +158,17 @@
   }
 }
 
+/* Toast muncul dari bawah. */
+@keyframes toast-masuk {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+.animasi-toast {
+  animation: toast-masuk 200ms ease-out;
+}
+
 /* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */
 * {
   scrollbar-width: thin;

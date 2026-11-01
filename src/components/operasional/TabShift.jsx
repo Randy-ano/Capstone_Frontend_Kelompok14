@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
 import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal } from "../ui";
+import { useToast, useToastGagal } from "../toast";
 import {
   Field,
   JENIS_SHIFT,
@@ -20,7 +21,9 @@ const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "
 // Tab Shift (FR-15, R22): HR Client & Manager mengatur (input massal), talent melihat shift miliknya.
 export default function TabShift({ user }) {
   const kelola = [ROLE.HR_CLIENT, ROLE.MANAGER].includes(user.role);
-  const { daftar: placement } = usePlacement(kelola ? "aktif" : "");
+  const { daftar: placement, error: errorPlacement } = usePlacement(kelola ? "aktif" : "");
+  useToastGagal(errorPlacement);
+  const toast = useToast();
   const [bulan, setBulan] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -30,7 +33,6 @@ export default function TabShift({ user }) {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
   const [atur, setAtur] = useState(false);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function TabShift({ user }) {
     setPage(1);
   };
   const berhasil = (pesan) => {
-    setSukses(pesan);
+    toast.sukses(pesan);
     setError("");
     setVersi((v) => v + 1);
   };
@@ -90,7 +92,7 @@ export default function TabShift({ user }) {
           />
         )}
         {kelola && (
-          <button type="button" onClick={() => (setSukses(""), setAtur(true))} className={`${tombolHalaman} sm:ml-auto`}>
+          <button type="button" onClick={() => setAtur(true)} className={`${tombolHalaman} sm:ml-auto`}>
             <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
             Atur Shift
           </button>
@@ -98,7 +100,6 @@ export default function TabShift({ user }) {
       </div>
 
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
       <div className="kartu overflow-hidden">
         {!hasil && !error && <Memuat>Memuat shift...</Memuat>}
@@ -108,7 +109,7 @@ export default function TabShift({ user }) {
         {hasil?.data.length > 0 && (
           <TabelKartu kolom={["Tanggal", user.role !== ROLE.TALENT && "Talent", "Shift", "Keterangan", "Diatur oleh", kelola && { label: "Aksi", className: "aksi" }]} className="md:min-w-[640px]">
             {hasil.data.map((s) => (
-              <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
+              <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={setError} />
             ))}
           </TabelKartu>
         )}

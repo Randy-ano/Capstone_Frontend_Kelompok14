@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda } from "../components/ui";
+import { useToast, useToastGagal } from "../components/toast";
 import { PlacementBadge } from "../components/rekrutmen/shared";
 import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
@@ -10,7 +11,9 @@ import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement }
 export default function MonitoringKinerja() {
   const { user } = useAuth();
   const manager = user.role === ROLE.MANAGER;
-  const { daftar: placement } = usePlacement("");
+  const { daftar: placement, error: errorPlacement } = usePlacement("");
+  useToastGagal(errorPlacement);
+  const toast = useToast();
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
   const [idPlacement, setIdPlacement] = useState("");
@@ -18,7 +21,6 @@ export default function MonitoringKinerja() {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
   const [catat, setCatat] = useState(false);
 
   useEffect(() => setPage(1), [search]);
@@ -49,7 +51,7 @@ export default function MonitoringKinerja() {
         judul="Monitoring Kinerja"
         aksi={
           manager && (
-            <button type="button" onClick={() => (setSukses(""), setCatat(true))} className={tombolHalaman}>
+            <button type="button" onClick={() => setCatat(true)} className={tombolHalaman}>
               <span className="material-symbols-outlined text-[18px]">add_notes</span>
               Catat Monitoring
             </button>
@@ -78,7 +80,6 @@ export default function MonitoringKinerja() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
         {!hasil && !error && <Memuat>Memuat monitoring...</Memuat>}
         {hasil?.data.length === 0 && (
           <div className="kartu">
@@ -131,7 +132,7 @@ export default function MonitoringKinerja() {
           onClose={() => setCatat(false)}
           onBerhasil={(pesan) => {
             setCatat(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             setVersi((v) => v + 1);
           }}
         />

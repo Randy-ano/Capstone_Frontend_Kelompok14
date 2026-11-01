@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggalWaktu, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, bolehKelola } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -29,7 +30,7 @@ export default function PermintaanKebutuhan() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const [opsiKlien, setOpsiKlien] = useState([]);
   const [opsiKompetensi, setOpsiKompetensi] = useState([]);
@@ -94,16 +95,13 @@ export default function PermintaanKebutuhan() {
   }
 
   const muatUlang = useCallback(() => setVersi((v) => v + 1), []);
-  const tutupDetail = useCallback(() => {
-    setDipilih(null);
-    setSukses("");
-  }, []);
+  const tutupDetail = useCallback(() => setDipilih(null), []);
   const tutupForm = useCallback(() => setForm(null), []);
 
   function tersimpan(job, pesan) {
     setForm(null);
     setOpsiKompetensi((opsi) => tambahOpsiKompetensi(opsi, job.kompetensi));
-    setSukses(pesan);
+    toast.sukses(pesan);
     setDipilih(job.id_job_req);
     muatUlang();
   }
@@ -188,7 +186,7 @@ export default function PermintaanKebutuhan() {
         </div>
       </div>
 
-      {dipilih && <JobDrawer id={dipilih} user={user} versi={versi} pesan={sukses} onClose={tutupDetail} onChanged={muatUlang} onEdit={(job) => setForm({ job })} />}
+      {dipilih && <JobDrawer id={dipilih} user={user} versi={versi} onClose={tutupDetail} onChanged={muatUlang} onEdit={(job) => setForm({ job })} />}
       {form && <FormJob job={form.job} user={user} opsiKompetensi={opsiKompetensi} onClose={tutupForm} onSaved={tersimpan} />}
     </div>
   );

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag } from "../components/ui";
+import { useToast } from "../components/toast";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
@@ -14,7 +15,7 @@ export default function RekomendasiKandidat() {
   const [opsiJob, setOpsiJob] = useState(null);
   const [errorJob, setErrorJob] = useState("");
   const [versi, setVersi] = useState(0);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     api("/job-requirements?per_page=100")
@@ -26,7 +27,6 @@ export default function RekomendasiKandidat() {
   const muatUlang = useCallback(() => setVersi((v) => v + 1), []);
 
   function pilihJob(id) {
-    setSukses("");
     setParams(id ? { job: id } : {});
   }
 
@@ -65,20 +65,19 @@ export default function RekomendasiKandidat() {
         {job && (
           <>
             <RingkasanJob job={job} />
-            {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
               <div className="xl:col-span-7">
                 <DaftarKandidat
                   key={`${job.id_job_req}-${versi}`}
                   job={job}
                   onScreening={(pesan) => {
-                    setSukses(pesan);
+                    toast.sukses(pesan);
                     muatUlang();
                   }}
                 />
               </div>
               <div className="xl:col-span-5">
-                <SudahScreening key={`${job.id_job_req}-${versi}`} job={job} onUbah={setSukses} />
+                <SudahScreening key={`${job.id_job_req}-${versi}`} job={job} onUbah={toast.sukses} />
               </div>
             </div>
           </>

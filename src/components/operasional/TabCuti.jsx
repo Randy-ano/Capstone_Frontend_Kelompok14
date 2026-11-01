@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
 import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { useToast } from "../toast";
 import { hariIni } from "../rekrutmen/shared";
 import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombolHalaman, tombolUtama, usePlacement } from "./shared";
 
@@ -13,7 +14,7 @@ export default function TabCuti({ user }) {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [ajukan, setAjukan] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,8 @@ export default function TabCuti({ user }) {
   }, [status, page, versi]);
 
   const berhasil = (pesan) => {
-    setSukses(pesan);
+    setError("");
+    toast.sukses(pesan);
     setVersi((v) => v + 1);
   };
 
@@ -53,7 +55,7 @@ export default function TabCuti({ user }) {
           opsi={Object.entries(STATUS_CUTI).map(([v, s]) => [v, s.label])}
         />
         {talent && (
-          <button type="button" onClick={() => (setSukses(""), setAjukan(true))} className={tombolHalaman}>
+          <button type="button" onClick={() => setAjukan(true)} className={tombolHalaman}>
             <span className="material-symbols-outlined text-[18px]">event_upcoming</span>
             Ajukan Cuti
           </button>
@@ -61,7 +63,6 @@ export default function TabCuti({ user }) {
       </div>
 
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       {!hasil && !error && <Memuat>Memuat pengajuan cuti...</Memuat>}
       {hasil?.data.length === 0 && (
         <div className="kartu">
@@ -73,7 +74,7 @@ export default function TabCuti({ user }) {
 
       <ul className="flex flex-col gap-space-sm">
         {hasil?.data.map((c) => (
-          <ItemCuti key={c.id_cuti} cuti={c} user={user} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
+          <ItemCuti key={c.id_cuti} cuti={c} user={user} onBerhasil={berhasil} onError={setError} />
         ))}
       </ul>
       {hasil && hasil.meta.total > 0 && (

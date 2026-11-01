@@ -5,8 +5,7 @@ import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDo
 
 
 // Panel samping detail dokumen: unduh, daftar penandatangan, atur penandatangan (R27), tanda tangan (R28).
-// `pesan` = pesan sukses aksi terakhir (unggah, buat, atur penandatangan, tanda tangan).
-export default function DokumenDrawer({ dokumen: d, pesan, onClose, onBerhasil }) {
+export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
   const [unduh, setUnduh] = useState(false);
   const [error, setError] = useState("");
   const jenis = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
@@ -41,7 +40,6 @@ export default function DokumenDrawer({ dokumen: d, pesan, onClose, onBerhasil }
         </div>
 
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {pesan && <Pesan jenis="sukses">{pesan}</Pesan>}
           {error && <Pesan>{error}</Pesan>}
           <section className="kartu p-space-md space-y-space-sm">
             <div className="flex items-start gap-space-sm">

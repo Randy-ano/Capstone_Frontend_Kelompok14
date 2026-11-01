@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
 import { Pesan, errorField } from "../ui";
+import { useToast, useToastGagal } from "../toast";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
 
@@ -20,19 +21,24 @@ function useForm(awal) {
 
 function useKlien(aktif) {
   const [daftar, setDaftar] = useState(null);
+  const toast = useToast();
   useEffect(() => {
     if (!aktif) return;
     api("/klien?per_page=100")
       .then((res) => setDaftar(res.data))
-      .catch(() => setDaftar([]));
-  }, [aktif]);
+      .catch((err) => {
+        setDaftar([]);
+        toast.gagal(err.message);
+      });
+  }, [aktif, toast]);
   return daftar;
 }
 
 // R25: unggah file (pdf/doc/docx/png/jpg, maks 5 MB).
 export function ModalUnggah({ user, onClose, onBerhasil }) {
   const internal = INTERNAL.includes(user.role);
-  const { daftar: placement } = usePlacement("");
+  const { daftar: placement, error: errorPlacement } = usePlacement("");
+  useToastGagal(errorPlacement);
   const klien = useKlien(internal);
   const { form, error, setError, set, e } = useForm({ jenis_dokumen: "", id_placement: "", id_klien: "" });
   const [file, setFile] = useState(null);

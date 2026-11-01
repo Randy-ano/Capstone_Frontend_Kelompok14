@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggal, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { JENIS_DOKUMEN, STATUS_DOKUMEN, StatusDokumenBadge } from "../components/dokumen/shared";
 import { ModalGenerate, ModalUnggah } from "../components/dokumen/ModalDokumen";
 import DokumenDrawer from "../components/dokumen/DokumenDrawer";
@@ -22,7 +23,7 @@ export default function Dokumen() {
   const [hasil, setHasil] = useState(null);
   const [jumlahTtd, setJumlahTtd] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [modal, setModal] = useState(""); // "" | "unggah" | "generate"
   const [dipilih, setDipilih] = useState(null);
 
@@ -54,7 +55,7 @@ export default function Dokumen() {
 
   function berhasil(data, pesan) {
     setModal("");
-    setSukses(pesan);
+    toast.sukses(pesan);
     setDipilih(data);
     setVersi((v) => v + 1);
   }
@@ -70,13 +71,13 @@ export default function Dokumen() {
         aksi={
           <div className="flex flex-col md:flex-row gap-space-sm">
             {user.role === ROLE.ACCOUNT_MANAGER && (
-              <button type="button" onClick={() => (setSukses(""), setModal("generate"))} className="tombol-kedua">
+              <button type="button" onClick={() => setModal("generate")} className="tombol-kedua">
                 <span className="material-symbols-outlined text-[18px]">note_add</span>
                 Buat dari Template
               </button>
             )}
             {BOLEH_UNGGAH.includes(user.role) && (
-              <button type="button" onClick={() => (setSukses(""), setModal("unggah"))} className="tombol-utama">
+              <button type="button" onClick={() => setModal("unggah")} className="tombol-utama">
                 <span className="material-symbols-outlined text-[18px]">upload_file</span>
                 Unggah Dokumen
               </button>
@@ -107,7 +108,6 @@ export default function Dokumen() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && !dipilih && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat dokumen...</Memuat>}
@@ -120,9 +120,9 @@ export default function Dokumen() {
                 const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
                 const sudah = d.penandatangan.filter((p) => p.status_ttd === "ditandatangani").length;
                 return (
-                  <tr key={d.id_dokumen} onClick={() => (setSukses(""), setDipilih(d))} className="hover:bg-surface-container-low cursor-pointer align-top">
+                  <tr key={d.id_dokumen} onClick={() => setDipilih(d)} className="hover:bg-surface-container-low cursor-pointer align-top">
                     <Sel peran="judul">
-                      <button type="button" onClick={(e) => (e.stopPropagation(), setSukses(""), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
+                      <button type="button" onClick={(e) => (e.stopPropagation(), setDipilih(d))} className="text-left flex items-start gap-space-sm group">
                         <span className="material-symbols-outlined text-[20px] text-primary">{j.ikon}</span>
                         <span className="min-w-0">
                           <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary break-all">{d.nama_file}</span>
@@ -171,8 +171,7 @@ export default function Dokumen() {
         <DokumenDrawer
           key={dipilih.id_dokumen + dipilih.status_dokumen + dipilih.penandatangan.length}
           dokumen={dipilih}
-          pesan={sukses}
-          onClose={() => (setDipilih(null), setSukses(""))}
+          onClose={() => setDipilih(null)}
           onBerhasil={berhasil}
         />
       )}

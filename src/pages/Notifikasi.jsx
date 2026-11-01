@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { KeadaanKosong, KepalaHalaman, Memuat, Pagination, Pesan, formatTanggalWaktu } from "../components/ui";
+import { useToast } from "../components/toast";
 import { infoTipe, waktuRelatif } from "../components/notifikasi/shared";
 
 const FILTER = [
@@ -21,7 +22,7 @@ export default function Notifikasi() {
   const [hasil, setHasil] = useState(null);
   const [jumlah, setJumlah] = useState(0);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -44,7 +45,7 @@ export default function Notifikasi() {
   }, [status, page, versi]);
 
   async function buka(n) {
-    if (!n.status_baca) await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch(() => {});
+    if (!n.status_baca) await api(`/notifikasi/${n.id_notifikasi}/baca`, { method: "PATCH" }).catch((err) => toast.gagal(err.message));
     const tujuan = infoTipe(n.tipe_notifikasi, user.role).path;
     if (tujuan) navigate(tujuan);
     else setVersi((v) => v + 1);
@@ -53,7 +54,7 @@ export default function Notifikasi() {
   async function bacaSemua() {
     try {
       const res = await api("/notifikasi/baca-semua", { method: "PATCH" });
-      setSukses(res.message);
+      toast.sukses(res.message);
       setVersi((v) => v + 1);
     } catch (err) {
       setError(err.message);
@@ -95,7 +96,6 @@ export default function Notifikasi() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat notifikasi...</Memuat>}

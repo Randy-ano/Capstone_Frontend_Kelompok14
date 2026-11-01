@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, useTunda } from "../components/ui";
 import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
+import { useToast } from "../components/toast";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 
 const PER_PAGE = 10;
@@ -188,7 +189,7 @@ export default function Penempatan() {
 function PlacementDrawer({ id, user, onClose, onChanged }) {
   const [pl, setPl] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -226,7 +227,6 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
           {error && <Pesan>{error}</Pesan>}
           {!error && !pl && <Memuat>Memuat detail...</Memuat>}
           {pl && (
@@ -271,7 +271,7 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
                   pl={pl}
                   onBerhasil={(data, pesan) => {
                     setPl(data);
-                    setSukses(pesan);
+                    toast.sukses(pesan);
                     onChanged();
                   }}
                 />

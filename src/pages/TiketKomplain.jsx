@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, Sel, TabelKartu, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { Field, LaporanBadge, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
 const KARTU = [
@@ -23,7 +24,7 @@ export default function TiketKomplain() {
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [buat, setBuat] = useState(false);
   const [dipilih, setDipilih] = useState(null);
 
@@ -58,7 +59,7 @@ export default function TiketKomplain() {
         judul="Tiket Komplain Klien"
         aksi={
           hr && (
-            <button type="button" onClick={() => (setSukses(""), setBuat(true))} className={tombolHalaman}>
+            <button type="button" onClick={() => setBuat(true)} className={tombolHalaman}>
               <span className="material-symbols-outlined text-[18px]">add_comment</span>
               Buat Laporan
             </button>
@@ -93,7 +94,6 @@ export default function TiketKomplain() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           {!hasil && !error && <Memuat>Memuat tiket...</Memuat>}
@@ -144,7 +144,7 @@ export default function TiketKomplain() {
           onClose={() => setBuat(false)}
           onBerhasil={(pesan) => {
             setBuat(false);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
           }}
         />
@@ -156,7 +156,7 @@ export default function TiketKomplain() {
           onClose={() => setDipilih(null)}
           onBerhasil={(data, pesan) => {
             setDipilih(data);
-            setSukses(pesan);
+            toast.sukses(pesan);
             muatUlang();
           }}
         />

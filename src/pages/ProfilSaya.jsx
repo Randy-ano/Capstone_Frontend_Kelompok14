@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField } from "../components/ui";
+import { useToast } from "../components/toast";
 import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 
@@ -104,7 +105,7 @@ export default function ProfilSaya() {
   const [opsiKompetensi, setOpsiKompetensi] = useState([]);
   const [errorMuat, setErrorMuat] = useState("");
   const [error, setError] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [simpan, setSimpan] = useState(false);
 
   useEffect(() => {
@@ -149,7 +150,6 @@ export default function ProfilSaya() {
   async function handleSimpan() {
     setSimpan(true);
     setError(null);
-    setSukses("");
     try {
       let res = await api("/talent/profil", { method: "PUT", body: keBody(form) });
       const pesan = [res.message];
@@ -159,7 +159,7 @@ export default function ProfilSaya() {
       }
       setProfil(res.data);
       setForm(keForm(res.data));
-      setSukses(pesan.join(" "));
+      toast.sukses(pesan.join(" "));
       muatUlangUser().catch(() => {});
     } catch (err) {
       setError(err);
@@ -184,7 +184,6 @@ export default function ProfilSaya() {
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <StatusProfil profil={profil} />
         {error && <Pesan>{error.message}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <Bagian ikon="person" judul="Data Pribadi">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md">
@@ -484,16 +483,15 @@ function StatusProfil({ profil }) {
 function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
   const [proses, setProses] = useState("");
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const lengkap = profil.status_kelengkapan === "lengkap";
 
   async function generate() {
     setProses("generate");
     setError("");
-    setSukses("");
     try {
       const res = await api("/talent/cv/generate", { method: "POST" });
-      setSukses(res.message);
+      toast.sukses(res.message);
       onCvDibuat(res.data);
     } catch (err) {
       setError(errorField(err, "profil") ?? err.message);
@@ -532,7 +530,6 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
   return (
     <Bagian ikon="picture_as_pdf" judul="CV" keterangan="CV dibuat otomatis dari data profil Anda dan dapat dilihat oleh tim PT Intellisys.">
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       <div className="flex flex-col sm:flex-row sm:items-center gap-space-sm">
         <span className="font-body-md text-body-md text-on-surface-variant sm:mr-auto">{keterangan}</span>
         <button

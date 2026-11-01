@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { BarisKosong, BarisMemuat, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggalWaktu, useTunda } from "../components/ui";
+import { useToast } from "../components/toast";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, TAHAPAN } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -29,7 +30,7 @@ export default function PipelineRekrutmen() {
   const [opsiKompetensi, setOpsiKompetensi] = useState([]);
   const [dipilih, setDipilih] = useState(null);
   const [form, setForm] = useState(null);
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   useEffect(() => setPage(1), [search]);
 
@@ -86,10 +87,7 @@ export default function PipelineRekrutmen() {
   }
 
   const muatUlang = useCallback(() => setVersi((v) => v + 1), []);
-  const tutupDetail = useCallback(() => {
-    setDipilih(null);
-    setSukses("");
-  }, []);
+  const tutupDetail = useCallback(() => setDipilih(null), []);
   const tutupForm = useCallback(() => setForm(null), []);
 
   const r = ringkasan;
@@ -154,7 +152,7 @@ export default function PipelineRekrutmen() {
         </div>
       </div>
 
-      {dipilih && <JobDrawer id={dipilih} user={user} versi={versi} pesan={sukses} onClose={tutupDetail} onChanged={muatUlang} onEdit={(job) => setForm({ job })} />}
+      {dipilih && <JobDrawer id={dipilih} user={user} versi={versi} onClose={tutupDetail} onChanged={muatUlang} onEdit={(job) => setForm({ job })} />}
       {form && (
         <FormJob
           job={form.job}
@@ -164,7 +162,7 @@ export default function PipelineRekrutmen() {
           onSaved={(job, pesan) => {
             setForm(null);
             setOpsiKompetensi((opsi) => tambahOpsiKompetensi(opsi, job.kompetensi));
-            setSukses(pesan);
+            toast.sukses(pesan);
             setDipilih(job.id_job_req);
             muatUlang();
           }}

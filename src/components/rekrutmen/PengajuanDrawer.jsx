@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
 import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal } from "../ui";
+import { useToast } from "../toast";
 import {
   EvaluasiBadge,
   INTERVIEW_FINAL,
@@ -71,8 +72,8 @@ function useAksi(onBerhasil) {
 export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
   const [p, setP] = useState(null);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
   const [versi, setVersi] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -92,7 +93,7 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
   }, [onClose]);
 
   function berhasil(pesan) {
-    setSukses(pesan);
+    toast.sukses(pesan);
     setVersi((v) => v + 1);
     onChanged();
   }
@@ -113,7 +114,6 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
           {error && <Pesan>{error}</Pesan>}
           {!error && !p && <Memuat>Memuat detail...</Memuat>}
           {p && (

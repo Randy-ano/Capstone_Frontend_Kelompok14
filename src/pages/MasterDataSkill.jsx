@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { useToast } from "../components/toast";
 import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
@@ -16,7 +17,7 @@ export default function MasterDataSkill() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [form, setForm] = useState(null); // null | { kompetensi: null } (tambah) | { kompetensi } (ubah)
 
   useEffect(() => setPage(1), [search]);
@@ -49,7 +50,7 @@ export default function MasterDataSkill() {
 
   function tersimpan(pesan) {
     setForm(null);
-    setSukses(pesan);
+    toast.sukses(pesan);
     muatUlang();
   }
 
@@ -62,10 +63,7 @@ export default function MasterDataSkill() {
         aksi={
           <button
             type="button"
-            onClick={() => {
-              setSukses("");
-              setForm({ kompetensi: null });
-            }}
+            onClick={() => setForm({ kompetensi: null })}
             className="tombol-utama w-full md:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
@@ -107,7 +105,6 @@ export default function MasterDataSkill() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           <TabelKartu
@@ -125,18 +122,12 @@ export default function MasterDataSkill() {
               <BarisKompetensi
                 key={k.id_kompetensi}
                 kompetensi={k}
-                onUbah={() => {
-                  setSukses("");
-                  setForm({ kompetensi: k });
-                }}
+                onUbah={() => setForm({ kompetensi: k })}
                 onTerhapus={(pesan) => {
-                  setSukses(pesan);
+                  toast.sukses(pesan);
                   muatUlang();
                 }}
-                onError={(pesan) => {
-                  setSukses("");
-                  setError(pesan);
-                }}
+                onError={setError}
               />
             ))}
           </TabelKartu>

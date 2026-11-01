@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
 import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu } from "../ui";
+import { useToast } from "../toast";
 import { HasilBadge } from "../talentPool/shared";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola } from "./shared";
 
 // Panel samping detail job requirement + log progres (GET /job-requirements/{id}/progres).
-// `versi` berubah dari luar (mis. setelah form ubah disimpan) agar data dimuat ulang; `pesan` = pesan sukses dari form.
-export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, onEdit }) {
+// `versi` berubah dari luar (mis. setelah form ubah disimpan) agar data dimuat ulang.
+export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit }) {
   const [job, setJob] = useState(null);
   const [screening, setScreening] = useState(null);
   const [error, setError] = useState("");
@@ -49,7 +50,6 @@ export default function JobDrawer({ id, user, versi, pesan, onClose, onChanged, 
         </div>
 
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {pesan && <Pesan jenis="sukses">{pesan}</Pesan>}
           {error && <Pesan>{error}</Pesan>}
           {!error && !job && <Memuat>Memuat detail...</Memuat>}
           {job && (
@@ -142,7 +142,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   const [konfirmasi, setKonfirmasi] = useState(false);
   const [kirim, setKirim] = useState("");
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
 
   const kelola = bolehKelola(user);
   const bisaUbah = kelola && BISA_DIUBAH.includes(job.status_req);
@@ -150,15 +150,14 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   const bisaBatal = kelola && BISA_DIBATALKAN.includes(job.status_req);
   const cariKandidat = user.role === ROLE.TALENT_SUPPORT && TERBUKA.includes(job.status_req);
 
-  if (!bisaUbah && !bisaAjukan && !bisaBatal && !cariKandidat && !sukses) return null;
+  if (!bisaUbah && !bisaAjukan && !bisaBatal && !cariKandidat) return null;
 
   async function ubahStatus(status) {
     setKirim(status);
     setError("");
-    setSukses("");
     try {
       const res = await api(`/job-requirements/${job.id_job_req}/status`, { method: "PATCH", body: { status_req: status } });
-      setSukses(res.message);
+      toast.sukses(res.message);
       setKonfirmasi(false);
       onUbahStatus(res.data);
     } catch (err) {
@@ -172,7 +171,6 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
   return (
     <div className="space-y-space-sm">
       {error && <Pesan>{error}</Pesan>}
-      {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
       {konfirmasi ? (
         <div className="bg-error-container rounded-xl p-space-md space-y-space-sm">
           <p className="font-body-md text-body-md text-on-error-container">

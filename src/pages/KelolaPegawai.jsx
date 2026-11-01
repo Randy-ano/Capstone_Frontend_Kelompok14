@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE_LABEL } from "../auth/roles";
+import { useToast } from "../components/toast";
 import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
@@ -20,7 +21,7 @@ export default function KelolaPegawai() {
   const [hasil, setHasil] = useState(null);
   const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [sukses, setSukses] = useState("");
+  const toast = useToast();
   const [form, setForm] = useState(null); // null | { pegawai: null } (tambah) | { pegawai } (ubah)
 
   useEffect(() => setPage(1), [search]);
@@ -53,7 +54,7 @@ export default function KelolaPegawai() {
   function berhasil(pesan) {
     setForm(null);
     setError("");
-    setSukses(pesan);
+    toast.sukses(pesan);
     muatUlang();
   }
 
@@ -66,10 +67,7 @@ export default function KelolaPegawai() {
         aksi={
           <button
             type="button"
-            onClick={() => {
-              setSukses("");
-              setForm({ pegawai: null });
-            }}
+            onClick={() => setForm({ pegawai: null })}
             className="tombol-utama w-full md:w-auto"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
@@ -111,7 +109,6 @@ export default function KelolaPegawai() {
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
           <TabelKartu kolom={["Nama", "Email", "Role", "No. Telepon", "Status", { label: "Aksi", className: "aksi" }]} className="md:min-w-[760px]" redup={memuat && hasil}>
@@ -126,15 +123,9 @@ export default function KelolaPegawai() {
                 key={p.id_pegawai}
                 pegawai={p}
                 diriSendiri={p.akun.id_user === user.id_user}
-                onUbah={() => {
-                  setSukses("");
-                  setForm({ pegawai: p });
-                }}
+                onUbah={() => setForm({ pegawai: p })}
                 onStatus={berhasil}
-                onError={(pesan) => {
-                  setSukses("");
-                  setError(pesan);
-                }}
+                onError={setError}
               />
             ))}
           </TabelKartu>
