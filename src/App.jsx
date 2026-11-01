@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
-import RequireAuth from "./auth/RequireAuth";
+import RequireAuth, { MemuatSesi } from "./auth/RequireAuth";
+import { useAuth } from "./auth/AuthContext";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import CutiShift from "./pages/CutiShift";
@@ -19,8 +20,20 @@ import PipelineRekrutmen from "./pages/PipelineRekrutmen";
 import ProfilSaya from "./pages/ProfilSaya";
 import TalentPool from "./pages/TalentPool";
 import TiketKomplain from "./pages/TiketKomplain";
-import ComingSoon from "./pages/ComingSoon";
+import TidakDitemukan from "./pages/TidakDitemukan";
 import PengaturanAkun from "./pages/PengaturanAkun";
+
+// Alamat tak dikenal: pengguna login melihat 404 di dalam layout, tamu melihatnya tanpa layout (tidak dilempar ke halaman masuk).
+function RuteTakDikenal() {
+  const { user, loading } = useAuth();
+  if (loading) return <MemuatSesi />;
+  if (user) return <AppLayout isi={<TidakDitemukan />} judulIsi="Halaman tidak ditemukan" />;
+  return (
+    <div className="min-h-screen flex items-center bg-surface">
+      <TidakDitemukan />
+    </div>
+  );
+}
 
 export default function App() {
   return (
@@ -47,9 +60,9 @@ export default function App() {
           <Route path="dokumen-quotation-po" element={<Dokumen />} />
           <Route path="notifikasi" element={<Notifikasi />} />
           <Route path="pengaturan-akun" element={<PengaturanAkun />} />
-          <Route path="*" element={<ComingSoon />} />
         </Route>
       </Route>
+      <Route path="*" element={<RuteTakDikenal />} />
     </Routes>
   );
 }
