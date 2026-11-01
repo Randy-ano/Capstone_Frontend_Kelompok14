@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { berandaFor } from "../data/navigation";
 import { InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
@@ -63,7 +63,9 @@ export default function Daftar() {
   const { user, register } = useAuth();
   useJudulTab("Daftar Akun");
   const navigate = useNavigate();
-  const [jenis, setJenis] = useState("talent");
+  // `?jenis=hr-client` dari tombol di halaman depan memilih tab HR Perusahaan.
+  const [params] = useSearchParams();
+  const [jenis, setJenis] = useState(params.get("jenis") === "hr-client" ? "hr-client" : "talent");
   const [form, setForm] = useState(FORM_KOSONG);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});

@@ -1,5 +1,6 @@
 // Komponen bersama halaman Masuk & Daftar (mockup Stitch "Masuk" dan "Daftar Akun Baru").
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo-intellisys.png";
 
 // Judul tab browser halaman di luar AppLayout.
@@ -13,7 +14,9 @@ export function useJudulTab(judul) {
 export function Merek({ tengah = false }) {
   return (
     <div className={`flex flex-col gap-2 ${tengah ? "items-center" : "items-start"}`}>
-      <img alt="Logo Intellisys" className="h-10 sm:h-12 w-auto object-contain" src={logo} />
+      <Link to="/" aria-label="Ke halaman depan" className="rounded-lg">
+        <img alt="Logo Intellisys" className="h-10 sm:h-12 w-auto object-contain" src={logo} />
+      </Link>
       <span className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-on-surface-variant">Talent Hub</span>
     </div>
   );

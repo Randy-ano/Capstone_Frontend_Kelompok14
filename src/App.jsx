@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import RequireAuth, { MemuatSesi } from "./auth/RequireAuth";
 import { useAuth } from "./auth/AuthContext";
 import BatasMuat from "./components/BatasMuat";
@@ -25,6 +25,7 @@ const ProfilSaya = lazy(() => import("./pages/ProfilSaya"));
 const TalentPool = lazy(() => import("./pages/TalentPool"));
 const TiketKomplain = lazy(() => import("./pages/TiketKomplain"));
 const TidakDitemukan = lazy(() => import("./pages/TidakDitemukan"));
+const HalamanDepan = lazy(() => import("./pages/HalamanDepan"));
 const PengaturanAkun = lazy(() => import("./pages/PengaturanAkun"));
 
 // Alamat tak dikenal: pengguna login melihat 404 di dalam layout, tamu melihatnya tanpa layout (tidak dilempar ke halaman masuk).
@@ -44,11 +45,11 @@ export default function App() {
     <BatasMuat>
       <Suspense fallback={<MemuatSesi />}>
         <Routes>
+          <Route index element={<HalamanDepan />} />
           <Route path="login" element={<Login />} />
           <Route path="daftar" element={<Daftar />} />
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
-              <Route index element={<Navigate to="/dashboard-rekapitulasi" replace />} />
               <Route path="dashboard-rekapitulasi" element={<DashboardRekapitulasi />} />
               <Route path="master-data-skill" element={<MasterDataSkill />} />
               <Route path="pipeline-rekrutmen" element={<PipelineRekrutmen />} />
