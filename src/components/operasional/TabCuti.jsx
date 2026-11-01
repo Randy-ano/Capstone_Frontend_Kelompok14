@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, Proses } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, Proses, teksUtuh } from "../ui";
 import { useToast } from "../toast";
 import { hariIni } from "../rekrutmen/shared";
 import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombolHalaman, tombolUtama, usePlacement } from "./shared";
@@ -256,7 +256,7 @@ function ModalAjukanCuti({ onClose, onBerhasil }) {
       <Field label="Alasan cuti" wajib error={e("alasan_cuti")}>
         <textarea rows={3} value={form.alasan_cuti} onChange={set("alasan_cuti")} maxLength={2000} className={`${inputClass(e("alasan_cuti"))} h-auto py-2`} />
       </Field>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Cuti disetujui setelah HR klien dan Manager PT Intellisys sama-sama menyetujui.</p>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">{teksUtuh("Cuti disetujui setelah HR klien dan Manager PT Intellisys sama-sama menyetujui.")}</p>
     </Modal>
   );
 }

@@ -5,7 +5,7 @@ import { ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
-import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
+import { BadgeTahapPengajuan, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
 const PER_PAGE = 10;
@@ -153,7 +153,7 @@ export default function PengajuanKandidat() {
                     </span>
                   </Sel>
                   <Sel peran="status">
-                    <PengajuanBadge status={p.status_pengajuan} />
+                    <BadgeTahapPengajuan pengajuan={p} />
                   </Sel>
                 </tr>
               );

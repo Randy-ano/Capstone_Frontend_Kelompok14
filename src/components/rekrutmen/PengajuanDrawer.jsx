@@ -6,10 +6,10 @@ import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal, P
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import {
+  BadgeTahapPengajuan,
   EvaluasiBadge,
   INTERVIEW_FINAL,
   InterviewBadge,
-  PengajuanBadge,
   bolehAturInterview,
   bolehPlacement,
   bolehTinjau,
@@ -129,8 +129,7 @@ function Ringkasan({ p }) {
   return (
     <Bagian icon="person" judul={p.talent.nama_lengkap}>
       <div className="flex flex-wrap gap-1">
-        <PengajuanBadge status={p.status_pengajuan} />
-        {p.evaluasi && <EvaluasiBadge status={p.evaluasi.status_evaluasi} />}
+        <BadgeTahapPengajuan pengajuan={p} />
       </div>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-space-md gap-y-space-sm pt-space-xs">
         <Info label="Posisi">{p.job_requirement.posisi}</Info>

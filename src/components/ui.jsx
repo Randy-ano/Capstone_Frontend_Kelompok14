@@ -1,5 +1,5 @@
 // Komponen & format kecil yang dipakai banyak halaman.
-import { useEffect, useState } from "react";
+import { Children, useEffect, useState } from "react";
 
 const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
@@ -165,7 +165,7 @@ export function KeadaanKosong({ ikon = "inbox", children, aksi, ringkas = false 
       <span className={`flex items-center justify-center rounded-full bg-surface-container text-outline ${ringkas ? "w-10 h-10" : "w-14 h-14"}`}>
         <span aria-hidden="true" className={`material-symbols-outlined ${ringkas ? "text-[22px]" : "text-[28px]"}`}>{ikon}</span>
       </span>
-      <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">{children}</p>
+      <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">{teksUtuh(children)}</p>
       {aksi}
     </div>
   );
@@ -217,6 +217,25 @@ export function BarisKosong({ kolom, ikon, children }) {
   );
 }
 
+// Browser boleh memutus baris setelah tanda hubung ("CV-" / "nya", "sama-" / "sama"), dan CSS hyphens tidak mencegahnya.
+// Kata yang mengandung tanda hubung dibungkus nowrap; bagian isi yang bukan teks dibiarkan.
+const KATA_BERHUBUNG = /(\S*\p{L}-\p{L}\S*)/gu;
+export function teksUtuh(isi) {
+  return Children.map(isi, (bagian) =>
+    typeof bagian !== "string"
+      ? bagian
+      : bagian.split(KATA_BERHUBUNG).map((teks, i) =>
+          i % 2 ? (
+            <span key={i} className="whitespace-nowrap">
+              {teks}
+            </span>
+          ) : (
+            teks
+          ),
+        ),
+  );
+}
+
 // Kepala halaman bergaya sama dengan Talent Pool.
 export function KepalaHalaman({ ikon, kategori, judul, children, aksi }) {
   return (
@@ -227,7 +246,7 @@ export function KepalaHalaman({ ikon, kategori, judul, children, aksi }) {
           <span>{kategori}</span>
         </div>
         <h1 className="font-headline-lg-mobile text-headline-lg-mobile sm:font-headline-lg sm:text-headline-lg text-on-surface tracking-tight">{judul}</h1>
-        {children && <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">{children}</p>}
+        {children && <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">{teksUtuh(children)}</p>}
       </div>
       {aksi && <div className="shrink-0 w-full md:w-auto">{aksi}</div>}
     </div>

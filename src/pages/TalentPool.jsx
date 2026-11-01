@@ -4,16 +4,16 @@ import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 import DetailDrawer from "../components/talentPool/DetailDrawer";
-import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, TagChip, formatTanggal, pecahTag } from "../components/ui";
+import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggal } from "../components/ui";
 import { STATUS_KETERSEDIAAN, StatusBadge } from "../components/talentPool/shared";
 
 const PER_PAGE = 10;
 const MAKS_CHIP = 3;
 
 const KARTU = [
-  { status: "", key: "total", label: "Total Talent", icon: "groups", warna: "text-primary" },
-  { status: "tersedia", key: "tersedia", label: "Tersedia", icon: "person_check", warna: "text-on-tertiary-container" },
-  { status: "tidak_tersedia", key: "tidak_tersedia", label: "Tidak Tersedia", icon: "person_off", warna: "text-outline" },
+  { status: "", key: "total", label: "Total Talent", icon: "groups", warna: "text-primary", keterangan: "Seluruh talent pool" },
+  { status: "tersedia", key: "tersedia", label: "Tersedia", icon: "person_check", warna: "text-on-tertiary-container", keterangan: "Termasuk yang sedang diproses. Klik untuk menyaring" },
+  { status: "tidak_tersedia", key: "tidak_tersedia", label: "Tidak Tersedia", icon: "person_off", warna: "text-outline", keterangan: "Klik untuk menyaring tidak tersedia" },
 ];
 
 // Halaman Talent Pool (FR-06): AM, TS, Manager melihat; TS mengubah status ketersediaan & tag keahlian.
@@ -110,7 +110,7 @@ export default function TalentPool() {
               nilai={ringkasan?.[k.key]}
               ikon={k.icon}
               warna={k.warna}
-              keterangan={k.status ? `Klik untuk menyaring ${k.label.toLowerCase()}` : "Seluruh talent pool"}
+              keterangan={k.keterangan}
               aktif={status === k.status}
               onClick={() => ubahFilter(setStatus)(k.status)}
             />
@@ -161,10 +161,10 @@ export default function TalentPool() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <TabelKartu kolom={["Nama", "Pendidikan", "Kompetensi", "Tag Keahlian", "Tanggal Masuk", "Status"]} className="md:min-w-[880px]" redup={memuat && hasil}>
-            {!hasil && memuat && <BarisMemuat kolom={6} />}
+          <TabelKartu kolom={["Nama", "Pendidikan", "Kompetensi", "Tanggal Masuk", "Status"]} className="md:min-w-[720px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
             {hasil?.data.length === 0 && (
-              <BarisKosong kolom={6} ikon="group">
+              <BarisKosong kolom={5} ikon="group">
                 {adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Talent pool masih kosong."}
               </BarisKosong>
             )}
@@ -184,7 +184,6 @@ export default function TalentPool() {
 function BarisTalent({ item, onOpen }) {
   const { talent } = item;
   const sisa = talent.kompetensi.length - MAKS_CHIP;
-  const tag = pecahTag(item.tag_keahlian);
 
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
@@ -211,11 +210,6 @@ function BarisTalent({ item, onOpen }) {
             </span>
           )}
           {talent.kompetensi.length === 0 && <span className="text-outline">-</span>}
-        </div>
-      </Sel>
-      <Sel label="Tag Keahlian">
-        <div className="flex flex-wrap gap-1 md:max-w-[220px]">
-          {tag.length ? tag.map((t) => <TagChip key={t}>{t}</TagChip>) : <span className="text-outline">-</span>}
         </div>
       </Sel>
       <Sel label="Tanggal Masuk" className="whitespace-nowrap text-on-surface-variant">{formatTanggal(item.tanggal_masuk)}</Sel>

@@ -24,6 +24,10 @@ const IKON = {
   status_kandidat: "work",
 };
 
+// Keterangan kartu yang diperjelas di sisi tampilan. Kartu ini menghitung talent yang tersedia dan belum masuk proses,
+// sedangkan angka "Tersedia" di Talent Pool mencakup yang sedang diproses.
+const KETERANGAN_KARTU = { talent_tersedia: "Tersedia, belum diproses" };
+
 const STATUS_REQ = { draft: "Draft", diajukan: "Diajukan", diproses: "Diproses", terpenuhi: "Terpenuhi", dibatalkan: "Dibatalkan" };
 
 function sapaan() {
@@ -123,7 +127,7 @@ function KartuTujuan({ kartu: k }) {
         </span>
       </div>
       <div className={`mt-auto pt-space-sm text-on-surface tabular-nums ${typeof k.nilai === "number" ? "font-headline-xl text-headline-xl" : "font-headline-sm text-headline-sm"}`}>{k.nilai}</div>
-      {k.keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{k.keterangan}</div>}
+      {(KETERANGAN_KARTU[k.kunci] ?? k.keterangan) && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{KETERANGAN_KARTU[k.kunci] ?? k.keterangan}</div>}
     </>
   );
   const kelas = "kartu h-full flex flex-col p-space-md transition-shadow duration-200";

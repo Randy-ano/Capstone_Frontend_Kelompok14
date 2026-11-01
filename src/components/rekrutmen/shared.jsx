@@ -36,6 +36,13 @@ export const InterviewBadge = ({ status }) => <BadgeDari peta={STATUS_INTERVIEW}
 export const EvaluasiBadge = ({ status }) => <BadgeDari peta={STATUS_EVALUASI} nilai={status} />;
 export const PlacementBadge = ({ status }) => <BadgeDari peta={STATUS_PLACEMENT} nilai={status} />;
 
+// Badge pengajuan mengikuti tahap terakhir yang sudah ada di data, agar tidak bertentangan dengan kolom tahap.
+export function BadgeTahapPengajuan({ pengajuan: p }) {
+  if (p.id_placement) return <Badge className={NADA.sukses}>Ditempatkan</Badge>;
+  if (p.evaluasi) return <EvaluasiBadge status={p.evaluasi.status_evaluasi} />;
+  return <PengajuanBadge status={p.status_pengajuan} />;
+}
+
 // Tahap terkini pengajuan untuk kolom tabel: menggabungkan status pengajuan, evaluasi, dan placement.
 export function tahapPengajuan(p) {
   if (p.id_placement) return { label: "Ditempatkan", ikon: "assignment_ind" };
