@@ -133,6 +133,17 @@ export function Memuat({ children = "Memuat...", baris = 3 }) {
   );
 }
 
+// Placeholder saat berkas halaman (React.lazy) sedang diunduh.
+export function MemuatHalaman() {
+  return (
+    <div className="px-space-md sm:px-space-xl pt-space-lg">
+      <div className="kartu p-space-lg">
+        <Memuat baris={5}>Memuat halaman...</Memuat>
+      </div>
+    </div>
+  );
+}
+
 // Baris tabel placeholder selama data pertama dimuat.
 export function BarisMemuat({ kolom, baris = 5 }) {
   return Array.from({ length: baris }, (_, i) => (
