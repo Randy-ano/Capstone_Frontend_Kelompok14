@@ -24,10 +24,6 @@ const IKON = {
   status_kandidat: "work",
 };
 
-// Keterangan kartu yang diperjelas di sisi tampilan. Kartu ini menghitung talent yang tersedia dan belum masuk proses,
-// sedangkan angka "Tersedia" di Talent Pool mencakup yang sedang diproses.
-const KETERANGAN_KARTU = { talent_tersedia: "Tersedia, belum diproses" };
-
 const STATUS_REQ = { draft: "Draft", diajukan: "Diajukan", diproses: "Diproses", terpenuhi: "Terpenuhi", dibatalkan: "Dibatalkan" };
 
 function sapaan() {
@@ -127,7 +123,7 @@ function KartuTujuan({ kartu: k }) {
         </span>
       </div>
       <div className={`mt-auto pt-space-sm text-on-surface tabular-nums ${typeof k.nilai === "number" ? "font-headline-xl text-headline-xl" : "font-headline-sm text-headline-sm"}`}>{k.nilai}</div>
-      {(KETERANGAN_KARTU[k.kunci] ?? k.keterangan) && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{KETERANGAN_KARTU[k.kunci] ?? k.keterangan}</div>}
+      {k.keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{k.keterangan}</div>}
     </>
   );
   const kelas = "kartu h-full flex flex-col p-space-md transition-shadow duration-200";
@@ -159,7 +155,7 @@ function AnalitikManager({ data }) {
   const totalKandidat = data.kandidat_per_tahapan.reduce((t, x) => t + x.jumlah, 0);
   return (
     <>
-      <Panel judul="Tren Placement" ikon="trending_up" keterangan="Jumlah talent yang mulai ditempatkan per bulan, 12 bulan terakhir.">
+      <Panel judul="Tren Penempatan" ikon="trending_up" keterangan="Jumlah talent yang mulai ditempatkan per bulan, 12 bulan terakhir.">
         <GrafikBulanan data={data.tren_placement} />
       </Panel>
 
@@ -167,7 +163,7 @@ function AnalitikManager({ data }) {
         <Panel judul="Kandidat per Tahapan" ikon="filter_alt" keterangan={`Posisi ${totalKandidat} kandidat saat ini di alur rekrutmen.`}>
           <DaftarBatang data={data.kandidat_per_tahapan.map((t) => ({ label: t.label, jumlah: t.jumlah }))} satuan="kandidat" />
         </Panel>
-        <Panel judul="Permintaan per Status" ikon="receipt_long" keterangan={`${data.job_requirement.total} permintaan kebutuhan; ${data.placement_aktif} placement aktif.`}>
+        <Panel judul="Permintaan per Status" ikon="receipt_long" keterangan={`${data.job_requirement.total} permintaan kebutuhan; ${data.placement_aktif} penempatan aktif.`}>
           <DaftarBatang data={Object.entries(data.job_requirement.per_status).map(([s, j]) => ({ label: STATUS_REQ[s] ?? s, jumlah: j }))} satuan="permintaan" />
         </Panel>
       </div>
@@ -216,7 +212,7 @@ function GrafikBulanan({ data }) {
                 <div key={g} className="border-t border-surface-container-high" />
               ))}
             </div>
-            <div className="absolute inset-x-0 top-0 bottom-0 flex items-end gap-1 sm:gap-2" role="img" aria-label="Tren placement per bulan">
+            <div className="absolute inset-x-0 top-0 bottom-0 flex items-end gap-1 sm:gap-2" role="img" aria-label="Tren penempatan per bulan">
               {data.map((d, i) => (
                 <button
                   key={d.bulan}
@@ -225,7 +221,7 @@ function GrafikBulanan({ data }) {
                   onMouseLeave={() => setAktif(null)}
                   onFocus={() => setAktif(i)}
                   onBlur={() => setAktif(null)}
-                  aria-label={`${d.label}: ${d.jumlah} placement`}
+                  aria-label={`${d.label}: ${d.jumlah} penempatan`}
                   className="relative flex-1 h-full flex flex-col justify-end items-center group focus:outline-none"
                 >
                   <span className="w-full flex-1 flex items-end justify-center pb-0">
@@ -237,7 +233,7 @@ function GrafikBulanan({ data }) {
                   <span className="h-6 pt-1 font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{d.label.split(" ")[0]}</span>
                   {aktif === i && (
                     <span className="absolute bottom-full mb-1 z-10 px-2 py-1 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-sm text-label-sm whitespace-nowrap shadow">
-                      {d.label}: {d.jumlah} placement
+                      {d.label}: {d.jumlah} penempatan
                     </span>
                   )}
                 </button>
@@ -247,11 +243,11 @@ function GrafikBulanan({ data }) {
         </div>
       </div>
       <table className="sr-only">
-        <caption>Jumlah placement per bulan</caption>
+        <caption>Jumlah penempatan per bulan</caption>
         <thead>
           <tr>
             <th>Bulan</th>
-            <th>Placement</th>
+            <th>Penempatan</th>
           </tr>
         </thead>
         <tbody>

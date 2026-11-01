@@ -79,7 +79,7 @@ export default function Penempatan() {
       ? "Penempatan Anda di klien PT Intellisys dan catatan monitoring kinerja Anda."
       : user.role === ROLE.HR_CLIENT
         ? "Talent PT Intellisys yang ditempatkan di perusahaan Anda."
-        : "Talent yang sudah ditempatkan di klien. Placement dibuat dari evaluasi yang diterima di halaman Pengajuan Kandidat.";
+        : "Talent yang sudah ditempatkan di klien. Penempatan dibuat dari evaluasi yang diterima di halaman Pengajuan Kandidat.";
 
   return (
     <div className="flex flex-col w-full pb-space-xl">
@@ -116,7 +116,7 @@ export default function Penempatan() {
               <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
               <PilihFilter
                 ikon="filter_alt"
-                label="Status placement"
+                label="Status penempatan"
                 value={status}
                 onChange={(n) => {
                   setStatus(n);
