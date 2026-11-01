@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { BarisKosong, BarisMemuat, KepalaHalaman, Pagination, Pesan, PilihFilter } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, Pagination, Pesan, PilihFilter, Sel, TabelKartu } from "../components/ui";
 import { InterviewBadge, STATUS_INTERVIEW, bolehAturInterview, formatJadwal, hariIni } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -84,66 +84,53 @@ export default function JadwalInterview() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[820px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Jadwal</th>
-                  <th>Kandidat</th>
-                  <th>Posisi & Klien</th>
-                  <th>Link / Lokasi</th>
-                  <th>Status</th>
+          <TabelKartu kolom={["Jadwal", "Kandidat", "Posisi & Klien", "Link / Lokasi", "Status"]} className="md:min-w-[820px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={5} ikon="event_available">
+                {lewat || status ? "Tidak ada jadwal interview yang cocok." : "Tidak ada jadwal interview mendatang."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((iv) => {
+              const link = /^https?:\/\//i.test(iv.link_lokasi_meeting ?? "") ? iv.link_lokasi_meeting : null;
+              return (
+                <tr key={iv.id_interview} onClick={() => setDipilih(iv.pengajuan.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                  <Sel label="Jadwal" className="whitespace-nowrap">
+                    <span className="block font-title-sm text-title-sm text-on-surface">{formatJadwal(iv.tanggal_interview, iv.waktu_interview)}</span>
+                    {iv.tanggal_interview === hari && <span className="font-label-sm text-label-sm text-primary">Hari ini</span>}
+                  </Sel>
+                  <Sel peran="judul">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDipilih(iv.pengajuan.id_pengajuan);
+                      }}
+                      className="text-left text-on-surface hover:text-primary max-md:font-title-sm max-md:text-title-sm"
+                    >
+                      {iv.pengajuan.talent.nama_lengkap}
+                    </button>
+                  </Sel>
+                  <Sel label="Posisi & Klien">
+                    <span className="block text-on-surface">{iv.pengajuan.job_requirement.posisi}</span>
+                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{iv.pengajuan.job_requirement.klien.nama_perusahaan}</span>
+                  </Sel>
+                  <Sel label="Link / Lokasi" className="max-w-[240px] break-all text-on-surface-variant">
+                    {link ? (
+                      <a href={link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline">
+                        {link}
+                      </a>
+                    ) : (
+                      iv.link_lokasi_meeting ?? <span className="text-outline">-</span>
+                    )}
+                  </Sel>
+                  <Sel peran="status">
+                    <InterviewBadge status={iv.status_interview} />
+                  </Sel>
                 </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="event_available">
-                    {lewat || status ? "Tidak ada jadwal interview yang cocok." : "Tidak ada jadwal interview mendatang."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((iv) => {
-                  const link = /^https?:\/\//i.test(iv.link_lokasi_meeting ?? "") ? iv.link_lokasi_meeting : null;
-                  return (
-                    <tr key={iv.id_interview} onClick={() => setDipilih(iv.pengajuan.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                      <td className="whitespace-nowrap">
-                        <span className="block font-title-sm text-title-sm text-on-surface">{formatJadwal(iv.tanggal_interview, iv.waktu_interview)}</span>
-                        {iv.tanggal_interview === hari && <span className="font-label-sm text-label-sm text-primary">Hari ini</span>}
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDipilih(iv.pengajuan.id_pengajuan);
-                          }}
-                          className="text-left text-on-surface hover:text-primary"
-                        >
-                          {iv.pengajuan.talent.nama_lengkap}
-                        </button>
-                      </td>
-                      <td>
-                        <span className="block text-on-surface">{iv.pengajuan.job_requirement.posisi}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{iv.pengajuan.job_requirement.klien.nama_perusahaan}</span>
-                      </td>
-                      <td className="max-w-[240px] break-all text-on-surface-variant">
-                        {link ? (
-                          <a href={link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-primary hover:underline">
-                            {link}
-                          </a>
-                        ) : (
-                          iv.link_lokasi_meeting ?? <span className="text-outline">-</span>
-                        )}
-                      </td>
-                      <td>
-                        <InterviewBadge status={iv.status_interview} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              );
+            })}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="jadwal" />}
         </div>
       </div>

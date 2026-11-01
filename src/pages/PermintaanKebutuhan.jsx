@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggalWaktu, useTunda } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, bolehKelola } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -173,31 +173,17 @@ export default function PermintaanKebutuhan() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[900px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Posisi</th>
-                  <th>Klien</th>
-                  <th>Kebutuhan</th>
-                  <th>Kompetensi</th>
-                  <th>SLA Deadline</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={6} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={6} ikon="receipt_long">
-                    {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((job) => (
-                  <BarisJob key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Posisi", "Klien", "Kebutuhan", "Kompetensi", "SLA Deadline", "Status"]} className="md:min-w-[900px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={6} ikon="receipt_long">
+                {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((job) => (
+              <BarisJob key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="permintaan" />}
         </div>
       </div>
@@ -212,7 +198,7 @@ function BarisJob({ job, onOpen }) {
   const sisa = job.kompetensi.length - MAKS_CHIP;
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td>
+      <Sel peran="judul">
         <button
           type="button"
           onClick={(e) => {
@@ -226,16 +212,16 @@ function BarisJob({ job, onOpen }) {
             {job.pengalaman_min ? `Min. ${job.pengalaman_min} tahun pengalaman` : "Tanpa minimal pengalaman"}
           </span>
         </button>
-      </td>
-      <td className="text-on-surface-variant">
+      </Sel>
+      <Sel label="Klien" className="text-on-surface-variant">
         <span className="block">{job.klien.nama_perusahaan}</span>
         {job.account_manager && <span className="block font-body-sm text-body-sm text-outline">AM: {job.account_manager.nama_pegawai}</span>}
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="setengah" label="Kebutuhan">
         <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
-      </td>
-      <td>
-        <div className="flex flex-wrap gap-1 max-w-[240px]">
+      </Sel>
+      <Sel label="Kompetensi" className="max-md:order-1">
+        <div className="flex flex-wrap gap-1 md:max-w-[240px]">
           {job.kompetensi.slice(0, MAKS_CHIP).map((k) => (
             <Chip key={k.id_kompetensi} title={k.kategori}>
               {k.nama_kompetensi}
@@ -250,16 +236,16 @@ function BarisJob({ job, onOpen }) {
             </span>
           )}
         </div>
-      </td>
-      <td className="whitespace-nowrap">
+      </Sel>
+      <Sel peran="setengah" label="SLA Deadline" className="whitespace-nowrap">
         <span className="block text-on-surface-variant">{formatTanggalWaktu(job.sla_deadline)}</span>
         <span className="block mt-1">
           <SlaBadge indikator={job.indikator_sla} />
         </span>
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="status">
         <StatusReqBadge status={job.status_req} />
-      </td>
+      </Sel>
     </tr>
   );
 }

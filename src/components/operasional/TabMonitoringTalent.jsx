@@ -68,7 +68,7 @@ export default function TabMonitoringTalent() {
       <ol className="flex flex-col gap-space-sm">
         {hasil?.data.map((m) => (
           <li key={m.id_monitoring} className="kartu p-space-md space-y-space-sm">
-            <div className="flex flex-wrap items-start justify-between gap-space-sm">
+            <div className="flex items-start justify-between gap-space-sm">
               <div className="min-w-0">
                 <div className="font-title-sm text-title-sm text-on-surface">{formatTanggalWaktu(m.tanggal_monitoring)}</div>
                 <div className="font-body-sm text-body-sm text-on-surface-variant">

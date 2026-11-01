@@ -149,10 +149,45 @@ export function KeadaanKosong({ ikon = "inbox", children, aksi, ringkas = false 
   );
 }
 
+// Tabel daftar: di layar >= 768px tampil sebagai tabel biasa, di bawahnya tiap baris menjadi kartu (lihat .tabel-kartu di index.css).
+// Barisnya tetap satu DOM yang sama, jadi aksi & state baris tidak perlu ditulis dua kali.
+// `kolom`: judul kolom (string atau { label, className }; nilai falsy dilewati). Lebar minimum desktop lewat `className`, mis. "md:min-w-[880px]".
+export function TabelKartu({ kolom, className = "", redup = false, children }) {
+  return (
+    <div className="overflow-x-auto w-full">
+      <table className={`tabel tabel-kartu text-left border-collapse transition-opacity ${redup ? "opacity-60" : ""} ${className}`}>
+        <thead>
+          <tr>
+            {kolom.filter(Boolean).map((k) => {
+              const { label, className: kelas } = typeof k === "string" ? { label: k } : k;
+              return (
+                <th key={label} className={kelas}>
+                  {label}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
+
+// Sel TabelKartu. Di mode kartu: peran "judul" = baris atas kiri, "status" = badge kanan atas, "aksi" = tombol di bawah,
+// "setengah" = setengah lebar kartu, tanpa peran = selebar kartu. `label` tampil di atas isi sel saat mode kartu.
+export function Sel({ peran, label, children, ...props }) {
+  return (
+    <td data-kartu={peran} data-label={label} {...props}>
+      {children}
+    </td>
+  );
+}
+
 // KeadaanKosong di dalam tabel (satu baris selebar semua kolom).
 export function BarisKosong({ kolom, ikon, children }) {
   return (
-    <tr>
+    <tr data-kosong>
       <td colSpan={kolom} className="!p-0">
         <KeadaanKosong ikon={ikon}>{children}</KeadaanKosong>
       </td>

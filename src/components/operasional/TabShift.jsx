@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal } from "../ui";
 import {
   Field,
   JENIS_SHIFT,
@@ -106,25 +106,11 @@ export default function TabShift({ user }) {
           <KeadaanKosong ikon="calendar_month">Belum ada shift pada bulan ini.</KeadaanKosong>
         )}
         {hasil?.data.length > 0 && (
-          <div className="overflow-x-auto w-full">
-            <table className="tabel min-w-[640px] text-left border-collapse">
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  {user.role !== ROLE.TALENT && <th>Talent</th>}
-                  <th>Shift</th>
-                  <th>Keterangan</th>
-                  <th>Diatur oleh</th>
-                  {kelola && <th className="aksi">Aksi</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {hasil.data.map((s) => (
-                  <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Tanggal", user.role !== ROLE.TALENT && "Talent", "Shift", "Keterangan", "Diatur oleh", kelola && { label: "Aksi", className: "aksi" }]} className="md:min-w-[640px]">
+            {hasil.data.map((s) => (
+              <BarisShift key={s.id_shift} shift={s} user={user} kelola={kelola} hariIni={hari} onBerhasil={berhasil} onError={(m) => (setSukses(""), setError(m))} />
+            ))}
+          </TabelKartu>
         )}
         {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="shift" />}
       </div>
@@ -164,14 +150,14 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
 
   return (
     <tr className={s.tanggal_shift === hariIni ? "bg-primary-fixed/30" : ""}>
-      <td className="whitespace-nowrap">
-        <span className="text-on-surface">
+      <Sel peran="judul" className="whitespace-nowrap">
+        <span className="text-on-surface max-md:font-title-sm max-md:text-title-sm">
           {namaHari(s.tanggal_shift)}, {formatTanggal(s.tanggal_shift)}
         </span>
         {s.tanggal_shift === hariIni && <span className="ml-2 font-label-sm text-label-sm text-primary">Hari ini</span>}
-      </td>
-      {user.role !== ROLE.TALENT && <td className="text-on-surface">{s.placement.talent.nama_lengkap}</td>}
-      <td>
+      </Sel>
+      {user.role !== ROLE.TALENT && <Sel label="Talent" className="text-on-surface">{s.placement.talent.nama_lengkap}</Sel>}
+      <Sel peran="status">
         {mode === "ubah" ? (
           <select value={jenis} onChange={(e) => setJenis(e.target.value)} aria-label="Jenis shift" className="h-9 px-2 rounded-lg bg-surface-container-low font-label-md text-label-md">
             {Object.entries(JENIS_SHIFT).map(([v, j]) => (
@@ -183,11 +169,11 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
         ) : (
           <ShiftBadge jenis={s.jenis_shift} />
         )}
-      </td>
-      <td className="text-on-surface-variant">{s.keterangan ?? "-"}</td>
-      <td className="text-on-surface-variant">{s.diatur_oleh ?? "-"}</td>
+      </Sel>
+      <Sel peran="setengah" label="Keterangan" className="text-on-surface-variant">{s.keterangan ?? "-"}</Sel>
+      <Sel peran="setengah" label="Diatur oleh" className="text-on-surface-variant">{s.diatur_oleh ?? "-"}</Sel>
       {kelola && (
-        <td>
+        <Sel peran="aksi">
           <div className="flex justify-end gap-1">
             {mode === "" && (
               <>
@@ -217,7 +203,7 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
               </>
             )}
           </div>
-        </td>
+        </Sel>
       )}
     </tr>
   );

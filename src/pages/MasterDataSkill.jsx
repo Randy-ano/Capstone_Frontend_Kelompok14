@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
 
@@ -110,45 +110,36 @@ export default function MasterDataSkill() {
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[640px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Nama Kompetensi</th>
-                  <th>Kategori</th>
-                  <th className="angka">Dipakai Talent</th>
-                  <th className="angka">Dipakai Permintaan</th>
-                  <th className="aksi">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="psychology">
-                    {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((k) => (
-                  <BarisKompetensi
-                    key={k.id_kompetensi}
-                    kompetensi={k}
-                    onUbah={() => {
-                      setSukses("");
-                      setForm({ kompetensi: k });
-                    }}
-                    onTerhapus={(pesan) => {
-                      setSukses(pesan);
-                      muatUlang();
-                    }}
-                    onError={(pesan) => {
-                      setSukses("");
-                      setError(pesan);
-                    }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu
+            kolom={["Nama Kompetensi", "Kategori", { label: "Dipakai Talent", className: "angka" }, { label: "Dipakai Permintaan", className: "angka" }, { label: "Aksi", className: "aksi" }]}
+            className="md:min-w-[640px]"
+            redup={memuat && hasil}
+          >
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={5} ikon="psychology">
+                {adaFilter ? "Tidak ada kompetensi yang cocok dengan pencarian atau filter." : "Belum ada kompetensi."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((k) => (
+              <BarisKompetensi
+                key={k.id_kompetensi}
+                kompetensi={k}
+                onUbah={() => {
+                  setSukses("");
+                  setForm({ kompetensi: k });
+                }}
+                onTerhapus={(pesan) => {
+                  setSukses(pesan);
+                  muatUlang();
+                }}
+                onError={(pesan) => {
+                  setSukses("");
+                  setError(pesan);
+                }}
+              />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="kompetensi" />}
         </div>
       </div>
@@ -178,11 +169,11 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td className="font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</td>
-      <td className="text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</td>
-      <td className="angka">{k.jumlah_talent}</td>
-      <td className="angka">{k.jumlah_job_requirement}</td>
-      <td>
+      <Sel peran="judul" className="font-title-sm text-title-sm text-on-surface">{k.nama_kompetensi}</Sel>
+      <Sel label="Kategori" className="text-on-surface-variant">{k.kategori ?? <span className="text-outline">-</span>}</Sel>
+      <Sel peran="setengah" label="Dipakai Talent" className="angka">{k.jumlah_talent}</Sel>
+      <Sel peran="setengah" label="Dipakai Permintaan" className="angka">{k.jumlah_job_requirement}</Sel>
+      <Sel peran="aksi">
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">Hapus?</span>
@@ -211,7 +202,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
             </button>
           </div>
         )}
-      </td>
+      </Sel>
     </tr>
   );
 }

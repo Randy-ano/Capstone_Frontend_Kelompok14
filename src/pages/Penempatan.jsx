@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, useTunda } from "../components/ui";
 import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 
@@ -141,52 +141,39 @@ export default function Penempatan() {
             {error && <Pesan>{error}</Pesan>}
 
             <div className="kartu overflow-hidden">
-              <div className="overflow-x-auto w-full">
-                <table className={`tabel min-w-[780px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-                  <thead>
-                    <tr>
-                      <th>Talent</th>
-                      <th>Posisi</th>
-                      <th>Klien</th>
-                      <th>Periode</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {!hasil && memuat && <BarisMemuat kolom={5} />}
-                    {hasil?.data.length === 0 && (
-                      <BarisKosong kolom={5} ikon="assignment_ind">
-                        {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
-                      </BarisKosong>
-                    )}
-                    {hasil?.data.map((pl) => (
-                      <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                        <td>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              buka(pl.id_placement);
-                            }}
-                            className="text-left group"
-                          >
-                            <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
-                            <span className="block font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</span>
-                          </button>
-                        </td>
-                        <td className="text-on-surface">{pl.posisi_penempatan}</td>
-                        <td className="text-on-surface-variant">{pl.klien.nama_perusahaan}</td>
-                        <td className="whitespace-nowrap text-on-surface-variant">
-                          {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
-                        </td>
-                        <td>
-                          <PlacementBadge status={pl.status_placement} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <TabelKartu kolom={["Talent", "Posisi", "Klien", "Periode", "Status"]} className="md:min-w-[780px]" redup={memuat && hasil}>
+                {!hasil && memuat && <BarisMemuat kolom={5} />}
+                {hasil?.data.length === 0 && (
+                  <BarisKosong kolom={5} ikon="assignment_ind">
+                    {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
+                  </BarisKosong>
+                )}
+                {hasil?.data.map((pl) => (
+                  <tr key={pl.id_placement} onClick={() => buka(pl.id_placement)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                    <Sel peran="judul">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          buka(pl.id_placement);
+                        }}
+                        className="text-left group max-w-full"
+                      >
+                        <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
+                        <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{pl.talent.email}</span>
+                      </button>
+                    </Sel>
+                    <Sel peran="setengah" label="Posisi" className="text-on-surface">{pl.posisi_penempatan}</Sel>
+                    <Sel peran="setengah" label="Klien" className="text-on-surface-variant">{pl.klien.nama_perusahaan}</Sel>
+                    <Sel label="Periode" className="whitespace-nowrap text-on-surface-variant">
+                      {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
+                    </Sel>
+                    <Sel peran="status">
+                      <PlacementBadge status={pl.status_placement} />
+                    </Sel>
+                  </tr>
+                ))}
+              </TabelKartu>
               {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="penempatan" />}
             </div>
           </>

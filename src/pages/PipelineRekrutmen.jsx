@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { BarisKosong, BarisMemuat, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, formatTanggalWaktu, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggalWaktu, useTunda } from "../components/ui";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, TAHAPAN } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -135,31 +135,21 @@ export default function PipelineRekrutmen() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[960px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Permintaan</th>
-                  <th>SLA</th>
-                  <th>Pemenuhan</th>
-                  <th className="angka">Screening</th>
-                  <th>Progres Terakhir</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={6} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={6} ikon="view_kanban">
-                    {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((job) => (
-                  <BarisPipeline key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu
+            kolom={["Permintaan", "SLA", "Pemenuhan", { label: "Screening", className: "angka" }, "Progres Terakhir", "Status"]}
+            className="md:min-w-[960px]"
+            redup={memuat && hasil}
+          >
+            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={6} ikon="view_kanban">
+                {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((job) => (
+              <BarisPipeline key={job.id_job_req} job={job} onOpen={() => setDipilih(job.id_job_req)} />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="permintaan" />}
         </div>
       </div>
@@ -190,7 +180,7 @@ function BarisPipeline({ job, onOpen }) {
 
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td>
+      <Sel peran="judul">
         <button
           type="button"
           onClick={(e) => {
@@ -202,18 +192,18 @@ function BarisPipeline({ job, onOpen }) {
           <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{job.posisi}</span>
           <span className="block font-body-sm text-body-sm text-on-surface-variant">{job.klien.nama_perusahaan}</span>
         </button>
-      </td>
-      <td className="whitespace-nowrap">
+      </Sel>
+      <Sel peran="setengah" label="SLA" className="whitespace-nowrap">
         <span className="block">
           <SlaBadge indikator={job.indikator_sla} />
         </span>
         <span className="block mt-1 font-body-sm text-body-sm text-on-surface-variant">{formatTanggalWaktu(job.sla_deadline)}</span>
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="setengah" label="Pemenuhan">
         <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
-      </td>
-      <td className="angka font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</td>
-      <td>
+      </Sel>
+      <Sel label="Screening" className="angka font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</Sel>
+      <Sel label="Progres Terakhir">
         {log ? (
           <div className="flex items-start gap-space-sm">
             <span className="material-symbols-outlined text-[18px] text-primary">{tahapan.ikon}</span>
@@ -228,10 +218,10 @@ function BarisPipeline({ job, onOpen }) {
         ) : (
           <span className="font-body-sm text-body-sm text-outline">Belum diajukan</span>
         )}
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="status">
         <StatusReqBadge status={job.status_req} />
-      </td>
+      </Sel>
     </tr>
   );
 }

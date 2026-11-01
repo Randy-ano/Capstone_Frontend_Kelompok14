@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KartuRingkasan, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, Sel, TabelKartu, errorField, formatTanggal, formatTanggalWaktu, useTunda } from "../components/ui";
 import { Field, LaporanBadge, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
 
 const KARTU = [
@@ -103,50 +103,37 @@ export default function TiketKomplain() {
             </KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
-            <div className="overflow-x-auto w-full">
-              <table className="tabel min-w-[760px] text-left border-collapse">
-                <thead>
-                  <tr>
-                    <th>Laporan</th>
-                    <th>Talent</th>
-                    <th>Dilaporkan</th>
-                    <th>Ditindaklanjuti</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hasil.data.map((l) => (
-                    <tr key={l.id_laporan} onClick={() => setDipilih(l)} className="hover:bg-surface-container-low cursor-pointer align-top">
-                      <td className="max-w-[320px]">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDipilih(l);
-                          }}
-                          className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary"
-                        >
-                          {l.judul_laporan}
-                        </button>
-                        <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{l.deskripsi_keluhan}</p>
-                      </td>
-                      <td>
-                        <span className="block text-on-surface">{l.placement.talent.nama_lengkap}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{l.placement.klien.nama_perusahaan}</span>
-                      </td>
-                      <td className="whitespace-nowrap">
-                        <span className="block text-on-surface-variant">{formatTanggal(l.tanggal_laporan)}</span>
-                        {l.pelapor && <span className="block font-body-sm text-body-sm text-outline">oleh {l.pelapor.nama_hr}</span>}
-                      </td>
-                      <td className="text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</td>
-                      <td>
-                        <LaporanBadge status={l.status_laporan} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TabelKartu kolom={["Laporan", "Talent", "Dilaporkan", "Ditindaklanjuti", "Status"]} className="md:min-w-[760px]">
+              {hasil.data.map((l) => (
+                <tr key={l.id_laporan} onClick={() => setDipilih(l)} className="hover:bg-surface-container-low cursor-pointer align-top">
+                  <Sel peran="judul" className="max-w-[320px]">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDipilih(l);
+                      }}
+                      className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary"
+                    >
+                      {l.judul_laporan}
+                    </button>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">{l.deskripsi_keluhan}</p>
+                  </Sel>
+                  <Sel peran="setengah" label="Talent">
+                    <span className="block text-on-surface">{l.placement.talent.nama_lengkap}</span>
+                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{l.placement.klien.nama_perusahaan}</span>
+                  </Sel>
+                  <Sel peran="setengah" label="Dilaporkan" className="whitespace-nowrap">
+                    <span className="block text-on-surface-variant">{formatTanggal(l.tanggal_laporan)}</span>
+                    {l.pelapor && <span className="block font-body-sm text-body-sm text-outline">oleh {l.pelapor.nama_hr}</span>}
+                  </Sel>
+                  <Sel label="Ditindaklanjuti" className="text-on-surface-variant">{l.tindak_lanjut.oleh ?? "-"}</Sel>
+                  <Sel peran="status">
+                    <LaporanBadge status={l.status_laporan} />
+                  </Sel>
+                </tr>
+              ))}
+            </TabelKartu>
           )}
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="tiket" />}
         </div>

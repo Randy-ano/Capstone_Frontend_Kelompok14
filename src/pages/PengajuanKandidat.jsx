@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
 import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -116,64 +116,51 @@ export default function PengajuanKandidat() {
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[860px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Kandidat</th>
-                  <th>Posisi & Klien</th>
-                  <th>Diajukan</th>
-                  <th>Tahap Saat Ini</th>
-                  <th>Status</th>
+          <TabelKartu kolom={["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]} className="md:min-w-[860px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={5} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={5} ikon="send">
+                {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((p) => {
+              const tahap = tahapPengajuan(p);
+              return (
+                <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                  <Sel peran="judul">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDipilih(p.id_pengajuan);
+                      }}
+                      className="text-left group"
+                    >
+                      <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{p.talent.nama_lengkap}</span>
+                      <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
+                    </button>
+                  </Sel>
+                  <Sel label="Posisi & Klien">
+                    <span className="block text-on-surface">{p.job_requirement.posisi}</span>
+                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
+                  </Sel>
+                  <Sel peran="setengah" label="Diajukan" className="whitespace-nowrap">
+                    <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
+                    {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
+                  </Sel>
+                  <Sel peran="setengah" label="Tahap Saat Ini">
+                    <span className="flex items-center gap-1 text-on-surface">
+                      <span className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
+                      {tahap.label}
+                    </span>
+                  </Sel>
+                  <Sel peran="status">
+                    <PengajuanBadge status={p.status_pengajuan} />
+                  </Sel>
                 </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="send">
-                    {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((p) => {
-                  const tahap = tahapPengajuan(p);
-                  return (
-                    <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                      <td>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDipilih(p.id_pengajuan);
-                          }}
-                          className="text-left group"
-                        >
-                          <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{p.talent.nama_lengkap}</span>
-                          <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
-                        </button>
-                      </td>
-                      <td>
-                        <span className="block text-on-surface">{p.job_requirement.posisi}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
-                      </td>
-                      <td className="whitespace-nowrap">
-                        <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
-                        {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
-                      </td>
-                      <td>
-                        <span className="flex items-center gap-1 text-on-surface">
-                          <span className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
-                          {tahap.label}
-                        </span>
-                      </td>
-                      <td>
-                        <PengajuanBadge status={p.status_pengajuan} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              );
+            })}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pengajuan" />}
         </div>
       </div>

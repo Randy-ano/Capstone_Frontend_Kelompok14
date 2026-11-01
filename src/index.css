@@ -86,6 +86,78 @@
   }
 }
 
+/* Mode kartu TabelKartu (src/components/ui.jsx) untuk layar < 768px. */
+@layer components {
+  @media (max-width: 767.98px) {
+    .tabel-kartu,
+    .tabel-kartu > tbody {
+      display: block;
+      width: 100%;
+    }
+    .tabel-kartu > thead {
+      @apply sr-only;
+    }
+    .tabel-kartu > tbody {
+      @apply flex flex-col gap-space-sm p-space-sm bg-surface-container-low;
+    }
+    /* :where agar warna hover & sorot baris (utility) tetap menang. */
+    :where(.tabel-kartu > tbody > tr) {
+      @apply bg-surface-container-lowest;
+    }
+    .tabel-kartu > tbody > tr {
+      @apply flex flex-wrap items-start gap-x-space-md gap-y-3 p-space-md rounded-xl border-0 shadow-sm ring-1 ring-surface-container-high;
+    }
+    .tabel-kartu > tbody > tr > td {
+      @apply block min-w-0 p-0 text-left whitespace-normal break-words;
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+    .tabel-kartu > tbody > tr > td:empty {
+      display: none;
+    }
+    .tabel-kartu > tbody > tr > td[data-label]::before {
+      @apply block mb-0.5 font-label-sm text-label-sm text-outline uppercase tracking-wider;
+      content: attr(data-label);
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="judul"] {
+      flex: 1 1 0;
+      order: -3;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="status"] {
+      @apply ml-auto;
+      flex: 0 0 auto;
+      order: -2;
+    }
+    /* Pemisah tak terlihat: judul & badge selalu punya baris sendiri, sel setengah tidak ikut naik. */
+    .tabel-kartu > tbody > tr::after {
+      content: "";
+      flex: 0 0 100%;
+      order: -1;
+      margin-top: -0.75rem;
+    }
+    .tabel-kartu > tbody > tr[data-kosong]::after,
+    .tabel-kartu > tbody > tr[data-memuat]::after {
+      content: none;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="setengah"] {
+      flex: 0 0 calc(50% - 0.5rem);
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] {
+      @apply pt-3 border-t border-surface-container;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] > div {
+      @apply flex-wrap justify-start;
+    }
+    .tabel-kartu > tbody > tr > td[data-kartu="aksi"] button {
+      flex: 1 1 auto;
+    }
+    /* Baris "belum ada data" tanpa bingkai kartu. */
+    .tabel-kartu > tbody > tr[data-kosong] {
+      @apply p-0 bg-transparent shadow-none ring-0;
+    }
+  }
+}
+
 /* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */
 * {
   scrollbar-width: thin;

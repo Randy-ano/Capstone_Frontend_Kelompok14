@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 import DetailDrawer from "../components/talentPool/DetailDrawer";
-import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, TagChip, formatTanggal, pecahTag } from "../components/ui";
+import { BarisKosong, BarisMemuat, Chip, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, TagChip, formatTanggal, pecahTag } from "../components/ui";
 import { STATUS_KETERSEDIAAN, StatusBadge } from "../components/talentPool/shared";
 
 const PER_PAGE = 10;
@@ -160,31 +160,17 @@ export default function TalentPool() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[880px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Pendidikan</th>
-                  <th>Kompetensi</th>
-                  <th>Tag Keahlian</th>
-                  <th>Tanggal Masuk</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={6} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={6} ikon="group">
-                    {adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Talent pool masih kosong."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((item) => (
-                  <BarisTalent key={item.id_talent_pool} item={item} onOpen={() => setDipilih(item.id_talent_pool)} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Nama", "Pendidikan", "Kompetensi", "Tag Keahlian", "Tanggal Masuk", "Status"]} className="md:min-w-[880px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={6} ikon="group">
+                {adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Talent pool masih kosong."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((item) => (
+              <BarisTalent key={item.id_talent_pool} item={item} onOpen={() => setDipilih(item.id_talent_pool)} />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="talent" />}
         </div>
       </div>
@@ -201,15 +187,15 @@ function BarisTalent({ item, onOpen }) {
 
   return (
     <tr onClick={onOpen} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-      <td>
-        <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="text-left group">
+      <Sel peran="judul">
+        <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="text-left group max-w-full">
           <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{talent.nama_lengkap}</span>
-          <span className="block font-body-sm text-body-sm text-on-surface-variant">{talent.email}</span>
+          <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{talent.email}</span>
         </button>
-      </td>
-      <td className="text-on-surface-variant max-w-[220px]">{talent.pendidikan ?? "-"}</td>
-      <td>
-        <div className="flex flex-wrap gap-1 max-w-[260px]">
+      </Sel>
+      <Sel label="Pendidikan" className="text-on-surface-variant max-w-[220px]">{talent.pendidikan ?? "-"}</Sel>
+      <Sel label="Kompetensi">
+        <div className="flex flex-wrap gap-1 md:max-w-[260px]">
           {talent.kompetensi.slice(0, MAKS_CHIP).map((k) => (
             <Chip key={k.id_kompetensi} title={k.kategori}>
               {k.nama_kompetensi}
@@ -225,16 +211,16 @@ function BarisTalent({ item, onOpen }) {
           )}
           {talent.kompetensi.length === 0 && <span className="text-outline">-</span>}
         </div>
-      </td>
-      <td>
-        <div className="flex flex-wrap gap-1 max-w-[220px]">
+      </Sel>
+      <Sel label="Tag Keahlian">
+        <div className="flex flex-wrap gap-1 md:max-w-[220px]">
           {tag.length ? tag.map((t) => <TagChip key={t}>{t}</TagChip>) : <span className="text-outline">-</span>}
         </div>
-      </td>
-      <td className="whitespace-nowrap text-on-surface-variant">{formatTanggal(item.tanggal_masuk)}</td>
-      <td>
+      </Sel>
+      <Sel label="Tanggal Masuk" className="whitespace-nowrap text-on-surface-variant">{formatTanggal(item.tanggal_masuk)}</Sel>
+      <Sel peran="status">
         <StatusBadge status={item.status_ketersediaan} />
-      </td>
+      </Sel>
     </tr>
   );
 }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE_LABEL } from "../auth/roles";
-import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, errorField, useTunda } from "../components/ui";
+import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
 
 const PER_PAGE = 15;
 const OPSI_ROLE = INTERNAL.map((r) => [r, ROLE_LABEL[r]]);
@@ -114,44 +114,30 @@ export default function KelolaPegawai() {
         {sukses && <Pesan jenis="sukses">{sukses}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className={`tabel min-w-[760px] text-left border-collapse transition-opacity ${memuat && hasil ? "opacity-60" : ""}`}>
-              <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>No. Telepon</th>
-                  <th>Status</th>
-                  <th className="aksi">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!hasil && memuat && <BarisMemuat kolom={6} />}
-                {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={6} ikon="manage_accounts">
-                    {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
-                  </BarisKosong>
-                )}
-                {hasil?.data.map((p) => (
-                  <BarisPegawai
-                    key={p.id_pegawai}
-                    pegawai={p}
-                    diriSendiri={p.akun.id_user === user.id_user}
-                    onUbah={() => {
-                      setSukses("");
-                      setForm({ pegawai: p });
-                    }}
-                    onStatus={berhasil}
-                    onError={(pesan) => {
-                      setSukses("");
-                      setError(pesan);
-                    }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TabelKartu kolom={["Nama", "Email", "Role", "No. Telepon", "Status", { label: "Aksi", className: "aksi" }]} className="md:min-w-[760px]" redup={memuat && hasil}>
+            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {hasil?.data.length === 0 && (
+              <BarisKosong kolom={6} ikon="manage_accounts">
+                {adaFilter ? "Tidak ada pegawai yang cocok dengan pencarian atau filter." : "Belum ada pegawai."}
+              </BarisKosong>
+            )}
+            {hasil?.data.map((p) => (
+              <BarisPegawai
+                key={p.id_pegawai}
+                pegawai={p}
+                diriSendiri={p.akun.id_user === user.id_user}
+                onUbah={() => {
+                  setSukses("");
+                  setForm({ pegawai: p });
+                }}
+                onStatus={berhasil}
+                onError={(pesan) => {
+                  setSukses("");
+                  setError(pesan);
+                }}
+              />
+            ))}
+          </TabelKartu>
           {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pegawai" />}
         </div>
       </div>
@@ -183,21 +169,21 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
 
   return (
     <tr className="hover:bg-surface-container-low transition-colors">
-      <td>
+      <Sel peran="judul">
         <span className="block font-title-sm text-title-sm text-on-surface">
           {p.nama_pegawai} {diriSendiri && <span className="font-label-sm text-label-sm text-primary">(Anda)</span>}
         </span>
         <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.jabatan}</span>
-      </td>
-      <td className="text-on-surface-variant">{p.akun.email}</td>
-      <td>
+      </Sel>
+      <Sel label="Email" className="text-on-surface-variant break-all">{p.akun.email}</Sel>
+      <Sel peran="setengah" label="Role">
         <Badge className="bg-secondary-container text-on-secondary-fixed">{ROLE_LABEL[p.akun.role] ?? p.akun.role}</Badge>
-      </td>
-      <td className="text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</td>
-      <td>
+      </Sel>
+      <Sel peran="setengah" label="No. Telepon" className="text-on-surface-variant">{p.no_telepon ?? <span className="text-outline">-</span>}</Sel>
+      <Sel peran="status">
         <Badge className={aktif ? "bg-tertiary-fixed text-on-tertiary-fixed-variant" : "bg-error-container text-on-error-container"}>{aktif ? "Aktif" : "Nonaktif"}</Badge>
-      </td>
-      <td>
+      </Sel>
+      <Sel peran="aksi">
         {konfirmasi ? (
           <div className="flex items-center justify-end gap-1">
             <span className="font-body-sm text-body-sm text-on-surface-variant mr-1">{aktif ? "Nonaktifkan?" : "Aktifkan?"}</span>
@@ -226,7 +212,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
             )}
           </div>
         )}
-      </td>
+      </Sel>
     </tr>
   );
 }
