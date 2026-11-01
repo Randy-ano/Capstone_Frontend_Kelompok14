@@ -89,7 +89,7 @@ export default function Lonceng() {
       </button>
 
       {buka && (
-        <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto sm:mt-2 sm:w-96 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high z-50 overflow-hidden">
+        <div className="animasi-menu fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto sm:mt-2 sm:w-96 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high z-50 overflow-hidden">
           <div className="flex items-center justify-between px-space-md py-space-sm border-b border-surface-container-high">
             <span className="font-title-sm text-title-sm text-on-surface">Notifikasi</span>
             {jumlah > 0 && (

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useToast } from "../components/toast";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
+import { Modal } from "../components/dialog";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
 
 const PER_PAGE = 15;
 
@@ -172,7 +173,7 @@ function BarisKompetensi({ kompetensi: k, onUbah, onTerhapus, onError }) {
               Tidak
             </button>
             <button type="button" onClick={handleHapus} disabled={hapus} className="tombol-bahaya">
-              {hapus ? "Menghapus..." : "Ya, Hapus"}
+              <Proses aktif={hapus}>Ya, Hapus</Proses>
             </button>
           </div>
         ) : (
@@ -232,58 +233,47 @@ function FormKompetensi({ kompetensi, opsiKategori, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah kompetensi" : "Tambah kompetensi"}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && !kirim) onClose();
-        }}
-        className="relative w-full sm:max-w-md bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Kompetensi" : "Tambah Kompetensi"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="p-space-md sm:p-space-lg space-y-space-md">
-          {error && !e("nama_kompetensi") && !e("kategori") && <Pesan>{error.message}</Pesan>}
-          {ubah && kompetensi.jumlah_talent + kompetensi.jumlah_job_requirement > 0 && (
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Dipakai {kompetensi.jumlah_talent} talent dan {kompetensi.jumlah_job_requirement} permintaan; perubahan nama langsung berlaku di semuanya.
-            </p>
-          )}
-          <label className="block space-y-1">
-            <span className="font-label-md text-label-md text-on-surface">
-              Nama kompetensi <span className="text-error">*</span>
-            </span>
-            <input autoFocus value={nama} onChange={ubahField(setNama)} maxLength={100} placeholder="Contoh: Golang" className={inputClass(e("nama_kompetensi"))} />
-            {e("nama_kompetensi") && <span className="block font-body-sm text-body-sm text-error">{e("nama_kompetensi")}</span>}
-          </label>
-          <label className="block space-y-1">
-            <span className="font-label-md text-label-md text-on-surface">Kategori</span>
-            <input list="opsi-kategori" value={kategori} onChange={ubahField(setKategori)} maxLength={100} placeholder="Pilih atau ketik kategori baru" className={inputClass(e("kategori"))} />
-            <datalist id="opsi-kategori">
-              {opsiKategori.map((k) => (
-                <option key={k} value={k} />
-              ))}
-            </datalist>
-            {e("kategori") && <span className="block font-body-sm text-body-sm text-error">{e("kategori")}</span>}
-          </label>
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <Modal
+      judul={ubah ? "Ubah Kompetensi" : "Tambah Kompetensi"}
+      label={ubah ? "Ubah kompetensi" : "Tambah kompetensi"}
+      lebar="sm:max-w-md"
+      sibuk={kirim}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
           <button type="submit" disabled={kirim} className="tombol-utama">
-            {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah"}
+            <Proses aktif={kirim}>{ubah ? "Simpan Perubahan" : "Tambah"}</Proses>
           </button>
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {error && !e("nama_kompetensi") && !e("kategori") && <Pesan>{error.message}</Pesan>}
+      {ubah && kompetensi.jumlah_talent + kompetensi.jumlah_job_requirement > 0 && (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Dipakai {kompetensi.jumlah_talent} talent dan {kompetensi.jumlah_job_requirement} permintaan; perubahan nama langsung berlaku di semuanya.
+        </p>
+      )}
+      <label className="block space-y-1">
+        <span className="font-label-md text-label-md text-on-surface">
+          Nama kompetensi <span className="text-error">*</span>
+        </span>
+        <input autoFocus value={nama} onChange={ubahField(setNama)} maxLength={100} placeholder="Contoh: Golang" className={inputClass(e("nama_kompetensi"))} />
+        {e("nama_kompetensi") && <span className="block font-body-sm text-body-sm text-error">{e("nama_kompetensi")}</span>}
+      </label>
+      <label className="block space-y-1">
+        <span className="font-label-md text-label-md text-on-surface">Kategori</span>
+        <input list="opsi-kategori" value={kategori} onChange={ubahField(setKategori)} maxLength={100} placeholder="Pilih atau ketik kategori baru" className={inputClass(e("kategori"))} />
+        <datalist id="opsi-kategori">
+          {opsiKategori.map((k) => (
+            <option key={k} value={k} />
+          ))}
+        </datalist>
+        {e("kategori") && <span className="block font-body-sm text-body-sm text-error">{e("kategori")}</span>}
+      </label>
+    </Modal>
   );
 }

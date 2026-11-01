@@ -3,7 +3,8 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE_LABEL } from "../auth/roles";
 import { useToast } from "../components/toast";
-import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda } from "../components/ui";
+import { Modal } from "../components/dialog";
+import { Badge, BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
 
 const PER_PAGE = 15;
 const OPSI_ROLE = INTERNAL.map((r) => [r, ROLE_LABEL[r]]);
@@ -182,7 +183,7 @@ function BarisPegawai({ pegawai: p, diriSendiri, onUbah, onStatus, onError }) {
               Tidak
             </button>
             <button type="button" onClick={ubahStatus} disabled={kirim} className={aktif ? "tombol-bahaya" : "tombol-utama"}>
-              {kirim ? "Menyimpan..." : "Ya"}
+              <Proses aktif={kirim}>Ya</Proses>
             </button>
           </div>
         ) : (
@@ -274,63 +275,52 @@ function FormPegawai({ pegawai, onClose, onSaved }) {
   const e = (field) => errorField(error, field);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={ubah ? "Ubah pegawai" : "Tambah pegawai"}>
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && !kirim) onClose();
-        }}
-        className="relative w-full sm:max-w-xl max-h-[95vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">{ubah ? "Ubah Pegawai" : "Tambah Pegawai"}</h2>
-          <button type="button" onClick={onClose} disabled={kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error.message}</Pesan>}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-            <Field label="Nama pegawai" wajib error={e("nama_pegawai")}>
-              <input autoFocus value={form.nama_pegawai} onChange={set("nama_pegawai")} maxLength={255} className={inputClass(e("nama_pegawai"))} />
-            </Field>
-            <Field label="Jabatan" wajib error={e("jabatan")}>
-              <input value={form.jabatan} onChange={set("jabatan")} maxLength={255} placeholder="Contoh: Talent Support" className={inputClass(e("jabatan"))} />
-            </Field>
-            <Field label="Email" wajib error={e("email")}>
-              <input type="email" value={form.email} onChange={set("email")} maxLength={255} placeholder="nama@intellisys.test" className={inputClass(e("email"))} />
-            </Field>
-            <Field label="Role" wajib error={e("role")}>
-              <select value={form.role} onChange={set("role")} className={inputClass(e("role"))}>
-                <option value="">Pilih role...</option>
-                {OPSI_ROLE.map(([nilai, label]) => (
-                  <option key={nilai} value={nilai}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="No. telepon" error={e("no_telepon")}>
-              <input value={form.no_telepon} onChange={set("no_telepon")} maxLength={30} placeholder="0812-..." className={inputClass(e("no_telepon"))} />
-            </Field>
-            <Field label="Password" wajib={!ubah} error={e("password")} keterangan={ubah ? "Kosongkan jika tidak diubah. Minimal 8 karakter." : "Minimal 8 karakter."}>
-              <input type="password" value={form.password} onChange={set("password")} autoComplete="new-password" className={inputClass(e("password"))} />
-            </Field>
-          </div>
-        </div>
-
-        <div className="shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high rounded-b-xl">
+    <Modal
+      judul={ubah ? "Ubah Pegawai" : "Tambah Pegawai"}
+      label={ubah ? "Ubah pegawai" : "Tambah pegawai"}
+      lebar="sm:max-w-xl"
+      sibuk={kirim}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      kaki={
+        <>
           <button type="button" onClick={onClose} disabled={kirim} className="tombol-kedua">
             Batal
           </button>
           <button type="submit" disabled={kirim} className="tombol-utama">
-            {kirim ? "Menyimpan..." : ubah ? "Simpan Perubahan" : "Tambah Pegawai"}
+            <Proses aktif={kirim}>{ubah ? "Simpan Perubahan" : "Tambah Pegawai"}</Proses>
           </button>
-        </div>
-      </form>
-    </div>
+        </>
+      }
+    >
+      {error && <Pesan>{error.message}</Pesan>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+        <Field label="Nama pegawai" wajib error={e("nama_pegawai")}>
+          <input autoFocus value={form.nama_pegawai} onChange={set("nama_pegawai")} maxLength={255} className={inputClass(e("nama_pegawai"))} />
+        </Field>
+        <Field label="Jabatan" wajib error={e("jabatan")}>
+          <input value={form.jabatan} onChange={set("jabatan")} maxLength={255} placeholder="Contoh: Talent Support" className={inputClass(e("jabatan"))} />
+        </Field>
+        <Field label="Email" wajib error={e("email")}>
+          <input type="email" value={form.email} onChange={set("email")} maxLength={255} placeholder="nama@intellisys.test" className={inputClass(e("email"))} />
+        </Field>
+        <Field label="Role" wajib error={e("role")}>
+          <select value={form.role} onChange={set("role")} className={inputClass(e("role"))}>
+            <option value="">Pilih role...</option>
+            {OPSI_ROLE.map(([nilai, label]) => (
+              <option key={nilai} value={nilai}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="No. telepon" error={e("no_telepon")}>
+          <input value={form.no_telepon} onChange={set("no_telepon")} maxLength={30} placeholder="0812-..." className={inputClass(e("no_telepon"))} />
+        </Field>
+        <Field label="Password" wajib={!ubah} error={e("password")} keterangan={ubah ? "Kosongkan jika tidak diubah. Minimal 8 karakter." : "Minimal 8 karakter."}>
+          <input type="password" value={form.password} onChange={set("password")} autoComplete="new-password" className={inputClass(e("password"))} />
+        </Field>
+      </div>
+    </Modal>
   );
 }

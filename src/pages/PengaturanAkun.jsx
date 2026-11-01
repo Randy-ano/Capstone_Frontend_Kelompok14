@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser } from "../auth/roles";
-import { KepalaHalaman, Pesan, errorField } from "../components/ui";
+import { KepalaHalaman, Pesan, Proses, errorField } from "../components/ui";
 import { useToast } from "../components/toast";
 
 const FORM_KOSONG = { password_lama: "", password: "", password_confirmation: "" };
@@ -108,8 +108,7 @@ export default function PengaturanAkun() {
               disabled={kirim}
               className="tombol-utama"
             >
-              <span className="material-symbols-outlined text-[18px]">{kirim ? "progress_activity" : "lock_reset"}</span>
-              {kirim ? "Menyimpan..." : "Simpan Password"}
+              <Proses aktif={kirim} ikon="lock_reset">Simpan Password</Proses>
             </button>
           </div>
         </form>

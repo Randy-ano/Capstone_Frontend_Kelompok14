@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda } from "../components/ui";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda, Proses } from "../components/ui";
 import { useToast, useToastGagal } from "../components/toast";
 import { PlacementBadge } from "../components/rekrutmen/shared";
 import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
@@ -91,7 +91,7 @@ export default function MonitoringKinerja() {
 
         <ol className="flex flex-col gap-space-sm">
           {hasil?.data.map((m) => (
-            <li key={m.id_monitoring} className="kartu p-space-md space-y-space-sm">
+            <li key={m.id_monitoring} className="kartu-item p-space-md space-y-space-sm">
               <div className="flex items-start justify-between gap-space-sm">
                 <div className="min-w-0">
                   <div className="font-title-sm text-title-sm text-on-surface">{m.placement.talent.nama_lengkap}</div>
@@ -179,7 +179,7 @@ function ModalCatat({ placement, awal, onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim} className="tombol-utama">
-          {kirim ? "Menyimpan..." : "Simpan"}
+          <Proses aktif={kirim}>Simpan</Proses>
         </button>
       }
     >

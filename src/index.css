@@ -24,7 +24,7 @@
   /* Tombol: utama = aksi utama halaman/form, kedua = aksi pendamping, bahaya = hapus/tolak/batalkan,
      teks = aksi ringan (reset filter, lihat detail), ikon = tombol berisi ikon saja. Tinggi minimal 40px agar mudah disentuh. */
   .tombol {
-    @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition-colors
+    @apply inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition duration-150 enabled:active:scale-[0.98]
       focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .tombol-utama {
@@ -43,7 +43,7 @@
     @apply tombol px-3 text-primary hover:bg-primary-fixed;
   }
   .tombol-ikon {
-    @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface
+    @apply inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-lg text-on-surface-variant transition duration-150 enabled:active:scale-95 hover:bg-surface-container hover:text-on-surface
       focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50;
   }
 
@@ -51,11 +51,15 @@
   .kartu {
     @apply bg-surface-container-lowest rounded-xl shadow-sm ring-1 ring-surface-container-high;
   }
+  /* Kartu berisi satu item daftar: bayangan sedikit naik saat disorot. */
+  .kartu-item {
+    @apply kartu transition-shadow duration-200 hover:shadow-md;
+  }
 
   /* Isian form. Label di atas, error di bawah (lihat Field di operasional/shared.jsx). */
   .input {
     @apply w-full min-h-[40px] px-3 rounded-lg bg-surface-container-lowest ring-1 ring-inset ring-outline-variant font-body-md text-body-md text-on-surface
-      placeholder:text-outline transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/60 disabled:bg-surface-container-low disabled:text-on-surface-variant;
+      placeholder:text-outline transition-shadow duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 disabled:bg-surface-container-low disabled:text-on-surface-variant;
   }
   .input-error {
     @apply ring-2 ring-error focus:ring-error;
@@ -70,7 +74,10 @@
     @apply py-3 px-4 bg-surface-container-low text-on-surface-variant font-label-md text-label-md font-semibold uppercase tracking-wide whitespace-nowrap border-b border-surface-container-high;
   }
   .tabel :where(tbody tr) {
-    @apply border-b border-surface-container transition-colors;
+    @apply border-b border-surface-container transition-colors duration-150;
+  }
+  .tabel :where(tbody tr:not([data-kosong], [data-memuat])):hover {
+    @apply bg-surface-container-low;
   }
   .tabel :where(tbody tr:last-child) {
     @apply border-b-0;
@@ -158,15 +165,65 @@
   }
 }
 
-/* Toast muncul dari bawah. */
-@keyframes toast-masuk {
+/* Animasi masuk: latar & menu memudar, drawer bergeser dari kanan, modal dari bawah (HP) atau memudar sambil membesar sedikit (desktop). */
+@keyframes pudar-masuk {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes geser-kanan {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes geser-bawah {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes naik-masuk {
   from {
     opacity: 0;
     transform: translateY(0.5rem);
   }
 }
+@keyframes muncul-masuk {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+.animasi-latar {
+  animation: pudar-masuk 200ms ease-out;
+}
+.animasi-laci {
+  animation: geser-kanan 200ms ease-out;
+}
+.animasi-modal {
+  animation: geser-bawah 200ms ease-out;
+}
+@media (min-width: 640px) {
+  .animasi-modal {
+    animation: muncul-masuk 150ms ease-out;
+  }
+}
 .animasi-toast {
-  animation: toast-masuk 200ms ease-out;
+  animation: naik-masuk 200ms ease-out;
+}
+.animasi-menu {
+  animation: naik-masuk 150ms ease-out;
+}
+
+/* Pengguna yang meminta gerakan minimal: animasi & transisi dimatikan. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Scrollbar tipis (bukan disembunyikan) agar tabel lebar tetap terlihat bisa digeser. */

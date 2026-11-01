@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
-import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu } from "../ui";
+import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu, Proses } from "../ui";
 import { useToast } from "../toast";
+import { Laci } from "../dialog";
 import { HasilBadge } from "../talentPool/shared";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola } from "./shared";
 
@@ -32,47 +33,29 @@ export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit 
     };
   }, [id, internal, versi, muat]);
 
-  useEffect(() => {
-    const esc = (event) => event.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail permintaan kebutuhan">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Permintaan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !job && <Memuat>Memuat detail...</Memuat>}
-          {job && (
-            <>
-              <Ringkasan job={job} />
-              <Aksi
-                job={job}
-                user={user}
-                onEdit={() => onEdit(job)}
-                onUbahStatus={(data) => {
-                  setJob((j) => ({ ...j, ...data }));
-                  setMuat((m) => m + 1);
-                  onChanged();
-                }}
-              />
-              <RingkasanProgres ringkasan={job.ringkasan_progres} />
-              {internal && <KandidatScreening items={screening} />}
-              <LogProgres items={job.log_progres} />
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+    <Laci judul="Detail Permintaan" label="Detail permintaan kebutuhan" onClose={onClose}>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !job && <Memuat>Memuat detail...</Memuat>}
+      {job && (
+        <>
+          <Ringkasan job={job} />
+          <Aksi
+            job={job}
+            user={user}
+            onEdit={() => onEdit(job)}
+            onUbahStatus={(data) => {
+              setJob((j) => ({ ...j, ...data }));
+              setMuat((m) => m + 1);
+              onChanged();
+            }}
+          />
+          <RingkasanProgres ringkasan={job.ringkasan_progres} />
+          {internal && <KandidatScreening items={screening} />}
+          <LogProgres items={job.log_progres} />
+        </>
+      )}
+    </Laci>
   );
 }
 
@@ -181,7 +164,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
               Tidak
             </button>
             <button type="button" onClick={() => ubahStatus("dibatalkan")} disabled={!!kirim} className="tombol-bahaya">
-              {kirim ? "Membatalkan..." : "Ya, Batalkan"}
+              <Proses aktif={kirim}>Ya, Batalkan</Proses>
             </button>
           </div>
         </div>
@@ -195,8 +178,7 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
           )}
           {bisaAjukan && (
             <button type="button" onClick={() => ubahStatus("diajukan")} disabled={!!kirim} className="tombol-utama">
-              <span className="material-symbols-outlined text-[18px]">send</span>
-              {kirim === "diajukan" ? "Mengajukan..." : "Ajukan"}
+              <Proses aktif={kirim === "diajukan"} ikon="send">Ajukan</Proses>
             </button>
           )}
           {bisaUbah && (

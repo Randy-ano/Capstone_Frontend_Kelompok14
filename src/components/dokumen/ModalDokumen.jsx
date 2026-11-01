@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { INTERNAL, ROLE } from "../../auth/roles";
-import { Pesan, errorField } from "../ui";
+import { Pesan, errorField, Proses } from "../ui";
 import { useToast, useToastGagal } from "../toast";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
@@ -63,7 +63,7 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
   }
 
   return (
-    <Modal judul="Unggah Dokumen" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}>{kirim ? "Mengunggah..." : "Unggah"}</button>}>
+    <Modal judul="Unggah Dokumen" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}><Proses aktif={kirim}>Unggah</Proses></button>}>
       {error && <Pesan>{error.message}</Pesan>}
       {user.role === ROLE.TALENT && (
         <p className="flex items-start gap-space-sm rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm text-on-surface-variant">
@@ -179,7 +179,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
   }
 
   return (
-    <Modal judul="Buat Dokumen dari Template" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}>{kirim ? "Membuat PDF..." : "Buat Dokumen"}</button>}>
+    <Modal judul="Buat Dokumen dari Template" sibuk={kirim} onClose={onClose} onSubmit={simpan} aksi={<button type="submit" disabled={kirim} className={tombolSimpan}><Proses aktif={kirim}>Buat Dokumen</Proses></button>}>
       {error && <Pesan>{error.message}</Pesan>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <Field label="Jenis" wajib error={e("jenis_dokumen")}>

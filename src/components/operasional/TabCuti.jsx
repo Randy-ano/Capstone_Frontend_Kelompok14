@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggal, Proses } from "../ui";
 import { useToast } from "../toast";
 import { hariIni } from "../rekrutmen/shared";
 import { CutiBadge, Field, Modal, STATUS_CUTI, StatusApproval, inputClass, labelPlacement, tombolHalaman, tombolUtama, usePlacement } from "./shared";
@@ -118,7 +118,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
   }
 
   return (
-    <li className="kartu p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
+    <li className="kartu-item p-space-md flex flex-col lg:flex-row lg:items-center gap-space-sm">
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-space-sm">
           <span className="font-title-sm text-title-sm text-on-surface">
@@ -158,7 +158,7 @@ function ItemCuti({ cuti: c, user, onBerhasil, onError }) {
                 }
                 className={konfirmasi === "disetujui" ? "tombol-utama" : "tombol-bahaya"}
               >
-                {kirim ? "Memproses..." : "Ya"}
+                <Proses aktif={kirim}>Ya</Proses>
               </button>
             </>
           ) : bolehPutuskan ? (
@@ -228,7 +228,7 @@ function ModalAjukanCuti({ onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim || daftar?.length === 0} className="tombol-utama">
-          {kirim ? "Mengirim..." : "Kirim Pengajuan"}
+          <Proses aktif={kirim}>Kirim Pengajuan</Proses>
         </button>
       }
     >

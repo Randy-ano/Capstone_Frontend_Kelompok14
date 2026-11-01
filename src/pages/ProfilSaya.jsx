@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
 import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
@@ -410,7 +410,7 @@ export default function ProfilSaya() {
             Batalkan Perubahan
           </button>
           <button type="button" onClick={handleSimpan} disabled={simpan} className="tombol-utama">
-            {simpan ? "Menyimpan..." : "Simpan Perubahan"}
+            <Proses aktif={simpan}>Simpan Perubahan</Proses>
           </button>
         </div>
       )}
@@ -538,8 +538,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           disabled={!profil.ada_cv || !!proses}
           className="tombol-kedua"
         >
-          <span className="material-symbols-outlined text-[18px]">visibility</span>
-          {proses === "lihat" ? "Membuka..." : "Lihat CV"}
+          <Proses aktif={proses === "lihat"} ikon="visibility">Lihat CV</Proses>
         </button>
         <button
           type="button"
@@ -547,8 +546,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
           disabled={adaPerubahan || !lengkap || !!proses}
           className="tombol-utama"
         >
-          <span className="material-symbols-outlined text-[18px]">description</span>
-          {proses === "generate" ? "Membuat..." : profil.ada_cv ? "Buat Ulang CV" : "Buat CV"}
+          <Proses aktif={proses === "generate"} ikon="description">{profil.ada_cv ? "Buat Ulang CV" : "Buat CV"}</Proses>
         </button>
       </div>
     </Bagian>

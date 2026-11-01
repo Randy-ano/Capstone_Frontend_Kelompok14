@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal, Proses } from "../ui";
 import { useToast } from "../toast";
+import { Laci } from "../dialog";
 import {
   EvaluasiBadge,
   INTERVIEW_FINAL,
@@ -86,12 +87,6 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
     };
   }, [id, versi]);
 
-  useEffect(() => {
-    const esc = (event) => event.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
-
   function berhasil(pesan) {
     toast.sukses(pesan);
     setVersi((v) => v + 1);
@@ -103,33 +98,21 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
   const adaInterviewSelesai = p?.interviews?.some((i) => i.status_interview === "selesai");
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail pengajuan">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-xl h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Pengajuan</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !p && <Memuat>Memuat detail...</Memuat>}
-          {p && (
-            <>
-              <Ringkasan p={p} />
-              {bolehTinjau(user) && p.status_pengajuan === "diajukan" && jobBerjalan && <Tinjau p={p} onBerhasil={berhasil} />}
-              {p.status_pengajuan !== "diajukan" && (
-                <Interviews p={p} user={user} terbuka={terbukaInterview} onBerhasil={berhasil} />
-              )}
-              <Evaluasi p={p} user={user} bolehIsi={bolehTinjau(user) && terbukaInterview && adaInterviewSelesai} perluInterview={terbukaInterview && !adaInterviewSelesai} onBerhasil={berhasil} />
-              <Penempatan p={p} user={user} jobBerjalan={jobBerjalan} onBerhasil={berhasil} />
-            </>
+    <Laci judul="Detail Pengajuan" label="Detail pengajuan" onClose={onClose}>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !p && <Memuat>Memuat detail...</Memuat>}
+      {p && (
+        <>
+          <Ringkasan p={p} />
+          {bolehTinjau(user) && p.status_pengajuan === "diajukan" && jobBerjalan && <Tinjau p={p} onBerhasil={berhasil} />}
+          {p.status_pengajuan !== "diajukan" && (
+            <Interviews p={p} user={user} terbuka={terbukaInterview} onBerhasil={berhasil} />
           )}
-        </div>
-      </div>
-    </div>
+          <Evaluasi p={p} user={user} bolehIsi={bolehTinjau(user) && terbukaInterview && adaInterviewSelesai} perluInterview={terbukaInterview && !adaInterviewSelesai} onBerhasil={berhasil} />
+          <Penempatan p={p} user={user} jobBerjalan={jobBerjalan} onBerhasil={berhasil} />
+        </>
+      )}
+    </Laci>
   );
 }
 
@@ -183,15 +166,14 @@ function Tinjau({ p, onBerhasil }) {
               Tidak
             </button>
             <button type="button" onClick={() => ubah("ditolak")} disabled={kirim} className="tombol-bahaya">
-              {kirim ? "Memproses..." : "Ya, Tolak"}
+              <Proses aktif={kirim}>Ya, Tolak</Proses>
             </button>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-space-sm">
           <button type="button" onClick={() => ubah("lanjut_interview")} disabled={kirim} className={tombolUtama}>
-            <span className="material-symbols-outlined text-[18px]">event_available</span>
-            {kirim ? "Memproses..." : "Lanjut Interview"}
+            <Proses aktif={kirim} ikon="event_available">Lanjut Interview</Proses>
           </button>
           <button type="button" onClick={() => setKonfirmasi(true)} disabled={kirim} className="tombol-bahaya-garis">
             <span className="material-symbols-outlined text-[18px]">person_remove</span>
@@ -308,7 +290,7 @@ function ItemInterview({ iv, ronde, atur, onBerhasil }) {
             disabled={kirim}
             className="tombol-bahaya"
           >
-            {kirim ? "Memproses..." : "Ya, Batalkan"}
+            <Proses aktif={kirim}>Ya, Batalkan</Proses>
           </button>
         </div>
       )}
@@ -379,7 +361,7 @@ function FormJadwal({ judul, awal, onBatal, onKirim, onBerhasil }) {
           Batal
         </button>
         <button type="button" onClick={simpan} disabled={kirim} className={tombolUtama}>
-          {kirim ? "Menyimpan..." : "Simpan Jadwal"}
+          <Proses aktif={kirim}>Simpan Jadwal</Proses>
         </button>
       </div>
     </div>
@@ -467,7 +449,7 @@ function Evaluasi({ p, user, bolehIsi, perluInterview, onBerhasil }) {
           }
           className={tombolUtama}
         >
-          {kirim ? "Menyimpan..." : "Simpan Evaluasi"}
+          <Proses aktif={kirim}>Simpan Evaluasi</Proses>
         </button>
       </div>
     </Bagian>
@@ -526,7 +508,7 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
           }
           className={tombolUtama}
         >
-          {kirim ? "Menyimpan..." : "Buat Placement"}
+          <Proses aktif={kirim}>Buat Placement</Proses>
         </button>
       </div>
     </Bagian>

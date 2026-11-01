@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../lib/api";
-import { KeadaanKosong, Memuat, Pesan, errorField, formatTanggalWaktu } from "../ui";
+import { KeadaanKosong, Memuat, Pesan, errorField, formatTanggalWaktu, Proses } from "../ui";
+import { Laci } from "../dialog";
 import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDokumenBadge, unduhDokumen } from "./shared";
 
 
@@ -9,12 +10,6 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
   const [unduh, setUnduh] = useState(false);
   const [error, setError] = useState("");
   const jenis = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
-
-  useEffect(() => {
-    const esc = (ev) => ev.key === "Escape" && onClose();
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
 
   async function klikUnduh() {
     setUnduh(true);
@@ -29,79 +24,66 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label="Detail dokumen">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg h-full bg-surface flex flex-col shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
-          <h2 className="font-title-md text-title-md text-on-surface">Detail Dokumen</h2>
-          <button type="button" onClick={onClose} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
+    <Laci judul="Detail Dokumen" label="Detail dokumen" lebar="max-w-lg" onClose={onClose}>
+      {error && <Pesan>{error}</Pesan>}
+      <section className="kartu p-space-md space-y-space-sm">
+        <div className="flex items-start gap-space-sm">
+          <span className="w-10 h-10 shrink-0 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
+            <span className="material-symbols-outlined text-[22px]">{jenis.ikon}</span>
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="font-title-sm text-title-sm text-on-surface break-all">{d.nama_file}</div>
+            <div className="font-body-sm text-body-sm text-on-surface-variant">{jenis.label}</div>
+          </div>
+          <StatusDokumenBadge status={d.status_dokumen} />
         </div>
+        <dl className="grid grid-cols-2 gap-space-sm font-body-sm text-body-sm">
+          <Info label="Klien">{d.klien?.nama_perusahaan}</Info>
+          <Info label="Talent">{d.talent?.nama_lengkap}</Info>
+          <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
+          <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
+        </dl>
+        <button type="button" onClick={klikUnduh} disabled={unduh} className="tombol-kedua w-full">
+          <Proses aktif={unduh} ikon="download">Unduh Dokumen</Proses>
+        </button>
+      </section>
 
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">
-          {error && <Pesan>{error}</Pesan>}
-          <section className="kartu p-space-md space-y-space-sm">
-            <div className="flex items-start gap-space-sm">
-              <span className="w-10 h-10 shrink-0 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
-                <span className="material-symbols-outlined text-[22px]">{jenis.ikon}</span>
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="font-title-sm text-title-sm text-on-surface break-all">{d.nama_file}</div>
-                <div className="font-body-sm text-body-sm text-on-surface-variant">{jenis.label}</div>
-              </div>
-              <StatusDokumenBadge status={d.status_dokumen} />
-            </div>
-            <dl className="grid grid-cols-2 gap-space-sm font-body-sm text-body-sm">
-              <Info label="Klien">{d.klien?.nama_perusahaan}</Info>
-              <Info label="Talent">{d.talent?.nama_lengkap}</Info>
-              <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
-              <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
-            </dl>
-            <button type="button" onClick={klikUnduh} disabled={unduh} className="tombol-kedua w-full">
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              {unduh ? "Mengunduh..." : "Unduh Dokumen"}
-            </button>
-          </section>
+      <section className="kartu p-space-md space-y-space-sm">
+        <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
+          <span className="material-symbols-outlined text-primary text-[20px]">draw</span>
+          Penandatangan
+        </h3>
+        {d.penandatangan.length === 0 ? (
+          <KeadaanKosong ringkas ikon="draw">
+            {d.aksi.boleh_atur_penandatangan ? "Belum ada penandatangan. Tentukan siapa yang harus menandatangani dokumen ini." : "Dokumen ini tidak memerlukan tanda tangan."}
+          </KeadaanKosong>
+        ) : (
+          <ul className="divide-y divide-surface-container-high">
+            {d.penandatangan.map((p) => {
+              const s = STATUS_TTD[p.status_ttd] ?? STATUS_TTD.menunggu;
+              return (
+                <li key={p.id_ttd} className="py-space-sm first:pt-0 last:pb-0 flex items-center justify-between gap-space-sm">
+                  <div className="min-w-0">
+                    <div className="font-body-md text-body-md text-on-surface">{p.nama}</div>
+                    <div className="font-body-sm text-body-sm text-on-surface-variant">{ROLE_SINGKAT[p.role] ?? p.role}</div>
+                  </div>
+                  <div className={`flex flex-col items-end font-body-sm text-body-sm ${s.className}`}>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">{s.ikon}</span>
+                      {s.label}
+                    </span>
+                    {p.tanggal_ttd && <span className="text-on-surface-variant">{formatTanggalWaktu(p.tanggal_ttd)}</span>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {d.aksi.boleh_atur_penandatangan && <AturPenandatangan dokumen={d} onBerhasil={onBerhasil} />}
+      </section>
 
-          <section className="kartu p-space-md space-y-space-sm">
-            <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
-              <span className="material-symbols-outlined text-primary text-[20px]">draw</span>
-              Penandatangan
-            </h3>
-            {d.penandatangan.length === 0 ? (
-              <KeadaanKosong ringkas ikon="draw">
-                {d.aksi.boleh_atur_penandatangan ? "Belum ada penandatangan. Tentukan siapa yang harus menandatangani dokumen ini." : "Dokumen ini tidak memerlukan tanda tangan."}
-              </KeadaanKosong>
-            ) : (
-              <ul className="divide-y divide-surface-container-high">
-                {d.penandatangan.map((p) => {
-                  const s = STATUS_TTD[p.status_ttd] ?? STATUS_TTD.menunggu;
-                  return (
-                    <li key={p.id_ttd} className="py-space-sm first:pt-0 last:pb-0 flex items-center justify-between gap-space-sm">
-                      <div className="min-w-0">
-                        <div className="font-body-md text-body-md text-on-surface">{p.nama}</div>
-                        <div className="font-body-sm text-body-sm text-on-surface-variant">{ROLE_SINGKAT[p.role] ?? p.role}</div>
-                      </div>
-                      <div className={`flex flex-col items-end font-body-sm text-body-sm ${s.className}`}>
-                        <span className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[16px]">{s.ikon}</span>
-                          {s.label}
-                        </span>
-                        {p.tanggal_ttd && <span className="text-on-surface-variant">{formatTanggalWaktu(p.tanggal_ttd)}</span>}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            {d.aksi.boleh_atur_penandatangan && <AturPenandatangan dokumen={d} onBerhasil={onBerhasil} />}
-          </section>
-
-          {d.aksi.perlu_tanda_tangan_saya && <TandaTangan dokumen={d} onBerhasil={onBerhasil} />}
-        </div>
-      </div>
-    </div>
+      {d.aksi.perlu_tanda_tangan_saya && <TandaTangan dokumen={d} onBerhasil={onBerhasil} />}
+    </Laci>
   );
 }
 
@@ -175,8 +157,7 @@ function AturPenandatangan({ dokumen, onBerhasil }) {
       <p className="font-body-sm text-body-sm text-on-surface-variant">Setelah dikirim, penandatangan tidak dapat diubah dan dokumen menunggu tanda tangan.</p>
       <div className="flex justify-end">
         <button type="button" onClick={simpan} disabled={kirim} className="tombol-utama">
-          <span className="material-symbols-outlined text-[18px]">send</span>
-          {kirim ? "Mengirim..." : `Minta Tanda Tangan (${dipilih.length})`}
+          <Proses aktif={kirim} ikon="send">{`Minta Tanda Tangan (${dipilih.length})`}</Proses>
         </button>
       </div>
     </div>
@@ -294,7 +275,7 @@ function TandaTangan({ dokumen, onBerhasil }) {
             Tidak
           </button>
           <button type="button" onClick={() => kirimKeputusan("ditolak")} disabled={kirim} className="tombol-bahaya">
-            {kirim ? "Memproses..." : "Ya, Tolak"}
+            <Proses aktif={kirim}>Ya, Tolak</Proses>
           </button>
         </div>
       ) : (
@@ -303,8 +284,7 @@ function TandaTangan({ dokumen, onBerhasil }) {
             Tolak
           </button>
           <button type="button" onClick={() => kirimKeputusan("ditandatangani")} disabled={kirim} className="tombol-utama">
-            <span className="material-symbols-outlined text-[18px]">draw</span>
-            {kirim ? "Menyimpan..." : "Tanda Tangani"}
+            <Proses aktif={kirim} ikon="draw">Tanda Tangani</Proses>
           </button>
         </div>
       )}

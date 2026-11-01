@@ -125,7 +125,7 @@ function KartuTujuan({ kartu: k }) {
       {k.keterangan && <div className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">{k.keterangan}</div>}
     </>
   );
-  const kelas = "kartu h-full flex flex-col p-space-md transition-shadow";
+  const kelas = "kartu h-full flex flex-col p-space-md transition-shadow duration-200";
   return k.tujuan ? (
     <Link to={k.tujuan} className={`${kelas} hover:shadow-md hover:ring-primary/40`}>
       {isi}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal } from "../ui";
+import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, Proses } from "../ui";
 import { useToast, useToastGagal } from "../toast";
 import {
   Field,
@@ -199,7 +199,7 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
                   onClick={() => (mode === "ubah" ? aksi("PUT", { jenis_shift: jenis }) : aksi("DELETE"))}
                   className={mode === "hapus" ? "tombol-bahaya" : "tombol-utama"}
                 >
-                  {kirim ? "Memproses..." : mode === "hapus" ? "Ya, Hapus" : "Simpan"}
+                  <Proses aktif={kirim}>{mode === "hapus" ? "Ya, Hapus" : "Simpan"}</Proses>
                 </button>
               </>
             )}
@@ -269,7 +269,7 @@ function ModalAturShift({ placement, awalPlacement, onClose, onBerhasil }) {
       onSubmit={simpan}
       aksi={
         <button type="submit" disabled={kirim} className="tombol-utama">
-          {kirim ? "Menyimpan..." : `Simpan ${tanggal.length} Shift`}
+          <Proses aktif={kirim}>{`Simpan ${tanggal.length} Shift`}</Proses>
         </button>
       }
     >

@@ -85,6 +85,24 @@ export function Pesan({ children }) {
   );
 }
 
+// Isi tombol aksi: saat `aktif`, spinner + "Memproses..." (tombolnya sendiri tetap diberi disabled); selain itu ikon opsional + label.
+export function Proses({ aktif, ikon, children }) {
+  if (aktif) {
+    return (
+      <>
+        <span aria-hidden="true" className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+        Memproses...
+      </>
+    );
+  }
+  return (
+    <>
+      {ikon && <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{ikon}</span>}
+      {children}
+    </>
+  );
+}
+
 // Pesan field dari error 422 backend ({ errors: { field: [pesan] } }).
 export const errorField = (error, field) => error?.errors?.[field]?.[0];
 
@@ -213,7 +231,7 @@ export function KartuRingkasan({ label, nilai, ikon, warna = "text-primary", ket
       type={onClick ? "button" : undefined}
       onClick={onClick}
       aria-pressed={onClick ? !!aktif : undefined}
-      className={`h-full flex flex-col text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm ring-inset transition-all ${onClick ? "hover:shadow-md" : ""} ${
+      className={`h-full flex flex-col text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm ring-inset transition-all duration-200 ${onClick ? "hover:shadow-md" : ""} ${
         aktif ? "ring-2 ring-primary" : "ring-1 ring-surface-container-high"
       }`}
     >

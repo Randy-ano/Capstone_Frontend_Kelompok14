@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda } from "../components/ui";
+import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
+import { Modal } from "../components/dialog";
 import { PengajuanBadge, STATUS_PENGAJUAN, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 
@@ -203,50 +204,32 @@ function ModalAjukan({ onClose, onBerhasil }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Ajukan kandidat"
-      onKeyDown={(e) => e.key === "Escape" && !kirim && onClose()}
-    >
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={() => !kirim && onClose()} />
-      <div className="relative w-full sm:max-w-2xl max-h-[90vh] flex flex-col bg-surface rounded-t-xl sm:rounded-xl shadow-xl">
-        <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 shrink-0 bg-surface-container-lowest rounded-t-xl border-b border-surface-container-high">
-          <h2 className="font-title-md text-title-md text-on-surface">Ajukan Kandidat ke Klien</h2>
-          <button type="button" autoFocus onClick={onClose} disabled={!!kirim} title="Tutup" className="tombol-ikon -mr-2">
-            <span className="material-symbols-outlined text-[22px]">close</span>
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-sm">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
-          {error && <Pesan>{error}</Pesan>}
-          {!error && !daftar && <Memuat />}
-          {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
-          <ul className="divide-y divide-surface-container-high">
-            {daftar?.map((s) => (
-              <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
-                <div className="min-w-0 flex-1">
-                  <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">
-                    {s.job_requirement.posisi} · {s.job_requirement.klien.nama_perusahaan} · Skor {formatAngka(s.skor_kecocokan, 2)}
-                  </div>
-                  {s.catatan_screening && <div className="font-body-sm text-body-sm text-outline">“{s.catatan_screening}”</div>}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => ajukan(s)}
-                  disabled={!!kirim}
-                  className="tombol-utama shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">send</span>
-                  {kirim === s.id_screening ? "Mengajukan..." : "Ajukan"}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+    <Modal judul="Ajukan Kandidat ke Klien" label="Ajukan kandidat" lebar="sm:max-w-2xl" sibuk={!!kirim} onClose={onClose}>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
+      {error && <Pesan>{error}</Pesan>}
+      {!error && !daftar && <Memuat />}
+      {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
+      <ul className="divide-y divide-surface-container-high">
+        {daftar?.map((s) => (
+          <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
+            <div className="min-w-0 flex-1">
+              <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
+              <div className="font-body-sm text-body-sm text-on-surface-variant">
+                {s.job_requirement.posisi} · {s.job_requirement.klien.nama_perusahaan} · Skor {formatAngka(s.skor_kecocokan, 2)}
+              </div>
+              {s.catatan_screening && <div className="font-body-sm text-body-sm text-outline">“{s.catatan_screening}”</div>}
+            </div>
+            <button
+              type="button"
+              onClick={() => ajukan(s)}
+              disabled={!!kirim}
+              className="tombol-utama shrink-0"
+            >
+              <Proses aktif={kirim === s.id_screening} ikon="send">Ajukan</Proses>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Modal>
   );
 }

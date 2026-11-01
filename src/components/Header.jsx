@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE_LABEL, displayUser, initials } from "../auth/roles";
 import { bolehKelola } from "./jobRequirement/shared";
+import { Proses } from "./ui";
 import Lonceng from "./notifikasi/Lonceng";
 
 export default function Header({ grup, title, onMenu }) {
@@ -88,7 +89,7 @@ function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-60 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high py-space-xs z-50">
+        <div className="animasi-menu absolute right-0 mt-2 w-60 bg-surface-container-lowest rounded-xl shadow-lg ring-1 ring-surface-container-high py-space-xs z-50">
           <div className="px-space-md py-space-sm border-b border-surface-container-high">
             <div className="font-label-md text-label-md text-on-surface truncate">{nama}</div>
             <div className="font-body-sm text-body-sm text-on-surface-variant truncate">{user.email}</div>
@@ -102,8 +103,7 @@ function UserMenu() {
             disabled={keluar}
             className="w-full flex items-center gap-space-sm min-h-[40px] px-space-md py-2 font-body-md text-body-md text-error hover:bg-error-container transition-colors disabled:opacity-60"
           >
-            <span className="material-symbols-outlined text-[20px]">logout</span>
-            {keluar ? "Keluar..." : "Keluar"}
+            <Proses aktif={keluar} ikon="logout">Keluar</Proses>
           </button>
         </div>
       )}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
@@ -268,7 +268,7 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
               Batal
             </button>
             <button type="button" onClick={screening} disabled={kirim} className="tombol-utama">
-              {kirim ? "Memproses..." : "Konfirmasi Screening"}
+              <Proses aktif={kirim}>Konfirmasi Screening</Proses>
             </button>
           </div>
         </div>
@@ -419,7 +419,7 @@ function ItemScreening({ screening: s, onSaved }) {
               disabled={kirim || (hasil === s.hasil_screening && (catatan.trim() || null) === (s.catatan_screening ?? null))}
               className="tombol-utama"
             >
-              {kirim ? "Menyimpan..." : "Simpan"}
+              <Proses aktif={kirim}>Simpan</Proses>
             </button>
           </div>
         </div>
