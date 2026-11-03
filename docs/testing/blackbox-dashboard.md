@@ -17,7 +17,7 @@
 | R-am | Kartu AM | Login AM | - | 6 kartu: Permintaan berjalan 4, Siap diajukan 0, Menunggu tinjauan 0, Interview 7 hari 0, Keluhan terbuka 1, Perlu tanda tangan 0; tanpa analitik Manager | Sesuai | Lulus |
 | R-ts | Kartu TS | Login TS | - | 4 kartu: Talent tersedia 12, Permintaan perlu kandidat 4, Screening belum diputuskan 1, Menunggu placement 0 | Sesuai | Lulus |
 | R-hr | Kartu HR Client | Login HR | - | 6 kartu data PT Maju Jaya: Permintaan berjalan 2, Kandidat perlu ditinjau 0, Interview 0, Talent ditempatkan 1, Cuti menunggu 1, Perlu tanda tangan 1 | Sesuai | Lulus |
-| R-tujuan | Kartu sebagai tautan | HR klik "Perlu tanda tangan Anda" | - | Pindah ke Dokumen (Quotation & PO) | Sesuai | Lulus |
+| R-tujuan | Kartu sebagai tautan | HR klik "Perlu tanda tangan Anda" | - | Pindah ke Dokumen | Sesuai | Lulus |
 | R-talent | Kartu Talent | Login talent | - | Status profil "Lengkap", Status kandidat "Ditempatkan" (Backend Developer di PT Maju Jaya), Interview 0, Cuti menunggu 1 | Sesuai | Lulus |
 | R-*-tanpa-analitik | Analitik khusus Manager | AM, TS, HR, Talent | - | Panel Tren Placement tidak tampil | Sesuai | Lulus |
 | R-403 | API Manager | `GET /dashboard/manager` dengan token AM | - | 403 "Anda tidak memiliki akses ke fitur ini." | 403 | Lulus |
