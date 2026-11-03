@@ -15,7 +15,7 @@
 |----|----------|---------|-------|-----------------------|--------------|--------|
 | N-01 | Badge lonceng | Login HR | - | Badge merah menunjukkan jumlah belum dibaca (6), bukan angka statis | 6 | Lulus |
 | N-02 | Dropdown | Klik lonceng | - | 6 notifikasi terbaru dulu (permintaan tanda tangan paling atas), ikon sesuai jenis, waktu relatif, titik biru untuk belum dibaca | Sesuai | Lulus |
-| N-03 | Buka dari dropdown | Klik "Anda diminta menandatangani dokumen …" | - | Pindah ke Dokumen (Quotation & PO); badge berkurang menjadi 5 | Sesuai | Lulus |
+| N-03 | Buka dari dropdown | Klik "Anda diminta menandatangani dokumen …" | - | Pindah ke Dokumen; badge berkurang menjadi 5 | Sesuai | Lulus |
 | N-04 | Tandai semua | Lonceng → **Tandai semua dibaca** | - | Badge hilang | Sesuai | Lulus |
 | N-05 | Event baru (R30) | Talent mengajukan cuti; HR membuka **Lihat semua notifikasi** → tab **Belum dibaca** | Cuti H+20 | Badge 1; satu notifikasi "Budi Santoso mengajukan cuti … Mohon beri keputusan." | Sesuai | Lulus |
 | N-06 | Buka dari halaman | Klik notifikasi cuti | - | Pindah ke Pengajuan Cuti & Shift; notifikasi ditandai dibaca, badge hilang | Sesuai | Lulus |

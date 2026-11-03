@@ -62,7 +62,7 @@ Semua halaman memakai API backend asli (tanpa data mockup). Menu & halaman yang 
 | Monitoring Kinerja | Account Manager, Manager |
 | Pengajuan Cuti & Shift | Talent, HR Client, Manager |
 | Tiket Komplain Klien | HR Client, Account Manager, Manager |
-| Dokumen (Quotation & PO) + tanda tangan | Semua (data sesuai role) |
+| Dokumen + tanda tangan | Semua (data sesuai role) |
 | Master Data Skill | Talent Support, Manager |
 | Kelola Akun Pegawai | Manager |
 | Pengaturan Akun | Belum dibuat (di luar spec backend) |

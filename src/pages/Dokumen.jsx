@@ -67,7 +67,7 @@ export default function Dokumen() {
       <KepalaHalaman
         ikon="description"
         kategori="Operasional & HR"
-        judul="Dokumen (Quotation & PO)"
+        judul="Dokumen"
         aksi={
           <div className="flex flex-col md:flex-row gap-space-sm">
             {user.role === ROLE.ACCOUNT_MANAGER && (

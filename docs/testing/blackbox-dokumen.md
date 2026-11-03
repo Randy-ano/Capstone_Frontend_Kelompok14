@@ -13,7 +13,7 @@
 
 | ID | Skenario | Langkah | Input | Hasil yang Diharapkan | Hasil Aktual | Status |
 |----|----------|---------|-------|-----------------------|--------------|--------|
-| D-01 | Daftar (AM) | Login AM, buka **Dokumen (Quotation & PO)** | - | 2 dokumen seed; tombol **Buat dari Template** & **Unggah Dokumen** | Sesuai | Lulus |
+| D-01 | Daftar (AM) | Login AM, buka **Dokumen** | - | 2 dokumen seed; tombol **Buat dari Template** & **Unggah Dokumen** | Sesuai | Lulus |
 | D-02 | Validasi template | **Buat dari Template** → **Buat Dokumen** tanpa isian | - | Pesan backend: klien, nomor dokumen, perihal, deskripsi item, harga satuan wajib diisi | Sesuai | Lulus |
 | D-03 | Buat quotation (R26) | Klien PT Maju Jaya, nomor `QUO/2026/10/777`, perihal, 1 item Rp18.000.000 → **Buat Dokumen** | - | Total Rp18.000.000 tampil; "Quotation berhasil dibuat."; drawer `quotation-quo-2026-10-777.pdf` dengan calon penandatangan (internal + HR PT Maju Jaya) | Sesuai | Lulus |
 | D-04 | Atur penandatangan (R27) | Centang Hendra Gunawan & Sari Wulandari → **Minta Tanda Tangan (2)** | - | "Penandatangan berhasil ditentukan. Dokumen menunggu tanda tangan."; status Menunggu Tanda Tangan; form atur hilang | Sesuai | Lulus |
@@ -26,6 +26,7 @@
 | D-11 | Semua menandatangani | Login Manager → quotation 001 → gambar tanda tangan → **Tanda Tangani** | - | "Dokumen telah ditandatangani semua pihak."; status Ditandatangani; bagian tanda tangan hilang | Sesuai | Lulus |
 | D-12 | Scope talent | Login talent; unggah `Kontrak Kerja Budi.pdf` jenis Lainnya | - | Hanya kontrak miliknya tampil; dokumen baru otomatis atas nama Budi; unduh quotation klien 403 | Sesuai | Lulus |
 | D-13 | Talent Support | Login TS | - | Melihat semua dokumen tanpa tombol unggah/template; API generate 403 | Sesuai | Lulus |
+| D-14 | Nama menu & judul (semua role) | Login tiap role (talent, HR, AM, TS, manager); lihat menu sidebar dan judul halaman `/dokumen-quotation-po` | - | Menu & judul halaman "Dokumen", judul tab "Dokumen · Intellisys Talent Hub"; path tetap `/dokumen-quotation-po` | Label menu "Dokumen" untuk kelima role (dicek via `navGroupsFor`); judul halaman & tab mengikuti | Lulus |
 | D-HP | Tampilan HP | Lebar 375px: daftar, modal template, drawer | - | Tanpa scroll horizontal; modal & drawer selebar layar | 375 / 375 / 375 | Lulus |
 
 ## Revisi 2026-10-24 — calon penandatangan per jenis dokumen & unggahan talent
