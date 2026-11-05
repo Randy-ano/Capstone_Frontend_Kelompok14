@@ -6,7 +6,7 @@ import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatT
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { HasilBadge } from "../talentPool/shared";
-import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola } from "./shared";
+import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola, formatKisaranGaji } from "./shared";
 
 // Panel samping detail job requirement + log progres (GET /job-requirements/{id}/progres).
 // `versi` berubah dari luar (mis. setelah form ubah disimpan) agar data dimuat ulang.
@@ -97,6 +97,8 @@ function Ringkasan({ job }) {
           <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
         </Info>
         <Info label="Pengalaman minimal">{job.pengalaman_min ? `${job.pengalaman_min} tahun` : "Tidak ada"}</Info>
+        {/* Halaman ini hanya untuk HR Client & internal; gaji tidak pernah dikirim ke talent. */}
+        <Info label="Kisaran gaji">{formatKisaranGaji(job.gaji_min, job.gaji_maks) ?? "Tidak dicantumkan"}</Info>
         <Info label="SLA deadline">{formatTanggalWaktu(job.sla_deadline)}</Info>
         <Info label="Dibuat">{formatTanggal(job.dibuat_pada)}</Info>
       </dl>
