@@ -6,7 +6,7 @@ import BatasMuat from "./BatasMuat";
 import { MemuatHalaman } from "./ui";
 import AksesDitolak from "../pages/AksesDitolak";
 import { useAuth } from "../auth/AuthContext";
-import { NAV_GROUPS, NAV_ITEMS, canAccess, labelUntuk } from "../data/navigation";
+import { NAV_GROUPS, NAV_ITEMS, belumDitempatkan, canAccess, labelUntuk } from "../data/navigation";
 
 // `isi` & `judulIsi`: isi selain Outlet untuk halaman di luar menu (404).
 export default function AppLayout({ isi, judulIsi }) {
@@ -14,7 +14,7 @@ export default function AppLayout({ isi, judulIsi }) {
   const { pathname } = useLocation();
   const current = NAV_ITEMS.find((item) => item.path === pathname);
   const grup = NAV_GROUPS.find((g) => g.items.includes(current))?.label;
-  const boleh = !current || canAccess(current, user.role);
+  const boleh = !current || canAccess(current, user);
   // Di layar < lg sidebar disembunyikan dan dibuka lewat tombol menu di header.
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -37,7 +37,9 @@ export default function AppLayout({ isi, judulIsi }) {
               <Suspense fallback={<MemuatHalaman />}>{isi ?? <Outlet />}</Suspense>
             </BatasMuat>
           ) : (
-            <AksesDitolak />
+            <AksesDitolak
+              pesan={belumDitempatkan(current, user) ? "Fitur ini tersedia setelah Anda ditempatkan di perusahaan klien." : undefined}
+            />
           )}
         </main>
       </div>

@@ -18,7 +18,7 @@ export default function TidakDitemukan() {
           <h1 className="font-headline-sm text-headline-sm text-on-surface">Halaman tidak ditemukan</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">Alamat yang Anda tuju tidak tersedia atau sudah dipindahkan.</p>
         </div>
-        <Link to={user ? berandaFor(user.role) : "/"} className="tombol-utama">
+        <Link to={user ? berandaFor(user) : "/"} className="tombol-utama">
           <span aria-hidden="true" className="material-symbols-outlined text-[18px]">home</span>
           Kembali ke Beranda
         </Link>

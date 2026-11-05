@@ -37,7 +37,7 @@ export default function HalamanDepan() {
   useJudulTab("Selamat Datang");
 
   if (loading) return <MemuatSesi />;
-  if (user) return <Navigate to={berandaFor(user.role)} replace />;
+  if (user) return <Navigate to={berandaFor(user)} replace />;
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">

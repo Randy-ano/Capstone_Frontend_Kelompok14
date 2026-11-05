@@ -14,7 +14,7 @@ const LINK_IDLE = "text-on-surface-variant hover:bg-surface-container-low hover:
 
 export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
-  const navGroups = navGroupsFor(user.role);
+  const navGroups = navGroupsFor(user);
   const { nama } = displayUser(user);
   // Di layar < lg sidebar berperilaku seperti drawer: Esc menutup, fokus kembali ke tombol menu.
   const panel = useRef(null);
