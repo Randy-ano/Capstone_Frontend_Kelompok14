@@ -5,6 +5,7 @@ import { ROLE } from "../../auth/roles";
 import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal, Proses } from "../ui";
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
+import { DaftarSertifikat } from "../sertifikat";
 import {
   BadgeTahapPengajuan,
   EvaluasiBadge,
@@ -105,6 +106,11 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
         <>
           <Ringkasan p={p} talent={user.role === ROLE.TALENT} />
           {user.role !== ROLE.TALENT && <PengalamanKandidat items={p.talent.riwayat_pengalaman_kerja ?? []} />}
+          {user.role !== ROLE.TALENT && (p.talent.sertifikat?.length ?? 0) > 0 && (
+            <Bagian icon="workspace_premium" judul="Sertifikat">
+              <DaftarSertifikat items={p.talent.sertifikat} />
+            </Bagian>
+          )}
           {bolehTinjau(user) && p.status_pengajuan === "diajukan" && jobBerjalan && <Tinjau p={p} onBerhasil={berhasil} />}
           {p.status_pengajuan !== "diajukan" && (
             <Interviews p={p} user={user} terbuka={terbukaInterview} onBerhasil={berhasil} />

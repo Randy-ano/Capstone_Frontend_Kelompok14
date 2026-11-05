@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, tagSelainKompetensi, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
+import { IKON_FILE, TombolLihatSertifikat } from "../components/sertifikat";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
@@ -261,6 +262,26 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
           ))}
         </ul>
       </div>
+      {(k.sertifikat?.length ?? 0) > 0 && (
+        <div className="space-y-1">
+          <div className="font-label-sm text-label-sm text-on-surface-variant">Sertifikat</div>
+          <ul className="space-y-1" aria-label="Sertifikat kandidat">
+            {k.sertifikat.map((s) => (
+              <li key={s.id_sertifikat} className="flex flex-wrap items-center justify-between gap-x-space-sm gap-y-1">
+                <span className="flex items-center gap-1 min-w-0 font-body-sm text-body-sm text-on-surface">
+                  <span aria-hidden="true" className="material-symbols-outlined text-primary text-[18px]">{IKON_FILE[s.jenis_file] ?? "workspace_premium"}</span>
+                  <span className="break-words">{s.nama_sertifikat}</span>
+                </span>
+                {s.file_sertifikat ? (
+                  <TombolLihatSertifikat sertifikat={s} className="tombol-teks min-h-[32px] px-2" />
+                ) : (
+                  <span className="font-body-sm text-body-sm text-outline">Belum ada file</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {tag.length > 0 && (
         <div className="flex flex-wrap items-center gap-1">
           <span className="font-label-sm text-label-sm text-on-surface-variant mr-1">Tag:</span>
