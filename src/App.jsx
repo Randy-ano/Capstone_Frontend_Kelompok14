@@ -27,6 +27,8 @@ const TiketKomplain = lazy(() => import("./pages/TiketKomplain"));
 const TidakDitemukan = lazy(() => import("./pages/TidakDitemukan"));
 const HalamanDepan = lazy(() => import("./pages/HalamanDepan"));
 const PengaturanAkun = lazy(() => import("./pages/PengaturanAkun"));
+const LupaPassword = lazy(() => import("./pages/LupaPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Alamat tak dikenal: pengguna login melihat 404 di dalam layout, tamu melihatnya tanpa layout (tidak dilempar ke halaman masuk).
 function RuteTakDikenal() {
@@ -48,6 +50,8 @@ export default function App() {
           <Route index element={<HalamanDepan />} />
           <Route path="login" element={<Login />} />
           <Route path="daftar" element={<Daftar />} />
+          <Route path="lupa-password" element={<LupaPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
               <Route path="dashboard-rekapitulasi" element={<DashboardRekapitulasi />} />
