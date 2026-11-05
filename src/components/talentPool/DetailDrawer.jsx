@@ -299,10 +299,14 @@ function PengalamanKerja({ items, lama }) {
           {items.map((p, i) => (
             <li key={`${p.nama_perusahaan}-${p.tanggal_mulai}-${i}`} className="border-l-2 border-primary-fixed-dim pl-space-sm">
               <div className="font-title-sm text-title-sm text-on-surface">{p.posisi}</div>
-              <div className="font-body-md text-body-md text-on-surface-variant">{p.nama_perusahaan}</div>
+              <div className="font-body-md text-body-md text-on-surface-variant">
+                {[p.nama_perusahaan, p.lokasi].filter(Boolean).join(" · ")}
+              </div>
               <div className="font-body-sm text-body-sm text-outline">
                 {formatBulan(p.tanggal_mulai)} – {p.masih_bekerja ? "Sekarang" : formatBulan(p.tanggal_selesai)}
+                {p.jenis_pekerjaan && ` · ${p.jenis_pekerjaan}`}
               </div>
+              {p.deskripsi && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 whitespace-pre-line">{p.deskripsi}</p>}
             </li>
           ))}
         </ol>
