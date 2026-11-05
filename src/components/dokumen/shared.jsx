@@ -48,13 +48,14 @@ export function StatusDokumenBadge({ status }) {
   return <Badge className={s.className}>{s.label}</Badge>;
 }
 
-// Unduh file terproteksi (Bearer token) lalu simpan dengan nama aslinya.
-export async function unduhDokumen(dokumen) {
-  const blob = await api(`/dokumen/${dokumen.id_dokumen}/download`, { blob: true });
+// Unduh file terproteksi (Bearer token). Default: versi bertanda tangan (gambar menjadi .pdf);
+// `asli: true` mengunduh file asli tanpa tanda tangan (khusus pengunggah & internal).
+export async function unduhDokumen(dokumen, { asli = false } = {}) {
+  const blob = await api(`/dokumen/${dokumen.id_dokumen}/${asli ? "file-asli" : "download"}`, { blob: true });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = dokumen.nama_file;
+  a.download = asli ? dokumen.nama_file : (dokumen.unduhan?.nama_file ?? dokumen.nama_file);
   document.body.appendChild(a);
   a.click();
   a.remove();
