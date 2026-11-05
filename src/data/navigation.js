@@ -6,6 +6,8 @@ const { TALENT, HR_CLIENT, ACCOUNT_MANAGER, TALENT_SUPPORT, MANAGER } = ROLE;
 // `ready: true` menandai halaman yang sudah memiliki desain di Stitch.
 // `roles` mengikuti kolom Role di tabel endpoint BACKEND_SPEC bagian 7; tanpa `roles` = semua role.
 // `labelTalent` = nama menu khusus role talent (menu role lain tetap memakai `label`).
+// `perluDitempatkan` = untuk role talent, menu hanya tampil jika `user.sudah_ditempatkan` (GET /auth/me);
+// backend juga menolak (403) talent yang belum punya penempatan Belum Aktif/Aktif.
 export const NAV_GROUPS = [
   {
     label: "Utama",
@@ -35,9 +37,9 @@ export const NAV_GROUPS = [
     label: "Operasional & HR",
     items: [
       { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [ACCOUNT_MANAGER, MANAGER] },
-      { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, MANAGER] },
+      { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, ...INTERNAL], perluDitempatkan: true },
       { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
-      { path: "/dokumen-quotation-po", label: "Dokumen", icon: "description", ready: true },
+      { path: "/dokumen-quotation-po", label: "Dokumen", icon: "description", ready: true, perluDitempatkan: true },
     ],
   },
   {
@@ -52,16 +54,19 @@ export const NAV_GROUPS = [
 
 export const NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
-export const canAccess = (item, role) => !item.roles || item.roles.includes(role);
+// Talent yang belum ditempatkan tidak bisa membuka menu `perluDitempatkan` (cuti & shift, dokumen).
+export const belumDitempatkan = (item, user) => Boolean(item.perluDitempatkan && user.role === TALENT && !user.sudah_ditempatkan);
+
+export const canAccess = (item, user) => (!item.roles || item.roles.includes(user.role)) && !belumDitempatkan(item, user);
 
 export const labelUntuk = (item, role) => (role === TALENT && item.labelTalent) || item.label;
 
-// Menu yang boleh dilihat role tertentu (dengan nama sesuai role); grup kosong disembunyikan.
-export const navGroupsFor = (role) =>
+// Menu yang boleh dilihat user (dengan nama sesuai role); grup kosong disembunyikan.
+export const navGroupsFor = (user) =>
   NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => canAccess(item, role)).map((item) => ({ ...item, label: labelUntuk(item, role) })),
+    items: group.items.filter((item) => canAccess(item, user)).map((item) => ({ ...item, label: labelUntuk(item, user.role) })),
   })).filter((group) => group.items.length > 0);
 
-// Halaman pertama setelah masuk: menu pertama yang boleh diakses role tersebut.
-export const berandaFor = (role) => NAV_ITEMS.find((item) => canAccess(item, role))?.path ?? "/";
+// Halaman pertama setelah masuk: menu pertama yang boleh diakses user tersebut.
+export const berandaFor = (user) => NAV_ITEMS.find((item) => canAccess(item, user))?.path ?? "/";

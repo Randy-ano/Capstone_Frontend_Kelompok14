@@ -8,6 +8,7 @@ import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../compo
 import { useToast } from "../components/toast";
 import { Laci } from "../components/dialog";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
+import { PenempatanBadge } from "../components/operasional/shared";
 
 const PER_PAGE = 10;
 
@@ -18,6 +19,8 @@ const TAB_TALENT = [
 
 // Halaman Penugasan Penempatan (FR-17): placement sesuai scope; TS/Manager mengakhiri placement (R20).
 // Talent ("Penempatan Saya") juga punya tab Monitoring berisi catatan kinerja tentang dirinya (FR-15).
+// Untuk talent: tanpa kolom nama (akunnya sendiri) dan status memakai status tampil backend
+// (Belum Aktif / Aktif / Selesai). Role lain tetap seperti sebelumnya.
 export default function Penempatan() {
   const { user } = useAuth();
   const internal = INTERNAL.includes(user.role);
@@ -113,8 +116,9 @@ export default function Penempatan() {
         ) : (
           <>
             <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-              <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
-              <PilihFilter
+              <KotakCari value={cari} onChange={setCari} placeholder={talent ? "Cari posisi atau klien..." : "Cari nama talent, posisi, atau klien..."} />
+              {/* Talent: status tampil (Belum Aktif/Aktif/Selesai) tidak sama dengan nilai filter status_placement, jadi filter disembunyikan. */}
+              {!talent && <PilihFilter
                 ikon="filter_alt"
                 label="Status penempatan"
                 value={status}
@@ -124,7 +128,7 @@ export default function Penempatan() {
                 }}
                 semua="Semua Status"
                 opsi={Object.entries(STATUS_PLACEMENT).map(([v, s]) => [v, s.label])}
-              />
+              />}
               {internal && (
                 <PilihFilter
                   ikon="business"
@@ -143,10 +147,14 @@ export default function Penempatan() {
             {error && <Pesan>{error}</Pesan>}
 
             <div className="kartu overflow-hidden">
-              <TabelKartu kolom={["Talent", "Posisi", "Klien", "Periode", "Status"]} className="md:min-w-[780px]" redup={memuat && hasil}>
-                {!hasil && memuat && <BarisMemuat kolom={5} />}
+              <TabelKartu
+                kolom={talent ? ["Posisi", "Klien", "Periode", "Status"] : ["Talent", "Posisi", "Klien", "Periode", "Status"]}
+                className={talent ? "md:min-w-[640px]" : "md:min-w-[780px]"}
+                redup={memuat && hasil}
+              >
+                {!hasil && memuat && <BarisMemuat kolom={talent ? 4 : 5} />}
                 {hasil?.data.length === 0 && (
-                  <BarisKosong kolom={5} ikon="assignment_ind">
+                  <BarisKosong kolom={talent ? 4 : 5} ikon="assignment_ind">
                     {adaFilter ? "Tidak ada penempatan yang cocok dengan pencarian atau filter." : "Belum ada penempatan."}
                   </BarisKosong>
                 )}
@@ -161,17 +169,19 @@ export default function Penempatan() {
                         }}
                         className="text-left group max-w-full"
                       >
-                        <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{pl.talent.nama_lengkap}</span>
-                        <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{pl.talent.email}</span>
+                        <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">
+                          {talent ? pl.posisi_penempatan : pl.talent.nama_lengkap}
+                        </span>
+                        {!talent && <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{pl.talent.email}</span>}
                       </button>
                     </Sel>
-                    <Sel peran="setengah" label="Posisi" className="text-on-surface">{pl.posisi_penempatan}</Sel>
+                    {!talent && <Sel peran="setengah" label="Posisi" className="text-on-surface">{pl.posisi_penempatan}</Sel>}
                     <Sel peran="setengah" label="Klien" className="text-on-surface-variant">{pl.klien.nama_perusahaan}</Sel>
                     <Sel label="Periode" className="whitespace-nowrap text-on-surface-variant">
                       {formatTanggal(pl.tanggal_mulai)} – {pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "sekarang"}
                     </Sel>
                     <Sel peran="status">
-                      <PlacementBadge status={pl.status_placement} />
+                      {talent ? <PenempatanBadge placement={pl} /> : <PlacementBadge status={pl.status_placement} />}
                     </Sel>
                   </tr>
                 ))}
@@ -219,11 +229,23 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
         <>
           <section className="kartu p-space-md space-y-space-sm">
             <div className="flex items-start justify-between gap-space-sm">
-              <div className="min-w-0">
-                <div className="font-title-md text-title-md text-on-surface">{pl.talent.nama_lengkap}</div>
-                <div className="font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</div>
-              </div>
-              <PlacementBadge status={pl.status_placement} />
+              {user.role === ROLE.TALENT ? (
+                <>
+                  <div className="min-w-0">
+                    <div className="font-title-md text-title-md text-on-surface">{pl.posisi_penempatan}</div>
+                    <div className="font-body-sm text-body-sm text-on-surface-variant">{pl.klien.nama_perusahaan}</div>
+                  </div>
+                  <PenempatanBadge placement={pl} />
+                </>
+              ) : (
+                <>
+                  <div className="min-w-0">
+                    <div className="font-title-md text-title-md text-on-surface">{pl.talent.nama_lengkap}</div>
+                    <div className="font-body-sm text-body-sm text-on-surface-variant">{pl.talent.email}</div>
+                  </div>
+                  <PlacementBadge status={pl.status_placement} />
+                </>
+              )}
             </div>
             <dl className="grid grid-cols-2 gap-x-space-md gap-y-space-sm">
               {[

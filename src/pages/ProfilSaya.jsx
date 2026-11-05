@@ -7,7 +7,7 @@ import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
 
 const JENJANG = ["SMA/SMK", "D3", "D4", "S1", "S2", "S3"];
-const JENIS_PEKERJAAN = ["Full-time", "Part-time", "Kontrak", "Magang", "Freelance"];
+const JENIS_PEKERJAAN = ["Full-time", "Part-time", "Kontrak", "Magang", "Freelance", "Skripsi"];
 const FIELD_PROFIL = ["nama_lengkap", "tanggal_lahir", "nomor_telepon", "domisili", "alamat", "gaji_harapan", "tentang_saya", "linkedin", "github", "portfolio", "instagram"];
 
 const PENDIDIKAN_KOSONG = { jenjang: "", nama_institusi: "", jurusan: "", tahun_mulai: "", tahun_selesai: "", deskripsi: "" };
@@ -306,6 +306,16 @@ export default function ProfilSaya() {
                     Masih bekerja di sini
                   </label>
                 </div>
+                <Field label="Deskripsi pekerjaan" error={ef("deskripsi")} className="sm:col-span-2 xl:col-span-3">
+                  <textarea
+                    rows={3}
+                    value={r.deskripsi}
+                    onChange={set("deskripsi")}
+                    maxLength={5000}
+                    placeholder="Tanggung jawab, proyek, dan hasil kerja. Tampil di CV Anda."
+                    className={`${inputClass(ef("deskripsi"))} h-auto py-2`}
+                  />
+                </Field>
               </KartuBaris>
             );
           })}

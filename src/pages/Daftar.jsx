@@ -72,7 +72,7 @@ export default function Daftar() {
   const [submitting, setSubmitting] = useState(false);
   const [lihatPassword, setLihatPassword] = useState(false);
 
-  if (user) return <Navigate to={berandaFor(user.role)} replace />;
+  if (user) return <Navigate to={berandaFor(user)} replace />;
 
   function gantiJenis(key) {
     setJenis(key);
@@ -105,7 +105,7 @@ export default function Daftar() {
     setSubmitting(true);
     try {
       const baru = await register(jenis, data);
-      navigate(berandaFor(baru.role), { replace: true });
+      navigate(berandaFor(baru), { replace: true });
     } catch (err) {
       // 422: validasi (mis. email sudah terdaftar); 0: backend mati.
       setError(err.message);

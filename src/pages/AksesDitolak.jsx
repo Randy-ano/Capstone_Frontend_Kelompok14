@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
-// Ditampilkan saat role user tidak berhak membuka sebuah menu (padanan 403 di backend).
-export default function AksesDitolak() {
+// Ditampilkan saat user tidak berhak membuka sebuah menu (padanan 403 di backend).
+export default function AksesDitolak({ pesan = "Peran Anda tidak memiliki akses ke halaman ini." }) {
   return (
     <div className="px-space-lg py-space-xl">
       <div className="kartu p-space-xl flex flex-col items-center text-center gap-space-md max-w-xl mx-auto">
@@ -10,7 +10,7 @@ export default function AksesDitolak() {
         </div>
         <div className="space-y-1">
           <h1 className="font-headline-sm text-headline-sm text-on-surface">Akses Ditolak</h1>
-          <p className="font-body-md text-body-md text-secondary">Peran Anda tidak memiliki akses ke halaman ini.</p>
+          <p className="font-body-md text-body-md text-secondary">{pesan}</p>
         </div>
         <Link
           to="/dashboard-rekapitulasi"

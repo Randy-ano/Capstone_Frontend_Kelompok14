@@ -24,6 +24,22 @@ export const JENIS_SHIFT = {
   libur: { label: "Libur", ikon: "beach_access", className: NADA.netral },
 };
 
+export const STATUS_SHIFT = {
+  aktif: { label: "Aktif", className: NADA.sukses },
+  dibatalkan: { label: "Dibatalkan", className: NADA.bahaya },
+};
+
+// Status tampil penempatan dari backend (`status_tampil`): belum_aktif, aktif, selesai.
+export const STATUS_TAMPIL_PENEMPATAN = {
+  belum_aktif: NADA.menunggu,
+  aktif: NADA.sukses,
+  selesai: NADA.netral,
+};
+
+export function PenempatanBadge({ placement }) {
+  return <Badge className={STATUS_TAMPIL_PENEMPATAN[placement.status_tampil] ?? NADA.netral}>{placement.label_status_tampil}</Badge>;
+}
+
 export const STATUS_LAPORAN = {
   baru: { label: "Baru", className: NADA.menunggu },
   diproses: { label: "Diproses", className: NADA.proses },
@@ -117,8 +133,21 @@ export function usePlacement(status = "aktif") {
 
 export const labelPlacement = (p) => `${p.talent.nama_lengkap} — ${p.posisi_penempatan} (${p.klien.nama_perusahaan})`;
 
+// Untuk talent: penempatannya sendiri, tanpa nama.
+export const labelPlacementSaya = (p) => `${p.posisi_penempatan} — ${p.klien.nama_perusahaan}`;
+
 // "2026-10-22" dari objek Date lokal (bukan UTC).
 export const keIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+// Jumlah hari kerja (Senin–Jumat) dari tanggal ISO `mulai` s.d. `selesai`, sama dengan perhitungan backend.
+export function hitungHariKerja(mulai, selesai) {
+  if (!mulai || !selesai || selesai < mulai) return 0;
+  let jumlah = 0;
+  for (let d = new Date(`${mulai}T00:00:00`); keIso(d) <= selesai; d.setDate(d.getDate() + 1)) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) jumlah += 1;
+  }
+  return jumlah;
+}
 
 const HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 export const namaHari = (iso) => HARI[new Date(`${iso}T00:00:00`).getDay()];

@@ -90,7 +90,7 @@ export default function Dokumen() {
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
         <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama file, klien, atau talent..." />
+          <KotakCari value={cari} onChange={setCari} placeholder={user.role === ROLE.TALENT ? "Cari nama file atau klien..." : "Cari nama file, klien, atau talent..."} />
           <PilihFilter ikon="category" label="Jenis dokumen" value={jenis} onChange={(v) => (setJenis(v), setPage(1))} semua="Semua Jenis" opsi={Object.entries(JENIS_DOKUMEN).map(([v, j]) => [v, j.label])} />
           <PilihFilter ikon="filter_alt" label="Status dokumen" value={status} onChange={(v) => (setStatus(v), setPage(1))} semua="Semua Status" opsi={Object.entries(STATUS_DOKUMEN).map(([v, s]) => [v, s.label])} />
           <button
@@ -115,7 +115,7 @@ export default function Dokumen() {
             <KeadaanKosong ikon="description">{adaFilter ? "Tidak ada dokumen yang cocok dengan pencarian atau filter." : "Belum ada dokumen."}</KeadaanKosong>
           )}
           {hasil?.data.length > 0 && (
-            <TabelKartu kolom={["Dokumen", "Klien / Talent", "Diunggah", "Tanda Tangan", "Status"]} className="md:min-w-[820px]">
+            <TabelKartu kolom={["Dokumen", user.role === ROLE.TALENT ? "Klien" : "Klien / Talent", "Diunggah", "Tanda Tangan", "Status"]} className="md:min-w-[820px]">
               {hasil.data.map((d) => {
                 const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
                 const sudah = d.penandatangan.filter((p) => p.status_ttd === "ditandatangani").length;
@@ -130,9 +130,9 @@ export default function Dokumen() {
                         </span>
                       </button>
                     </Sel>
-                    <Sel peran="setengah" label="Klien / Talent">
+                    <Sel peran="setengah" label={user.role === ROLE.TALENT ? "Klien" : "Klien / Talent"}>
                       <span className="block text-on-surface">{d.klien?.nama_perusahaan ?? "-"}</span>
-                      {d.talent && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
+                      {d.talent && user.role !== ROLE.TALENT && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
                     </Sel>
                     <Sel peran="setengah" label="Diunggah" className="whitespace-nowrap">
                       <span className="block text-on-surface-variant">{formatTanggal(d.tanggal_unggah)}</span>

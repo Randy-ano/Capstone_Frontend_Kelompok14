@@ -103,7 +103,8 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
       {!error && !p && <Memuat>Memuat detail...</Memuat>}
       {p && (
         <>
-          <Ringkasan p={p} />
+          <Ringkasan p={p} talent={user.role === ROLE.TALENT} />
+          {user.role !== ROLE.TALENT && <PengalamanKandidat items={p.talent.riwayat_pengalaman_kerja ?? []} />}
           {bolehTinjau(user) && p.status_pengajuan === "diajukan" && jobBerjalan && <Tinjau p={p} onBerhasil={berhasil} />}
           {p.status_pengajuan !== "diajukan" && (
             <Interviews p={p} user={user} terbuka={terbukaInterview} onBerhasil={berhasil} />
@@ -125,17 +126,43 @@ function Info({ label, children }) {
   );
 }
 
-function Ringkasan({ p }) {
+// Pengalaman kerja kandidat (GET /pengajuan/{id}) beserta deskripsi pekerjaan, untuk HR Client & internal.
+function PengalamanKandidat({ items }) {
   return (
-    <Bagian icon="person" judul={p.talent.nama_lengkap}>
+    <Bagian icon="work_history" judul="Pengalaman Kerja">
+      {items.length === 0 ? (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada pengalaman kerja.</p>
+      ) : (
+        <ol className="space-y-space-sm">
+          {items.map((r) => (
+            <li key={r.id_pengalaman_kerja} className="border-l-2 border-primary-fixed-dim pl-space-sm">
+              <div className="font-title-sm text-title-sm text-on-surface">{r.posisi}</div>
+              <div className="font-body-md text-body-md text-on-surface-variant">{[r.nama_perusahaan, r.lokasi].filter(Boolean).join(" · ")}</div>
+              <div className="font-body-sm text-body-sm text-outline">
+                {formatTanggal(r.tanggal_mulai)} – {r.masih_bekerja ? "Sekarang" : formatTanggal(r.tanggal_selesai)}
+                {r.jenis_pekerjaan && ` · ${r.jenis_pekerjaan}`}
+              </div>
+              {r.deskripsi && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 whitespace-pre-line">{r.deskripsi}</p>}
+            </li>
+          ))}
+        </ol>
+      )}
+    </Bagian>
+  );
+}
+
+// `talent`: dibuka talent sendiri, sehingga nama, pendidikan, dan email dirinya tidak ditampilkan.
+function Ringkasan({ p, talent }) {
+  return (
+    <Bagian icon={talent ? "work" : "person"} judul={talent ? p.job_requirement.posisi : p.talent.nama_lengkap}>
       <div className="flex flex-wrap gap-1">
         <BadgeTahapPengajuan pengajuan={p} />
       </div>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-space-md gap-y-space-sm pt-space-xs">
         <Info label="Posisi">{p.job_requirement.posisi}</Info>
         <Info label="Klien">{p.job_requirement.klien.nama_perusahaan}</Info>
-        <Info label="Pendidikan">{p.talent.pendidikan}</Info>
-        <Info label="Email">{p.talent.email}</Info>
+        {!talent && <Info label="Pendidikan">{p.talent.pendidikan}</Info>}
+        {!talent && <Info label="Email">{p.talent.email}</Info>}
         <Info label="Diajukan oleh">{p.account_manager?.nama_pegawai}</Info>
         <Info label="Tanggal pengajuan">{formatTanggal(p.tanggal_pengajuan)}</Info>
         {p.screening && <Info label="Skor kecocokan">{formatAngka(p.screening.skor_kecocokan, 2)}</Info>}
