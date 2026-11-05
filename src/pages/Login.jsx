@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { IkonKiri, InputSandi, Isian, KakiHalaman, Merek, PesanError, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
+import { IkonKiri, InputSandi, Isian, KakiHalaman, Merek, PesanError, PesanSukses, TombolUtama, kelasInput, useJudulTab } from "../components/auth/AuthUi";
 
 // Mockup Stitch "Masuk - Varian 1 (Clean Enterprise Minimalist)": kartu di tengah dengan latar pola titik.
 export default function Login() {
@@ -9,7 +9,9 @@ export default function Login() {
   useJudulTab("Masuk");
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState("");
+  // Setelah reset password: pesan sukses dan email dari halaman Reset Password.
+  const pesanSukses = location.state?.pesanSukses ?? null;
+  const [email, setEmail] = useState(location.state?.email ?? "");
   const [password, setPassword] = useState("");
   const [ingat, setIngat] = useState(true);
   const [lihatSandi, setLihatSandi] = useState(false);
@@ -58,6 +60,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-space-md">
+            {!error && <PesanSukses>{pesanSukses}</PesanSukses>}
             <PesanError>{error}</PesanError>
 
             <Isian label="Email Perusahaan / Akun" error={fieldErrors.email}>
@@ -90,10 +93,15 @@ export default function Login() {
               />
             </Isian>
 
-            <label className="flex items-center gap-space-sm w-fit cursor-pointer select-none">
-              <input type="checkbox" checked={ingat} onChange={(e) => setIngat(e.target.checked)} className="w-4 h-4 rounded accent-aksen" />
-              <span className="font-body-md text-body-md text-on-surface-variant">Ingat saya</span>
-            </label>
+            <div className="flex flex-wrap items-center justify-between gap-space-sm">
+              <label className="flex items-center gap-space-sm w-fit cursor-pointer select-none">
+                <input type="checkbox" checked={ingat} onChange={(e) => setIngat(e.target.checked)} className="w-4 h-4 rounded accent-aksen" />
+                <span className="font-body-md text-body-md text-on-surface-variant">Ingat saya</span>
+              </label>
+              <Link to="/lupa-password" className="font-title-sm text-title-sm text-aksen hover:text-aksen-hover">
+                Lupa password?
+              </Link>
+            </div>
 
             <div className="pt-space-sm">
               <TombolUtama memproses={submitting}>

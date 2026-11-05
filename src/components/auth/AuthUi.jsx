@@ -84,6 +84,43 @@ export function PesanError({ children }) {
   );
 }
 
+export function PesanSukses({ children }) {
+  if (!children) return null;
+  return (
+    <div role="status" className="flex items-start gap-space-sm p-space-sm rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-body-md text-body-md">
+      <span aria-hidden="true" className="material-symbols-outlined text-[20px]">check_circle</span>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+// Kerangka halaman tamu berbentuk kartu di tengah (sama dengan halaman Masuk): Lupa Password, Reset Password.
+export function KartuTamu({ judul, keterangan, children, bawah }) {
+  return (
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-b from-surface to-surface-container-low">
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none opacity-50"
+        style={{ backgroundImage: "radial-gradient(rgba(148, 163, 184, 0.28) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+      />
+      <main className="relative flex-1 flex flex-col items-center justify-center px-space-md py-space-xl">
+        <div className="w-full max-w-[460px] bg-surface-container-lowest rounded-2xl border border-outline-variant/50 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.18)] p-space-lg sm:p-9">
+          <div className="text-center mb-space-xl">
+            <Merek tengah />
+            <h1 className="mt-space-lg font-headline-md text-headline-md text-on-surface">{judul}</h1>
+            {keterangan && <p className="mt-1.5 font-body-md text-body-md text-on-surface-variant">{keterangan}</p>}
+          </div>
+          {children}
+          {bawah && <div className="mt-space-lg pt-space-md border-t border-surface-container text-center">{bawah}</div>}
+        </div>
+      </main>
+      <footer className="relative w-full px-space-lg py-space-lg text-center border-t border-outline-variant/40 bg-surface-container-lowest/40 backdrop-blur-sm">
+        <KakiHalaman />
+      </footer>
+    </div>
+  );
+}
+
 export function TombolUtama({ memproses, children }) {
   return (
     <button
