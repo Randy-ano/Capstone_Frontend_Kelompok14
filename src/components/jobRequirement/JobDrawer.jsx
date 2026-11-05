@@ -5,7 +5,7 @@ import { INTERNAL, ROLE } from "../../auth/roles";
 import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatTanggalWaktu, Proses } from "../ui";
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
-import { HasilBadge } from "../talentPool/shared";
+import { CatatanUsulan, UsulanBadge } from "../rekrutmen/usulan";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola, formatKisaranGaji } from "./shared";
 
 // Panel samping detail job requirement + log progres (GET /job-requirements/{id}/progres).
@@ -51,7 +51,7 @@ export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit 
             }}
           />
           <RingkasanProgres ringkasan={job.ringkasan_progres} />
-          {internal && <KandidatScreening items={screening} />}
+          {internal && <KandidatDiusulkan items={screening} />}
           <LogProgres items={job.log_progres} />
         </>
       )}
@@ -203,10 +203,10 @@ function Aksi({ job, user, onEdit, onUbahStatus }) {
 
 function RingkasanProgres({ ringkasan }) {
   const angka = [
-    ["Screening", ringkasan.jumlah_screening],
-    ["Menunggu", ringkasan.screening_pending],
-    ["Lolos", ringkasan.screening_lolos],
-    ["Tidak lolos", ringkasan.screening_tidak_lolos],
+    ["Diusulkan", ringkasan.jumlah_screening],
+    ["Menunggu AM", ringkasan.usulan_menunggu_am],
+    ["Diteruskan", ringkasan.usulan_diteruskan],
+    ["Tidak diteruskan", ringkasan.usulan_tidak_diteruskan],
     ["Sisa kebutuhan", ringkasan.sisa_kebutuhan],
   ];
   return (
@@ -223,13 +223,13 @@ function RingkasanProgres({ ringkasan }) {
   );
 }
 
-function KandidatScreening({ items }) {
+function KandidatDiusulkan({ items }) {
   return (
-    <Bagian icon="fact_check" judul="Kandidat di-screening">
+    <Bagian icon="forward_to_inbox" judul="Kandidat Diusulkan">
       {!items ? (
         <Memuat />
       ) : items.length === 0 ? (
-        <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat yang di-screening.</KeadaanKosong>
+        <KeadaanKosong ringkas ikon="forward_to_inbox">Belum ada kandidat yang diusulkan Talent Support.</KeadaanKosong>
       ) : (
         <ul className="divide-y divide-surface-container-high">
           {items.map((s) => (
@@ -239,10 +239,10 @@ function KandidatScreening({ items }) {
                 <div className="font-body-sm text-body-sm text-on-surface-variant">
                   {formatTanggal(s.tanggal_screening)} · oleh {s.talent_support?.nama_pegawai ?? "-"}
                 </div>
-                {s.catatan_screening && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">“{s.catatan_screening}”</p>}
+                <CatatanUsulan catatan={s.catatan_screening} alasan={s.alasan_tidak_diteruskan} />
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
-                <HasilBadge hasil={s.hasil_screening} />
+                <UsulanBadge status={s.status_usulan} label={s.label_status_usulan} />
                 <span className="font-label-sm text-label-sm text-on-surface-variant">Skor {formatAngka(s.skor_kecocokan, 2)}</span>
               </div>
             </li>

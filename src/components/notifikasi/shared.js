@@ -1,7 +1,10 @@
 // Pemetaan tipe notifikasi (backend `tipe_notifikasi`) ke ikon & halaman tujuan (FR-16).
-import { INTERNAL } from "../../auth/roles";
+import { INTERNAL, ROLE } from "../../auth/roles";
 
 const TIPE = {
+  permintaan_diajukan: { ikon: "post_add", path: "/rekomendasi-kandidat" },
+  usulan_kandidat: { ikon: "forward_to_inbox", path: "/pengajuan-kandidat" },
+  usulan_tidak_diteruskan: { ikon: "block", path: "/rekomendasi-kandidat" },
   pengajuan_dibuat: { ikon: "send", path: "/pengajuan-kandidat" },
   pengajuan_diperbarui: { ikon: "rule", path: "/pengajuan-kandidat" },
   evaluasi_disimpan: { ikon: "rate_review", path: "/pengajuan-kandidat" },
@@ -23,6 +26,8 @@ export function infoTipe(tipe, role) {
   const t = TIPE[tipe] ?? { ikon: "notifications", path: null };
   // Pengingat SLA untuk role non-internal diarahkan ke permintaan kebutuhan.
   if (t.path === "/pipeline-rekrutmen" && !INTERNAL.includes(role)) return { ...t, path: "/permintaan-kebutuhan" };
+  // Permintaan baru: TS mencari kandidat di Rekomendasi, AM membuka daftar permintaan.
+  if (tipe === "permintaan_diajukan" && role !== ROLE.TALENT_SUPPORT) return { ...t, path: "/permintaan-kebutuhan" };
   return t;
 }
 

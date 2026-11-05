@@ -114,7 +114,7 @@ export default function PermintaanKebutuhan() {
       label: "Diproses",
       nilai: r?.diproses,
       ikon: "pending_actions",
-      keterangan: `${r?.diajukan ?? "–"} lainnya diajukan, menunggu screening`,
+      keterangan: `${r?.diajukan ?? "–"} lainnya diajukan, menunggu usulan kandidat`,
       aktif: status === "diproses",
       onClick: () => (setStatus("diproses"), setSla(""), setPage(1)),
     },

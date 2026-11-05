@@ -1,4 +1,4 @@
-// Label & komponen khusus job requirement, screening, dan progres (FR-05, 07, 08, 09).
+// Label & komponen khusus job requirement, usulan kandidat, dan progres (FR-05, 07, 08, 09).
 import { ROLE } from "../../auth/roles";
 import { Badge, NADA } from "../ui";
 
@@ -18,7 +18,8 @@ export const INDIKATOR_SLA = {
 
 export const TAHAPAN = {
   kebutuhan_dibuat: { label: "Kebutuhan diajukan", ikon: "post_add" },
-  screening: { label: "Screening", ikon: "fact_check" },
+  // Tahap `screening` di backend = usulan Talent Support ke Account Manager (revisi 2026-11-05).
+  screening: { label: "Diusulkan ke AM", ikon: "forward_to_inbox" },
   diajukan: { label: "Diajukan ke klien", ikon: "send" },
   interview: { label: "Interview", ikon: "event_available" },
   evaluasi: { label: "Evaluasi", ikon: "rate_review" },

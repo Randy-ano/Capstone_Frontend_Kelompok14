@@ -172,7 +172,7 @@ function Ringkasan({ p, talent }) {
         <Info label="Diajukan oleh">{p.account_manager?.nama_pegawai}</Info>
         <Info label="Tanggal pengajuan">{formatTanggal(p.tanggal_pengajuan)}</Info>
         {p.screening && <Info label="Skor kecocokan">{formatAngka(p.screening.skor_kecocokan, 2)}</Info>}
-        {p.screening?.catatan_screening && <Info label="Catatan screening">{p.screening.catatan_screening}</Info>}
+        {p.screening?.catatan_screening && <Info label="Catatan Talent Support">{p.screening.catatan_screening}</Info>}
       </dl>
       {p.job_requirement.status_req !== "diproses" && (
         <p className="font-body-sm text-body-sm text-on-surface-variant">Permintaan ini sudah {p.job_requirement.status_req}; proses kandidat tidak dapat dilanjutkan.</p>

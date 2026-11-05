@@ -134,7 +134,7 @@ export default function PipelineRekrutmen() {
 
         <div className="kartu overflow-hidden">
           <TabelKartu
-            kolom={["Permintaan", "SLA", "Pemenuhan", { label: "Screening", className: "angka" }, "Progres Terakhir", "Status"]}
+            kolom={["Permintaan", "SLA", "Pemenuhan", { label: "Diusulkan", className: "angka" }, "Progres Terakhir", "Status"]}
             className="md:min-w-[960px]"
             redup={memuat && hasil}
           >
@@ -200,7 +200,7 @@ function BarisPipeline({ job, onOpen }) {
       <Sel peran="setengah" label="Pemenuhan">
         <Pemenuhan terpenuhi={job.terpenuhi} jumlah={job.jumlah_kebutuhan} />
       </Sel>
-      <Sel label="Screening" className="angka font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</Sel>
+      <Sel label="Diusulkan" className="angka font-title-sm text-title-sm text-on-surface">{job.jumlah_screening}</Sel>
       <Sel label="Progres Terakhir">
         {log ? (
           <div className="flex items-start gap-space-sm">
