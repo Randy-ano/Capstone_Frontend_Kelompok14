@@ -5,6 +5,7 @@ import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, errorField, Proses }
 import { useToast } from "../components/toast";
 import { STATUS_KANDIDAT } from "../components/talentPool/shared";
 import FilterKompetensi from "../components/talentPool/FilterKompetensi";
+import { FileSertifikat } from "../components/sertifikat";
 
 const JENJANG = ["SMA/SMK", "D3", "D4", "S1", "S2", "S3"];
 const JENIS_PEKERJAAN = ["Full-time", "Part-time", "Kontrak", "Magang", "Freelance", "Skripsi"];
@@ -28,7 +29,13 @@ function keForm(p) {
       ...Object.fromEntries(Object.keys(PENGALAMAN_KOSONG).map((f) => [f, keString(r[f])])),
       masih_bekerja: Boolean(r.masih_bekerja),
     })),
-    sertifikat: p.sertifikat.map((r) => Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, keString(r[f])]))),
+    // id_sertifikat dikirim balik agar baris lama diperbarui (file tetap); file_sertifikat/jenis_file hanya untuk tampilan.
+    sertifikat: p.sertifikat.map((r) => ({
+      id_sertifikat: r.id_sertifikat,
+      file_sertifikat: r.file_sertifikat ?? null,
+      jenis_file: r.jenis_file ?? null,
+      ...Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, keString(r[f])])),
+    })),
     bahasa: p.bahasa.map((r) => ({ nama_bahasa: r.nama_bahasa, tingkat_kemampuan: keString(r.tingkat_kemampuan) })),
     kompetensi: p.kompetensi.map((k) => k.id_kompetensi),
   };
@@ -59,7 +66,10 @@ function keBody(form) {
     tanggal_selesai: r.masih_bekerja ? null : kosongNull(r.tanggal_selesai),
     deskripsi: kosongNull(r.deskripsi),
   }));
-  body.sertifikat = form.sertifikat.map((r) => Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, kosongNull(r[f])])));
+  body.sertifikat = form.sertifikat.map((r) => ({
+    id_sertifikat: r.id_sertifikat ?? null,
+    ...Object.fromEntries(Object.keys(SERTIFIKAT_KOSONG).map((f) => [f, kosongNull(r[f])])),
+  }));
   body.bahasa = form.bahasa.map((r) => ({ nama_bahasa: kosongNull(r.nama_bahasa), tingkat_kemampuan: kosongNull(r.tingkat_kemampuan) }));
   return body;
 }
@@ -146,6 +156,13 @@ export default function ProfilSaya() {
     setForm((f) => ({ ...f, [daftar]: f[daftar].map((r, j) => (j === i ? { ...r, [field]: nilai } : r)) }));
   const tambahBaris = (daftar, kosong) => setForm((f) => ({ ...f, [daftar]: [...f[daftar], { ...kosong }] }));
   const hapusBaris = (daftar, i) => setForm((f) => ({ ...f, [daftar]: f[daftar].filter((_, j) => j !== i) }));
+
+  // File sertifikat diunggah langsung (terpisah dari Simpan) untuk baris yang sudah tersimpan.
+  function fileTerunggah(data) {
+    const pasang = (r) => (r.id_sertifikat === data.id_sertifikat ? { ...r, file_sertifikat: data.file_sertifikat, jenis_file: data.jenis_file } : r);
+    setProfil((p) => ({ ...p, sertifikat: p.sertifikat.map(pasang) }));
+    setForm((f) => ({ ...f, sertifikat: f.sertifikat.map(pasang) }));
+  }
 
   async function handleSimpan() {
     setSimpan(true);
@@ -346,7 +363,7 @@ export default function ProfilSaya() {
         <Bagian
           ikon="workspace_premium"
           judul="Sertifikat"
-          keterangan="Opsional. Ditampilkan di CV Anda."
+          keterangan="Opsional. Ditampilkan di CV Anda. File sertifikat (PDF/JPG/PNG, maks 2 MB) dapat dilihat Talent Support, Account Manager, Manager, dan HR Client yang menerima pengajuan Anda. Menghapus baris sertifikat juga menghapus filenya saat profil disimpan."
           aksi={<TombolTambah onClick={() => tambahBaris("sertifikat", SERTIFIKAT_KOSONG)} />}
         >
           {form.sertifikat.length === 0 && <Kosong>Belum ada sertifikat.</Kosong>}
@@ -354,7 +371,7 @@ export default function ProfilSaya() {
             const ef = (f) => e(`sertifikat.${i}.${f}`);
             const set = (f) => (ev) => ubahBaris("sertifikat", i, f, ev.target.value);
             return (
-              <KartuBaris key={i} judul={`Sertifikat ${i + 1}`} onHapus={() => hapusBaris("sertifikat", i)}>
+              <KartuBaris key={r.id_sertifikat ?? `baru-${i}`} judul={`Sertifikat ${i + 1}`} onHapus={() => hapusBaris("sertifikat", i)}>
                 <Field label="Nama sertifikat" wajib error={ef("nama_sertifikat")}>
                   <input value={r.nama_sertifikat} onChange={set("nama_sertifikat")} maxLength={255} placeholder="Contoh: AWS Certified Developer" className={inputClass(ef("nama_sertifikat"))} />
                 </Field>
@@ -370,6 +387,7 @@ export default function ProfilSaya() {
                 <Field label="Tautan verifikasi" error={ef("url_sertifikat")} className="sm:col-span-2">
                   <input type="url" value={r.url_sertifikat} onChange={set("url_sertifikat")} maxLength={255} placeholder="https://..." className={inputClass(ef("url_sertifikat"))} />
                 </Field>
+                <UnggahFileSertifikat baris={r} onBerhasil={fileTerunggah} />
               </KartuBaris>
             );
           })}
@@ -436,6 +454,54 @@ function TombolTambah({ onClick }) {
       <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
       Tambah
     </button>
+  );
+}
+
+// Unggah / ganti / lihat file satu sertifikat. Baris baru harus disimpan dulu agar punya id.
+function UnggahFileSertifikat({ baris, onBerhasil }) {
+  const toast = useToast();
+  const [kirim, setKirim] = useState(false);
+  const [error, setError] = useState("");
+  const inputId = `file-sertifikat-${baris.id_sertifikat ?? "baru"}`;
+
+  async function pilih(ev) {
+    const file = ev.target.files?.[0];
+    ev.target.value = "";
+    if (!file) return;
+    setKirim(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await api(`/talent/sertifikat/${baris.id_sertifikat}/file`, { method: "POST", body: fd });
+      onBerhasil(res.data);
+      toast.sukses(res.message);
+    } catch (err) {
+      setError(err.errors?.file?.[0] ?? err.message);
+    } finally {
+      setKirim(false);
+    }
+  }
+
+  return (
+    <div className="sm:col-span-2 xl:col-span-3 space-y-1 min-w-0">
+      <span className="block font-label-md text-label-md text-on-surface">File sertifikat</span>
+      {!baris.id_sertifikat ? (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">Simpan profil terlebih dahulu untuk mengunggah file sertifikat ini.</p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-space-sm">
+          {baris.file_sertifikat && <FileSertifikat sertifikat={baris} />}
+          <label htmlFor={inputId} className={`tombol-kedua cursor-pointer ${kirim ? "opacity-50 pointer-events-none" : ""}`}>
+            <Proses aktif={kirim} ikon={baris.file_sertifikat ? "sync" : "upload_file"}>
+              {baris.file_sertifikat ? "Ganti file" : "Unggah file"}
+            </Proses>
+          </label>
+          <input id={inputId} type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={pilih} disabled={kirim} className="sr-only" />
+          <span className="font-body-sm text-body-sm text-outline">PDF/JPG/PNG, maks 2 MB</span>
+        </div>
+      )}
+      {error && <p className="font-body-sm text-body-sm text-error">{error}</p>}
+    </div>
   );
 }
 
