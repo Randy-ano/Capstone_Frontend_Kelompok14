@@ -36,7 +36,8 @@ export const NAV_GROUPS = [
   {
     label: "Operasional & HR",
     items: [
-      { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [ACCOUNT_MANAGER, MANAGER] },
+      // Revisi monitoring per talent: HR Client mencatat, Manager mencatat & memberi SP, AM & TS melihat. Talent: tab di Penempatan Saya.
+      { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, TALENT_SUPPORT, MANAGER] },
       { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, ...INTERNAL], perluDitempatkan: true },
       { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
       // Dokumen juga terbuka untuk talent yang punya Kontrak Kerja untuk ditandatangani (`user.akses_dokumen`, R36).
