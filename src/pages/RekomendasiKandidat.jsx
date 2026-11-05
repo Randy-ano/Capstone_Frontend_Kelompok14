@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, tagSelainKompetensi, Proses } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, formatAngka, formatTanggal, formatTanggalWaktu, tagSelainKompetensi } from "../components/ui";
 import { useToast } from "../components/toast";
 import { IKON_FILE, TombolLihatSertifikat } from "../components/sertifikat";
-import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
+import { CatatanUsulan, ModalUsulkan, UsulanBadge } from "../components/rekrutmen/usulan";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
-// Halaman Rekomendasi Kandidat (FR-07, FR-08) — khusus Talent Support.
+// Halaman Rekomendasi Kandidat (FR-07, FR-08) — khusus Talent Support. TS mengusulkan kandidat ke Account Manager
+// beserta catatan (revisi 2026-11-05); talent di luar daftar ini (skor < 70) bisa diusulkan dari Talent Pool.
 // Skor berbasis aturan (R9): 80% kecocokan kompetensi + 20% pengalaman kerja. Hanya kandidat dengan skor
 // minimal `meta.skor_minimum` (70) yang dikirim backend. Setiap kompetensi permintaan tampil sekali per kandidat:
 // cocok (centang) atau belum dimiliki (silang).
@@ -37,7 +38,7 @@ export default function RekomendasiKandidat() {
     <div className="flex flex-col w-full pb-space-xl">
       <KepalaHalaman ikon="person_search" kategori="Talent Management" judul="Rekomendasi Kandidat">
         Pencocokan berbasis aturan antara data profil talent dan kebutuhan klien: skor = 80% kecocokan kompetensi + 20% pengalaman kerja.
-        Pilih permintaan, lalu screening kandidat yang sesuai.
+        Pilih permintaan, lalu usulkan kandidat yang sesuai ke Account Manager.
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
@@ -73,14 +74,14 @@ export default function RekomendasiKandidat() {
                 <DaftarKandidat
                   key={`${job.id_job_req}-${versi}`}
                   job={job}
-                  onScreening={(pesan) => {
+                  onUsul={(pesan) => {
                     toast.sukses(pesan);
                     muatUlang();
                   }}
                 />
               </div>
               <div className="xl:col-span-5">
-                <SudahScreening key={`${job.id_job_req}-${versi}`} job={job} onUbah={toast.sukses} />
+                <SudahDiusulkan key={`${job.id_job_req}-${versi}`} job={job} />
               </div>
             </div>
           </>
@@ -131,7 +132,7 @@ function Bagian({ ikon, judul, info, children }) {
   );
 }
 
-function DaftarKandidat({ job, onScreening }) {
+function DaftarKandidat({ job, onUsul }) {
   const [hasil, setHasil] = useState(null);
   const [error, setError] = useState("");
 
@@ -169,40 +170,23 @@ function DaftarKandidat({ job, onScreening }) {
           }
         >
           Belum ada kandidat tersedia dengan skor kecocokan minimal {hasil.meta?.skor_minimum ?? 70}. Kandidat lain belum cukup memenuhi
-          kompetensi atau pengalaman yang dibutuhkan, atau sudah di-screening untuk permintaan ini.
+          kompetensi atau pengalaman yang dibutuhkan, atau sudah diusulkan untuk permintaan ini. Talent lain tetap bisa diusulkan dari
+          Talent Pool.
         </KeadaanKosong>
       )}
       <ol className="space-y-space-md">
         {hasil?.data.map((k, i) => (
-          <KartuKandidat key={k.id_talent} kandidat={k} peringkat={i + 1} job={job} onScreening={onScreening} />
+          <KartuKandidat key={k.id_talent} kandidat={k} peringkat={i + 1} job={job} onUsul={onUsul} />
         ))}
       </ol>
     </Bagian>
   );
 }
 
-function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
+function KartuKandidat({ kandidat: k, peringkat, job, onUsul }) {
   const [buka, setBuka] = useState(false);
-  const [catatan, setCatatan] = useState("");
-  const [kirim, setKirim] = useState(false);
-  const [error, setError] = useState(null);
   // Tag keahlian hanya yang bukan nama kompetensi, karena kompetensi sudah tampil sebagai cocok/belum.
   const tag = tagSelainKompetensi(k.tag_keahlian, [...k.kompetensi_cocok, ...k.kompetensi_kurang]);
-
-  async function screening() {
-    setKirim(true);
-    setError(null);
-    try {
-      const res = await api("/screening", {
-        method: "POST",
-        body: { id_job_req: job.id_job_req, id_talent: k.id_talent, catatan_screening: catatan.trim() || null },
-      });
-      onScreening(`${res.message} ${k.nama_lengkap} masuk tahap screening.`);
-    } catch (err) {
-      setError(err);
-      setKirim(false);
-    }
-  }
 
   return (
     <li className="rounded-xl ring-1 ring-surface-container-high p-space-md space-y-space-sm">
@@ -291,44 +275,29 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
         </div>
       )}
 
-      {error && <Pesan>{errorField(error, "id_talent") ?? errorField(error, "id_job_req") ?? error.message}</Pesan>}
-      {buka ? (
-        <div className="space-y-space-sm pt-space-xs">
-          <textarea
-            rows={2}
-            value={catatan}
-            onChange={(e) => setCatatan(e.target.value)}
-            maxLength={2000}
-            placeholder="Catatan screening (opsional)"
-            aria-label="Catatan screening"
-            className="input py-2"
-          />
-          <div className="flex flex-wrap justify-end gap-space-sm">
-            <button type="button" onClick={() => setBuka(false)} disabled={kirim} className="tombol-kedua">
-              Batal
-            </button>
-            <button type="button" onClick={screening} disabled={kirim} className="tombol-utama">
-              <Proses aktif={kirim}>Konfirmasi Screening</Proses>
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => setBuka(true)}
-            className="tombol-utama"
-          >
-            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">fact_check</span>
-            Screening
-          </button>
-        </div>
+      <div className="flex justify-end">
+        <button type="button" onClick={() => setBuka(true)} className="tombol-utama w-full sm:w-auto">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+          Usulkan ke AM
+        </button>
+      </div>
+      {buka && (
+        <ModalUsulkan
+          talent={k}
+          job={job}
+          skor={k.skor_kecocokan}
+          onClose={() => setBuka(false)}
+          onBerhasil={(res) => {
+            setBuka(false);
+            onUsul(`${res.message} (${k.nama_lengkap})`);
+          }}
+        />
       )}
     </li>
   );
 }
 
-function SudahScreening({ job, onUbah }) {
+function SudahDiusulkan({ job }) {
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
 
@@ -342,129 +311,30 @@ function SudahScreening({ job, onUbah }) {
     };
   }, [job.id_job_req]);
 
-  function ganti(baru, pesan) {
-    setItems((list) => list.map((s) => (s.id_screening === baru.id_screening ? baru : s)));
-    onUbah(pesan);
-  }
-
   return (
-    <Bagian ikon="fact_check" judul="Sudah di-screening" info={items && <span className="font-label-sm text-label-sm text-on-surface-variant">{items.length} kandidat</span>}>
+    <Bagian ikon="forward_to_inbox" judul="Sudah Diusulkan ke AM" info={items && <span className="font-label-sm text-label-sm text-on-surface-variant">{items.length} kandidat</span>}>
       {error && <Pesan>{error}</Pesan>}
       {!error && !items && <Memuat />}
-      {items?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat yang di-screening untuk permintaan ini.</KeadaanKosong>}
+      {items?.length === 0 && <KeadaanKosong ringkas ikon="forward_to_inbox">Belum ada kandidat yang diusulkan untuk permintaan ini.</KeadaanKosong>}
       <ul className="divide-y divide-surface-container-high">
         {items?.map((s) => (
-          <ItemScreening key={s.id_screening} screening={s} onSaved={ganti} />
+          <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 space-y-1">
+            <div className="flex items-start justify-between gap-space-sm">
+              <div className="min-w-0">
+                <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
+                <div className="font-body-sm text-body-sm text-on-surface-variant">
+                  Skor {formatAngka(s.skor_kecocokan, 2)} · {formatTanggal(s.tanggal_screening)}
+                  {s.talent_support && ` · oleh ${s.talent_support.nama_pegawai}`}
+                </div>
+              </div>
+              <div className="shrink-0">
+                <UsulanBadge status={s.status_usulan} label={s.label_status_usulan} />
+              </div>
+            </div>
+            <CatatanUsulan catatan={s.catatan_screening} alasan={s.alasan_tidak_diteruskan} />
+          </li>
         ))}
       </ul>
     </Bagian>
-  );
-}
-
-function ItemScreening({ screening: s, onSaved }) {
-  const [ubah, setUbah] = useState(false);
-  const [hasil, setHasil] = useState(s.hasil_screening);
-  const [catatan, setCatatan] = useState(s.catatan_screening ?? "");
-  const [kirim, setKirim] = useState(false);
-  const [error, setError] = useState(null);
-  const final = s.hasil_screening === "tidak_lolos";
-
-  async function simpan() {
-    const body = {};
-    if (hasil !== s.hasil_screening) body.hasil_screening = hasil;
-    if ((catatan.trim() || null) !== (s.catatan_screening ?? null)) body.catatan_screening = catatan.trim() || null;
-
-    setKirim(true);
-    setError(null);
-    try {
-      const res = await api(`/screening/${s.id_screening}`, { method: "PUT", body });
-      setUbah(false);
-      onSaved(res.data, `${res.message} (${res.data.talent.nama_lengkap})`);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setKirim(false);
-    }
-  }
-
-  return (
-    <li className="py-space-sm first:pt-0 last:pb-0 space-y-space-sm">
-      <div className="flex items-start justify-between gap-space-sm">
-        <div className="min-w-0">
-          <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
-          <div className="font-body-sm text-body-sm text-on-surface-variant">
-            Skor {formatAngka(s.skor_kecocokan, 2)} · {formatTanggal(s.tanggal_screening)}
-          </div>
-          {s.catatan_screening && !ubah && <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">“{s.catatan_screening}”</p>}
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <HasilBadge hasil={s.hasil_screening} />
-          {!ubah && (
-            <button type="button" onClick={() => setUbah(true)} className="font-label-sm text-label-sm text-primary hover:underline">
-              {final ? "Ubah catatan" : "Ubah hasil"}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {ubah && (
-        <div className="bg-surface-container-low rounded-lg p-space-sm space-y-space-sm">
-          {error && <Pesan>{errorField(error, "hasil_screening") ?? error.message}</Pesan>}
-          {!final && (
-            <div className="grid grid-cols-3 gap-1" role="radiogroup" aria-label="Hasil screening">
-              {Object.entries(HASIL_SCREENING).map(([nilai, { label }]) => (
-                <button
-                  key={nilai}
-                  type="button"
-                  role="radio"
-                  aria-checked={hasil === nilai}
-                  onClick={() => setHasil(nilai)}
-                  className={`h-10 rounded-lg font-label-md text-label-md transition-colors ${
-                    hasil === nilai ? "bg-primary text-on-primary shadow-sm" : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-          {hasil === "tidak_lolos" && !final && (
-            <p className="font-body-sm text-body-sm text-error">Hasil "Tidak Lolos" bersifat final: talent dikembalikan menjadi tersedia dan hasil tidak dapat diubah lagi.</p>
-          )}
-          <textarea
-            rows={2}
-            value={catatan}
-            onChange={(e) => setCatatan(e.target.value)}
-            maxLength={2000}
-            placeholder="Catatan screening"
-            aria-label="Catatan screening"
-            className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container"
-          />
-          <div className="flex justify-end gap-space-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setUbah(false);
-                setHasil(s.hasil_screening);
-                setCatatan(s.catatan_screening ?? "");
-                setError(null);
-              }}
-              disabled={kirim}
-              className="tombol-kedua"
-            >
-              Batal
-            </button>
-            <button
-              type="button"
-              onClick={simpan}
-              disabled={kirim || (hasil === s.hasil_screening && (catatan.trim() || null) === (s.catatan_screening ?? null))}
-              className="tombol-utama"
-            >
-              <Proses aktif={kirim}>Simpan</Proses>
-            </button>
-          </div>
-        </div>
-      )}
-    </li>
   );
 }

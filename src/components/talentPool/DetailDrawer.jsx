@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
-import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, tagSelainKompetensi, Proses } from "../ui";
+import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatAngka, formatBulan, formatRupiah, formatTanggal, tagSelainKompetensi, Proses } from "../ui";
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { DaftarSertifikat } from "../sertifikat";
-import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
+import { STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
+import { CatatanUsulan, ModalUsulkan, UsulanBadge } from "../rekrutmen/usulan";
 
-// Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
+// Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id} dan
+// mengusulkan talent ke AM lewat POST /screening).
 export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState("");
+  const [versi, setVersi] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     let batal = false;
@@ -22,7 +26,7 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
     return () => {
       batal = true;
     };
-  }, [id]);
+  }, [id, versi]);
 
   function handleUpdated(data) {
     setDetail(data);
@@ -43,11 +47,21 @@ export default function DetailDrawer({ id, bolehUbah, onClose, onUpdated }) {
       {detail && (
         <>
           <Profil detail={detail} />
+          {bolehUbah && (
+            <UsulkanKeAm
+              detail={detail}
+              onBerhasil={(res) => {
+                toast.sukses(`${res.message} (${res.data.talent.nama_lengkap} → ${res.data.job_requirement.posisi})`);
+                setVersi((v) => v + 1);
+                onUpdated();
+              }}
+            />
+          )}
           {bolehUbah && <FormUbah detail={detail} onUpdated={handleUpdated} />}
           <RiwayatPendidikan items={detail.talent.riwayat_pendidikan} />
           <PengalamanKerja items={detail.talent.riwayat_pengalaman_kerja} lama={detail.talent.lama_pengalaman_tahun} />
           {detail.talent.sertifikat.length > 0 && <Sertifikat items={detail.talent.sertifikat} />}
-          <RiwayatScreening items={detail.riwayat_screening} />
+          <RiwayatUsulan items={detail.riwayat_screening} />
         </>
       )}
     </Laci>
@@ -325,16 +339,16 @@ function Sertifikat({ items }) {
   );
 }
 
-function RiwayatScreening({ items }) {
+function RiwayatUsulan({ items }) {
   return (
-    <Bagian icon="fact_check" judul="Riwayat Screening">
+    <Bagian icon="forward_to_inbox" judul="Riwayat Usulan">
       {items.length === 0 ? (
-        <Kosong>Talent belum pernah di-screening.</Kosong>
+        <Kosong>Talent belum pernah diusulkan ke Account Manager.</Kosong>
       ) : (
         <ul className="divide-y divide-surface-container-high">
-          {items.map((s) => {
-            return (
-              <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 flex items-start justify-between gap-space-sm">
+          {items.map((s) => (
+            <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 space-y-1">
+              <div className="flex items-start justify-between gap-space-sm">
                 <div className="min-w-0">
                   <div className="font-title-sm text-title-sm text-on-surface">{s.posisi ?? "-"}</div>
                   <div className="font-body-sm text-body-sm text-on-surface-variant">
@@ -342,17 +356,60 @@ function RiwayatScreening({ items }) {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <HasilBadge hasil={s.hasil_screening} />
+                  <UsulanBadge status={s.status_usulan} label={s.label_status_usulan} />
                   {s.skor_kecocokan != null && (
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">Skor {Number(s.skor_kecocokan).toLocaleString("id-ID")}</span>
+                    <span className="font-label-sm text-label-sm text-on-surface-variant">Skor {formatAngka(s.skor_kecocokan, 2)}</span>
                   )}
                 </div>
-              </li>
-            );
-          })}
+              </div>
+              <CatatanUsulan catatan={s.catatan_screening} alasan={s.alasan_tidak_diteruskan} />
+            </li>
+          ))}
         </ul>
       )}
     </Bagian>
+  );
+}
+
+// TS mengusulkan talent ke AM untuk permintaan yang dipilih. Talent harus tersedia (di pool & tidak sedang diproses).
+function UsulkanKeAm({ detail, onBerhasil }) {
+  const [buka, setBuka] = useState(false);
+  const alasan =
+    detail.status_ketersediaan !== "tersedia"
+      ? "Talent ditandai tidak tersedia di talent pool."
+      : detail.talent.status_kandidat !== "tersedia"
+        ? `Talent sedang ${(STATUS_KANDIDAT[detail.talent.status_kandidat] ?? detail.talent.status_kandidat).toLowerCase()}; tunggu sampai prosesnya selesai.`
+        : null;
+
+  return (
+    <section className="kartu p-space-md space-y-space-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+        <div className="min-w-0">
+          <h3 className="flex items-center gap-space-sm font-title-sm text-title-sm text-on-surface">
+            <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px]">forward_to_inbox</span>
+            Usulkan ke Account Manager
+          </h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            {alasan ?? "Pilih permintaan tujuan; talent di luar rekomendasi (skor < 70) tetap boleh diusulkan."}
+          </p>
+        </div>
+        <button type="button" onClick={() => setBuka(true)} disabled={!!alasan} className="tombol-utama shrink-0 w-full sm:w-auto">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+          Usulkan ke AM
+        </button>
+      </div>
+      {buka && (
+        <ModalUsulkan
+          talent={detail.talent}
+          sudahDiusulkan={detail.riwayat_screening.map((s) => s.id_job_req)}
+          onClose={() => setBuka(false)}
+          onBerhasil={(res) => {
+            setBuka(false);
+            onBerhasil(res);
+          }}
+        />
+      )}
+    </section>
   );
 }
 

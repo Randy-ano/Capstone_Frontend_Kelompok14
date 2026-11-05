@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
@@ -7,13 +8,15 @@ import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
 import { BadgeTahapPengajuan, STATUS_TAMPIL, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
+import TabUsulan, { usulanAktif } from "../components/rekrutmen/TabUsulan";
+import { CatatanUsulan } from "../components/rekrutmen/usulan";
 
 const PER_PAGE = 10;
 
 const KETERANGAN = {
   [ROLE.HR_CLIENT]: "Tinjau kandidat yang diajukan PT Intellisys, pantau jadwal interview dari Account Manager, lalu beri evaluasi.",
   [ROLE.TALENT]: "Pantau proses Anda: diajukan ke klien, interview, sampai hasil evaluasi.",
-  [ROLE.ACCOUNT_MANAGER]: "Ajukan kandidat yang lolos screening ke klien, jadwalkan interview dan tandai selesai, lalu pantau hingga evaluasi.",
+  [ROLE.ACCOUNT_MANAGER]: "Tinjau usulan kandidat dari Talent Support, teruskan ke klien, jadwalkan interview dan tandai selesai, lalu pantau hingga evaluasi.",
 };
 
 // Halaman Pengajuan Kandidat (FR-10, 11, 12, 17): AM mengajukan, HR Client meninjau/interview/evaluasi, TS membuat penempatan.
@@ -33,6 +36,18 @@ export default function PengajuanKandidat() {
   const toast = useToast();
   const [dipilih, setDipilih] = useState(null);
   const [ajukan, setAjukan] = useState(false);
+  // AM: tab "Pengajuan ke Klien" (default) dan "Usulan dari Talent Support" (?tab=usulan).
+  const am = user.role === ROLE.ACCOUNT_MANAGER;
+  const [params, setParams] = useSearchParams();
+  const tab = am && params.get("tab") === "usulan" ? "usulan" : "pengajuan";
+  const [jumlahUsulan, setJumlahUsulan] = useState(null);
+
+  useEffect(() => {
+    if (!am) return;
+    api("/screening?status_usulan=menunggu_am&per_page=100")
+      .then((res) => setJumlahUsulan(res.data.filter(usulanAktif).length))
+      .catch(() => setJumlahUsulan(null));
+  }, [am, versi]);
 
   useEffect(() => setPage(1), [search]);
 
@@ -84,95 +99,133 @@ export default function PengajuanKandidat() {
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
-        <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder={talent ? "Cari posisi..." : "Cari nama kandidat atau posisi..."} />
-          <PilihFilter
-            ikon="filter_alt"
-            label="Status"
-            value={status}
-            onChange={(n) => {
-              setStatus(n);
-              setPage(1);
+        {am && (
+          <div className="inline-flex self-start max-w-full p-1 bg-surface-container rounded-full shadow-sm" role="tablist" aria-label="Bagian pengajuan">
+            {[
+              { key: "pengajuan", ikon: "send", label: "Pengajuan ke Klien", pendek: "Pengajuan" },
+              { key: "usulan", ikon: "forward_to_inbox", label: "Usulan dari Talent Support", pendek: "Usulan TS" },
+            ].map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setParams(t.key === "usulan" ? { tab: "usulan" } : {})}
+                className={`min-h-[40px] px-4 sm:px-5 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all ${
+                  tab === t.key ? "bg-surface-container-lowest text-primary font-semibold shadow-sm" : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{t.ikon}</span>
+                <span className="sm:hidden">{t.pendek}</span>
+                <span className="hidden sm:inline">{t.label}</span>
+                {t.key === "usulan" && jumlahUsulan > 0 && (
+                  <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-center">{jumlahUsulan}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        {tab === "usulan" ? (
+          <TabUsulan
+            onJumlah={setJumlahUsulan}
+            onDiteruskan={(id) => {
+              muatUlang();
+              setDipilih(id);
             }}
-            semua="Semua Status"
-            opsi={Object.entries(STATUS_TAMPIL).map(([v, s]) => [v, s.label])}
           />
-          {adaFilter && (
-            <button
-              type="button"
-              onClick={() => {
-                setCari("");
-                setStatus("");
-                setPage(1);
-              }}
-              className="tombol-teks"
-            >
-              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
-              Reset
-            </button>
-          )}
-        </div>
+        ) : (
+          <>
+            <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
+              <KotakCari value={cari} onChange={setCari} placeholder={talent ? "Cari posisi..." : "Cari nama kandidat atau posisi..."} />
+              <PilihFilter
+                ikon="filter_alt"
+                label="Status"
+                value={status}
+                onChange={(n) => {
+                  setStatus(n);
+                  setPage(1);
+                }}
+                semua="Semua Status"
+                opsi={Object.entries(STATUS_TAMPIL).map(([v, s]) => [v, s.label])}
+              />
+              {adaFilter && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCari("");
+                    setStatus("");
+                    setPage(1);
+                  }}
+                  className="tombol-teks"
+                >
+                  <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+                  Reset
+                </button>
+              )}
+            </div>
 
-        {error && <Pesan>{error}</Pesan>}
+            {error && <Pesan>{error}</Pesan>}
 
-        <div className="kartu overflow-hidden">
-          <TabelKartu
-            kolom={talent ? ["Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"] : ["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]}
-            className={talent ? "md:min-w-[680px]" : "md:min-w-[860px]"}
-            redup={memuat && hasil}
-          >
-            {!hasil && memuat && <BarisMemuat kolom={talent ? 4 : 5} />}
-            {hasil?.data.length === 0 && (
-              <BarisKosong kolom={talent ? 4 : 5} ikon="send">
-                {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
-              </BarisKosong>
-            )}
-            {hasil?.data.map((p) => {
-              const tahap = tahapPengajuan(p);
-              return (
-                <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
-                  <Sel peran="judul">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDipilih(p.id_pengajuan);
-                      }}
-                      className="text-left group"
-                    >
-                      <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">
-                        {talent ? p.job_requirement.posisi : p.talent.nama_lengkap}
-                      </span>
-                      <span className="block font-body-sm text-body-sm text-on-surface-variant">
-                        {talent ? p.job_requirement.klien.nama_perusahaan : p.talent.pendidikan ?? p.talent.email}
-                      </span>
-                    </button>
-                  </Sel>
-                  {!talent && (
-                    <Sel label="Posisi & Klien">
-                      <span className="block text-on-surface">{p.job_requirement.posisi}</span>
-                      <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
-                    </Sel>
-                  )}
-                  <Sel peran="setengah" label="Diajukan" className="whitespace-nowrap">
-                    <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
-                    {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
-                  </Sel>
-                  <Sel peran="setengah" label="Tahap Saat Ini">
-                    <span className="flex items-center gap-1 text-on-surface">
-                      <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
-                      {tahap.label}
-                    </span>
-                  </Sel>
-                  <Sel peran="status">
-                    <BadgeTahapPengajuan pengajuan={p} />
-                  </Sel>
-                </tr>
-              );
-            })}
-          </TabelKartu>
-          {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pengajuan" />}
-        </div>
+            <div className="kartu overflow-hidden">
+              <TabelKartu
+                kolom={talent ? ["Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"] : ["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]}
+                className={talent ? "md:min-w-[680px]" : "md:min-w-[860px]"}
+                redup={memuat && hasil}
+              >
+                {!hasil && memuat && <BarisMemuat kolom={talent ? 4 : 5} />}
+                {hasil?.data.length === 0 && (
+                  <BarisKosong kolom={talent ? 4 : 5} ikon="send">
+                    {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
+                  </BarisKosong>
+                )}
+                {hasil?.data.map((p) => {
+                  const tahap = tahapPengajuan(p);
+                  return (
+                    <tr key={p.id_pengajuan} onClick={() => setDipilih(p.id_pengajuan)} className="hover:bg-surface-container-low cursor-pointer transition-colors align-top">
+                      <Sel peran="judul">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDipilih(p.id_pengajuan);
+                          }}
+                          className="text-left group"
+                        >
+                          <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">
+                            {talent ? p.job_requirement.posisi : p.talent.nama_lengkap}
+                          </span>
+                          <span className="block font-body-sm text-body-sm text-on-surface-variant">
+                            {talent ? p.job_requirement.klien.nama_perusahaan : p.talent.pendidikan ?? p.talent.email}
+                          </span>
+                        </button>
+                      </Sel>
+                      {!talent && (
+                        <Sel label="Posisi & Klien">
+                          <span className="block text-on-surface">{p.job_requirement.posisi}</span>
+                          <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
+                        </Sel>
+                      )}
+                      <Sel peran="setengah" label="Diajukan" className="whitespace-nowrap">
+                        <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
+                        {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
+                      </Sel>
+                      <Sel peran="setengah" label="Tahap Saat Ini">
+                        <span className="flex items-center gap-1 text-on-surface">
+                          <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
+                          {tahap.label}
+                        </span>
+                      </Sel>
+                      <Sel peran="status">
+                        <BadgeTahapPengajuan pengajuan={p} />
+                      </Sel>
+                    </tr>
+                  );
+                })}
+              </TabelKartu>
+              {hasil && hasil.meta.total > 0 && <Pagination meta={hasil.meta} onPage={setPage} satuan="pengajuan" />}
+            </div>
+          </>
+        )}
       </div>
 
       {dipilih && <PengajuanDrawer id={dipilih} user={user} onClose={tutupDetail} onChanged={muatUlang} />}
@@ -191,15 +244,15 @@ export default function PengajuanKandidat() {
   );
 }
 
-// AM memilih kandidat yang lolos screening dan belum diajukan (R14).
+// AM memilih usulan Talent Support yang belum diteruskan (R14).
 function ModalAjukan({ onClose, onBerhasil }) {
   const [daftar, setDaftar] = useState(null);
   const [error, setError] = useState("");
   const [kirim, setKirim] = useState(null);
 
   useEffect(() => {
-    api("/screening?hasil=lolos&belum_diajukan=1&per_page=100")
-      .then((res) => setDaftar(res.data.filter((s) => s.job_requirement.status_req === "diproses")))
+    api("/screening?status_usulan=menunggu_am&per_page=100")
+      .then((res) => setDaftar(res.data.filter(usulanAktif)))
       .catch((err) => setError(err.message));
   }, []);
 
@@ -217,10 +270,10 @@ function ModalAjukan({ onClose, onBerhasil }) {
 
   return (
     <Modal judul="Ajukan Kandidat ke Klien" label="Ajukan kandidat" lebar="sm:max-w-2xl" sibuk={!!kirim} onClose={onClose}>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Kandidat yang lolos screening dan belum diajukan, untuk permintaan yang sedang diproses.</p>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">Usulan dari Talent Support yang belum diteruskan, untuk permintaan yang sedang diproses.</p>
       {error && <Pesan>{error}</Pesan>}
       {!error && !daftar && <Memuat />}
-      {daftar?.length === 0 && <KeadaanKosong ringkas ikon="fact_check">Belum ada kandidat lolos screening yang menunggu diajukan.</KeadaanKosong>}
+      {daftar?.length === 0 && <KeadaanKosong ringkas ikon="forward_to_inbox">Belum ada usulan Talent Support yang menunggu diteruskan.</KeadaanKosong>}
       <ul className="divide-y divide-surface-container-high">
         {daftar?.map((s) => (
           <li key={s.id_screening} className="py-space-sm flex flex-col sm:flex-row sm:items-center gap-space-sm">
@@ -229,7 +282,7 @@ function ModalAjukan({ onClose, onBerhasil }) {
               <div className="font-body-sm text-body-sm text-on-surface-variant">
                 {s.job_requirement.posisi} · {s.job_requirement.klien.nama_perusahaan} · Skor {formatAngka(s.skor_kecocokan, 2)}
               </div>
-              {s.catatan_screening && <div className="font-body-sm text-body-sm text-outline">“{s.catatan_screening}”</div>}
+              <CatatanUsulan catatan={s.catatan_screening} />
             </div>
             <button
               type="button"
@@ -237,7 +290,7 @@ function ModalAjukan({ onClose, onBerhasil }) {
               disabled={!!kirim}
               className="tombol-utama shrink-0"
             >
-              <Proses aktif={kirim === s.id_screening} ikon="send">Ajukan</Proses>
+              <Proses aktif={kirim === s.id_screening} ikon="send">Teruskan ke Klien</Proses>
             </button>
           </li>
         ))}
