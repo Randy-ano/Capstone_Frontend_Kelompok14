@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../lib/api";
+import { useAuth } from "../../auth/AuthContext";
+import { ROLE } from "../../auth/roles";
 import { KeadaanKosong, Memuat, Pesan, errorField, formatTanggalWaktu, Proses } from "../ui";
 import { Laci } from "../dialog";
 import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDokumenBadge, unduhDokumen } from "./shared";
@@ -7,6 +9,7 @@ import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDo
 
 // Panel samping detail dokumen: unduh, daftar penandatangan, atur penandatangan (R27), tanda tangan (R28).
 export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
+  const { user } = useAuth();
   const [unduh, setUnduh] = useState(false);
   const [error, setError] = useState("");
   const jenis = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
@@ -39,7 +42,7 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
         </div>
         <dl className="grid grid-cols-2 gap-space-sm font-body-sm text-body-sm">
           <Info label="Klien">{d.klien?.nama_perusahaan}</Info>
-          <Info label="Talent">{d.talent?.nama_lengkap}</Info>
+          {user.role !== ROLE.TALENT && <Info label="Talent">{d.talent?.nama_lengkap}</Info>}
           <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
           <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
         </dl>

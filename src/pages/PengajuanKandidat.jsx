@@ -19,6 +19,8 @@ const KETERANGAN = {
 // Halaman Pengajuan Kandidat (FR-10, 11, 12, 17): AM mengajukan, HR Client meninjau/interview/evaluasi, TS membuat penempatan.
 export default function PengajuanKandidat() {
   const { user } = useAuth();
+  // Talent membuka prosesnya sendiri: kolom nama kandidat tidak perlu.
+  const talent = user.role === ROLE.TALENT;
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
   const [status, setStatus] = useState("");
@@ -83,7 +85,7 @@ export default function PengajuanKandidat() {
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama kandidat atau posisi..." />
+          <KotakCari value={cari} onChange={setCari} placeholder={talent ? "Cari posisi..." : "Cari nama kandidat atau posisi..."} />
           <PilihFilter
             ikon="filter_alt"
             label="Status"
@@ -114,10 +116,14 @@ export default function PengajuanKandidat() {
         {error && <Pesan>{error}</Pesan>}
 
         <div className="kartu overflow-hidden">
-          <TabelKartu kolom={["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]} className="md:min-w-[860px]" redup={memuat && hasil}>
-            {!hasil && memuat && <BarisMemuat kolom={5} />}
+          <TabelKartu
+            kolom={talent ? ["Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"] : ["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]}
+            className={talent ? "md:min-w-[680px]" : "md:min-w-[860px]"}
+            redup={memuat && hasil}
+          >
+            {!hasil && memuat && <BarisMemuat kolom={talent ? 4 : 5} />}
             {hasil?.data.length === 0 && (
-              <BarisKosong kolom={5} ikon="send">
+              <BarisKosong kolom={talent ? 4 : 5} ikon="send">
                 {adaFilter ? "Tidak ada pengajuan yang cocok dengan pencarian atau filter." : "Belum ada pengajuan kandidat."}
               </BarisKosong>
             )}
@@ -134,14 +140,20 @@ export default function PengajuanKandidat() {
                       }}
                       className="text-left group"
                     >
-                      <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{p.talent.nama_lengkap}</span>
-                      <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.talent.pendidikan ?? p.talent.email}</span>
+                      <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">
+                        {talent ? p.job_requirement.posisi : p.talent.nama_lengkap}
+                      </span>
+                      <span className="block font-body-sm text-body-sm text-on-surface-variant">
+                        {talent ? p.job_requirement.klien.nama_perusahaan : p.talent.pendidikan ?? p.talent.email}
+                      </span>
                     </button>
                   </Sel>
-                  <Sel label="Posisi & Klien">
-                    <span className="block text-on-surface">{p.job_requirement.posisi}</span>
-                    <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
-                  </Sel>
+                  {!talent && (
+                    <Sel label="Posisi & Klien">
+                      <span className="block text-on-surface">{p.job_requirement.posisi}</span>
+                      <span className="block font-body-sm text-body-sm text-on-surface-variant">{p.job_requirement.klien.nama_perusahaan}</span>
+                    </Sel>
+                  )}
                   <Sel peran="setengah" label="Diajukan" className="whitespace-nowrap">
                     <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
                     {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}

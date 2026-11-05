@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, formatTanggalWaktu } from "../ui";
-import { PlacementBadge } from "../rekrutmen/shared";
+import { PenempatanBadge } from "./shared";
 
 // FR-15: talent melihat catatan monitoring kinerja tentang dirinya (read-only; backend hanya mengirim placement miliknya).
 export default function TabMonitoringTalent() {
@@ -75,7 +75,7 @@ export default function TabMonitoringTalent() {
                   {m.placement.posisi_penempatan} · {m.placement.klien.nama_perusahaan}
                 </div>
               </div>
-              <PlacementBadge status={m.placement.status_placement} />
+              <PenempatanBadge placement={m} />
             </div>
             <div>
               <div className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hasil monitoring</div>
