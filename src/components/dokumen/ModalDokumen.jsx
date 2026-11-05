@@ -86,7 +86,6 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
         <select value={form.jenis_dokumen} onChange={set("jenis_dokumen")} className={inputClass(e("jenis_dokumen"))}>
           <option value="">Pilih jenis...</option>
           {Object.entries(JENIS_DOKUMEN)
-            .filter(([v]) => v !== "cv")
             .map(([v, j]) => (
               <option key={v} value={v}>
                 {j.label}

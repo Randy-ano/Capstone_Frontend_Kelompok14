@@ -2,13 +2,13 @@
 import { api } from "../../lib/api";
 import { Badge, NADA } from "../ui";
 
+// Menu Dokumen khusus dokumen kerja sama: CV tidak tampil di sini (diakses lewat Profil & CV Saya / detail talent).
 export const JENIS_DOKUMEN = {
   quotation: { label: "Quotation", ikon: "request_quote" },
   purchase_order: { label: "Purchase Order", ikon: "shopping_cart" },
   pks: { label: "Perjanjian Kerja Sama", ikon: "handshake" },
   kontrak_kerja: { label: "Kontrak Kerja", ikon: "contract" },
   surat_peringatan: { label: "Surat Peringatan", ikon: "warning" },
-  cv: { label: "CV", ikon: "badge" },
   lainnya: { label: "Lainnya", ikon: "description" },
 };
 
