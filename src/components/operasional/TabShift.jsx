@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
-import { KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, Proses } from "../ui";
+import { Badge, KeadaanKosong, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, Proses } from "../ui";
 import { useToast, useToastGagal } from "../toast";
 import {
   Field,
   JENIS_SHIFT,
   Modal,
+  STATUS_SHIFT,
   ShiftBadge,
   inputClass,
   keIso,
@@ -18,7 +19,8 @@ import {
 
 const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-// Tab Shift (FR-15, R22): HR Client & Manager mengatur (input massal), talent melihat shift miliknya.
+// Tab Shift (FR-15, R22): HR Client & Manager mengatur (input massal) dan membatalkan (tidak ada hapus);
+// talent melihat shift miliknya. Shift yang dibatalkan tetap tampil dengan badge Dibatalkan.
 export default function TabShift({ user }) {
   const kelola = [ROLE.HR_CLIENT, ROLE.MANAGER].includes(user.role);
   const { daftar: placement, error: errorPlacement } = usePlacement(kelola ? "aktif" : "");
@@ -132,25 +134,26 @@ export default function TabShift({ user }) {
 }
 
 function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
-  const [mode, setMode] = useState(""); // "" | "ubah" | "hapus"
+  const [mode, setMode] = useState(""); // "" | "ubah" | "batal"
   const [jenis, setJenis] = useState(s.jenis_shift);
   const [kirim, setKirim] = useState(false);
+  const dibatalkan = s.status_shift === "dibatalkan";
 
-  async function aksi(method, body) {
+  async function aksi(path, method, body) {
     setKirim(true);
     try {
-      const res = await api(`/shift/${s.id_shift}`, { method, body });
+      const res = await api(path, { method, body });
       setMode("");
       onBerhasil(res.message);
     } catch (err) {
-      onError(errorField(err, "jenis_shift") ?? errorField(err, "tanggal_shift") ?? err.message);
+      onError(errorField(err, "jenis_shift") ?? errorField(err, "tanggal_shift") ?? errorField(err, "status_shift") ?? err.message);
     } finally {
       setKirim(false);
     }
   }
 
   return (
-    <tr className={s.tanggal_shift === hariIni ? "bg-primary-fixed/30" : ""}>
+    <tr className={dibatalkan ? "text-on-surface-variant" : s.tanggal_shift === hariIni ? "bg-primary-fixed/30" : ""}>
       <Sel peran="judul" className="whitespace-nowrap">
         <span className="text-on-surface max-md:font-title-sm max-md:text-title-sm">
           {namaHari(s.tanggal_shift)}, {formatTanggal(s.tanggal_shift)}
@@ -168,7 +171,12 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
             ))}
           </select>
         ) : (
-          <ShiftBadge jenis={s.jenis_shift} />
+          <span className="flex flex-wrap items-center gap-1">
+            <span className={dibatalkan ? "line-through opacity-60" : ""}>
+              <ShiftBadge jenis={s.jenis_shift} />
+            </span>
+            {dibatalkan && <Badge className={STATUS_SHIFT.dibatalkan.className}>{STATUS_SHIFT.dibatalkan.label}</Badge>}
+          </span>
         )}
       </Sel>
       <Sel peran="setengah" label="Keterangan" className="text-on-surface-variant">{s.keterangan ?? "-"}</Sel>
@@ -176,30 +184,33 @@ function BarisShift({ shift: s, user, kelola, hariIni, onBerhasil, onError }) {
       {kelola && (
         <Sel peran="aksi">
           <div className="flex justify-end gap-1">
-            {mode === "" && (
+            {mode === "" && dibatalkan && <span className="font-body-sm text-body-sm text-on-surface-variant">-</span>}
+            {mode === "" && !dibatalkan && (
               <>
                 <button type="button" onClick={() => setMode("ubah")} className="tombol-kedua">
                   <span aria-hidden="true" className="material-symbols-outlined text-[16px]">edit</span>
                   Ubah
                 </button>
-                <button type="button" onClick={() => setMode("hapus")} className="tombol-bahaya-garis">
-                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">delete</span>
-                  Hapus
+                <button type="button" onClick={() => setMode("batal")} className="tombol-bahaya-garis">
+                  <span aria-hidden="true" className="material-symbols-outlined text-[16px]">event_busy</span>
+                  Batalkan
                 </button>
               </>
             )}
             {mode !== "" && (
               <>
                 <button type="button" onClick={() => (setMode(""), setJenis(s.jenis_shift))} disabled={kirim} className="tombol-kedua">
-                  Batal
+                  Tidak
                 </button>
                 <button
                   type="button"
                   disabled={kirim || (mode === "ubah" && jenis === s.jenis_shift)}
-                  onClick={() => (mode === "ubah" ? aksi("PUT", { jenis_shift: jenis }) : aksi("DELETE"))}
-                  className={mode === "hapus" ? "tombol-bahaya" : "tombol-utama"}
+                  onClick={() =>
+                    mode === "ubah" ? aksi(`/shift/${s.id_shift}`, "PUT", { jenis_shift: jenis }) : aksi(`/shift/${s.id_shift}/batal`, "PATCH")
+                  }
+                  className={mode === "batal" ? "tombol-bahaya" : "tombol-utama"}
                 >
-                  <Proses aktif={kirim}>{mode === "hapus" ? "Ya, Hapus" : "Simpan"}</Proses>
+                  <Proses aktif={kirim}>{mode === "batal" ? "Ya, Batalkan" : "Simpan"}</Proses>
                 </button>
               </>
             )}
@@ -317,7 +328,9 @@ function ModalAturShift({ placement, awalPlacement, onClose, onBerhasil }) {
         </div>
       </fieldset>
       <p className="font-body-sm text-body-sm text-on-surface-variant">
-        {tanggal.length ? `${tanggal.length} tanggal akan diatur. Tanggal yang sudah punya shift akan diperbarui.` : "Pilih rentang tanggal dan hari."}
+        {tanggal.length
+          ? `${tanggal.length} tanggal akan diatur. Tanggal yang sudah punya shift (termasuk yang dibatalkan) akan diperbarui.`
+          : "Pilih rentang tanggal dan hari."}
       </p>
       {(e("tanggal") || e("tanggal.0")) && <p className="font-body-sm text-body-sm text-error">{e("tanggal") ?? e("tanggal.0")}</p>}
       <div className="grid grid-cols-2 gap-space-sm">
