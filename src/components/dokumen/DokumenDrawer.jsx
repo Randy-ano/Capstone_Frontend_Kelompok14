@@ -49,6 +49,12 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
         <button type="button" onClick={klikUnduh} disabled={unduh} className="tombol-kedua w-full">
           <Proses aktif={unduh} ikon="download">Unduh Dokumen</Proses>
         </button>
+        {d.penandatangan.length > 0 && d.nama_file.toLowerCase().endsWith(".pdf") && (
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            PDF yang diunduh memuat tanda tangan yang sudah masuk, di blok tanda tangan dokumen atau di Lembar Pengesahan pada halaman terakhir. Penandatangan
+            yang belum menandatangani tertulis "Belum ditandatangani".
+          </p>
+        )}
       </section>
 
       <section className="kartu p-space-md space-y-space-sm">
