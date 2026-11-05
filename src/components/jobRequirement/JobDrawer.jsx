@@ -6,6 +6,7 @@ import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatT
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { CatatanUsulan, UsulanBadge } from "../rekrutmen/usulan";
+import { DaftarPeriksaPermintaan } from "../dokumen/berurutan";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola, formatKisaranGaji } from "./shared";
 
 // Panel samping detail job requirement + log progres (GET /job-requirements/{id}/progres).
@@ -51,6 +52,11 @@ export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit 
             }}
           />
           <RingkasanProgres ringkasan={job.ringkasan_progres} />
+          {job.kelengkapan_dokumen && (
+            <Bagian icon="fact_check" judul="Kelengkapan Dokumen">
+              <DaftarPeriksaPermintaan kelengkapan={job.kelengkapan_dokumen} />
+            </Bagian>
+          )}
           {internal && <KandidatDiusulkan items={screening} />}
           <LogProgres items={job.log_progres} />
         </>
