@@ -4,6 +4,7 @@ import { initials } from "../../auth/roles";
 import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, tagSelainKompetensi, Proses } from "../ui";
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
+import { DaftarSertifikat } from "../sertifikat";
 import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
 
 // Panel samping detail talent pool (GET /talent-pool/{id}). `bolehUbah` = role TS (PATCH /talent-pool/{id}).
@@ -319,16 +320,7 @@ function PengalamanKerja({ items, lama }) {
 function Sertifikat({ items }) {
   return (
     <Bagian icon="workspace_premium" judul="Sertifikat">
-      <ul className="space-y-space-sm">
-        {items.map((s) => (
-          <li key={s.id_sertifikat}>
-            <div className="font-title-sm text-title-sm text-on-surface">{s.nama_sertifikat}</div>
-            <div className="font-body-sm text-body-sm text-on-surface-variant">
-              {[s.penerbit, s.tanggal_terbit && formatTanggal(s.tanggal_terbit)].filter(Boolean).join(" · ")}
-            </div>
-          </li>
-        ))}
-      </ul>
+      <DaftarSertifikat items={items} />
     </Bagian>
   );
 }
