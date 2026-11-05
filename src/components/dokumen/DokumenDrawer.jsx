@@ -10,19 +10,21 @@ import { ATURAN_PENANDATANGAN, JENIS_DOKUMEN, ROLE_SINGKAT, STATUS_TTD, StatusDo
 // Panel samping detail dokumen: unduh, daftar penandatangan, atur penandatangan (R27), tanda tangan (R28).
 export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
   const { user } = useAuth();
-  const [unduh, setUnduh] = useState(false);
+  // null | "ttd" | "asli": tombol unduh yang sedang diproses.
+  const [unduh, setUnduh] = useState(null);
   const [error, setError] = useState("");
   const jenis = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
+  const gambar = /\.(png|jpe?g)$/i.test(d.nama_file);
 
-  async function klikUnduh() {
-    setUnduh(true);
+  async function klikUnduh(versi) {
+    setUnduh(versi);
     setError("");
     try {
-      await unduhDokumen(d);
+      await unduhDokumen(d, { asli: versi === "asli" });
     } catch (err) {
       setError(err.message);
     } finally {
-      setUnduh(false);
+      setUnduh(null);
     }
   }
 
@@ -46,13 +48,29 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
           <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
           <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
         </dl>
-        <button type="button" onClick={klikUnduh} disabled={unduh} className="tombol-kedua w-full">
-          <Proses aktif={unduh} ikon="download">Unduh Dokumen</Proses>
-        </button>
-        {d.penandatangan.length > 0 && d.nama_file.toLowerCase().endsWith(".pdf") && (
+        <div className="flex flex-col gap-1">
+          <button type="button" onClick={() => klikUnduh("ttd")} disabled={unduh !== null} className="tombol-kedua w-full">
+            <Proses aktif={unduh === "ttd"} ikon="download">
+              {d.unduhan?.dengan_tanda_tangan ? "Unduh Dokumen (dengan tanda tangan)" : "Unduh Dokumen"}
+            </Proses>
+          </button>
+          {d.unduhan?.diolah && d.aksi.boleh_unduh_asli && (
+            <button type="button" onClick={() => klikUnduh("asli")} disabled={unduh !== null} className="tombol-teks">
+              <Proses aktif={unduh === "asli"} ikon="description">Unduh File Asli</Proses>
+            </button>
+          )}
+        </div>
+        {d.unduhan?.diolah && (
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            PDF yang diunduh memuat tanda tangan yang sudah masuk, di blok tanda tangan dokumen atau di Lembar Pengesahan pada halaman terakhir. Penandatangan
-            yang belum menandatangani tertulis "Belum ditandatangani".
+            {gambar
+              ? "Gambar dokumen diunduh sebagai PDF: halaman pertama berisi gambar dokumen, halaman berikutnya Lembar Pengesahan berisi tanda tangan."
+              : "PDF yang diunduh memuat tanda tangan yang sudah masuk, di blok tanda tangan dokumen atau di Lembar Pengesahan pada halaman terakhir."}{" "}
+            Penandatangan yang belum menandatangani tertulis "Belum ditandatangani".
+          </p>
+        )}
+        {d.penandatangan.length > 0 && !d.unduhan?.diolah && (
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            File Word diunduh apa adanya; tanda tangan tidak dapat dicetak ke file ini. Status tanda tangan tercatat di bagian Penandatangan.
           </p>
         )}
       </section>
@@ -72,11 +90,12 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
               const s = STATUS_TTD[p.status_ttd] ?? STATUS_TTD.menunggu;
               return (
                 <li key={p.id_ttd} className="py-space-sm first:pt-0 last:pb-0 flex items-center justify-between gap-space-sm">
-                  <div className="min-w-0">
-                    <div className="font-body-md text-body-md text-on-surface">{p.nama}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-body-md text-body-md text-on-surface break-words">{p.nama}</div>
                     <div className="font-body-sm text-body-sm text-on-surface-variant">{ROLE_SINGKAT[p.role] ?? p.role}</div>
                   </div>
-                  <div className={`flex flex-col items-end font-body-sm text-body-sm ${s.className}`}>
+                  {p.ada_gambar_ttd && <GambarTtd idDokumen={d.id_dokumen} penandatangan={p} />}
+                  <div className={`flex flex-col items-end shrink-0 text-right font-body-sm text-body-sm ${s.className}`}>
                     <span className="flex items-center gap-1">
                       <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{s.ikon}</span>
                       {s.label}
@@ -94,6 +113,31 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
       {d.aksi.perlu_tanda_tangan_saya && <TandaTangan dokumen={d} onBerhasil={onBerhasil} />}
     </Laci>
   );
+}
+
+// Thumbnail gambar tanda tangan (dimuat lewat API ber-token). Disembunyikan bila gagal dimuat.
+function GambarTtd({ idDokumen, penandatangan: p }) {
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    let batal = false;
+    let objek = null;
+    api(`/dokumen/${idDokumen}/tanda-tangan/${p.id_ttd}/gambar`, { blob: true })
+      .then((blob) => {
+        if (batal) return;
+        objek = URL.createObjectURL(blob);
+        setUrl(objek);
+      })
+      .catch(() => !batal && setUrl(false));
+    return () => {
+      batal = true;
+      if (objek) URL.revokeObjectURL(objek);
+    };
+  }, [idDokumen, p.id_ttd]);
+
+  if (url === false) return null;
+  if (!url) return <span aria-hidden="true" className="w-20 h-10 shrink-0 rounded-md bg-surface-container-low animate-pulse" />;
+  return <img src={url} alt={`Tanda tangan ${p.nama}`} className="w-20 h-10 shrink-0 object-contain rounded-md bg-white ring-1 ring-outline-variant p-0.5" />;
 }
 
 function Info({ label, children }) {
