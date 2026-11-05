@@ -5,6 +5,7 @@ const TIPE = {
   permintaan_diajukan: { ikon: "post_add", path: "/rekomendasi-kandidat" },
   usulan_kandidat: { ikon: "forward_to_inbox", path: "/pengajuan-kandidat" },
   usulan_tidak_diteruskan: { ikon: "block", path: "/rekomendasi-kandidat" },
+  sp_diberikan: { ikon: "gavel", path: "/monitoring-kinerja" },
   pengajuan_dibuat: { ikon: "send", path: "/pengajuan-kandidat" },
   pengajuan_diperbarui: { ikon: "rule", path: "/pengajuan-kandidat" },
   evaluasi_disimpan: { ikon: "rate_review", path: "/pengajuan-kandidat" },
@@ -28,6 +29,8 @@ export function infoTipe(tipe, role) {
   if (t.path === "/pipeline-rekrutmen" && !INTERNAL.includes(role)) return { ...t, path: "/permintaan-kebutuhan" };
   // Permintaan baru: TS mencari kandidat di Rekomendasi, AM membuka daftar permintaan.
   if (tipe === "permintaan_diajukan" && role !== ROLE.TALENT_SUPPORT) return { ...t, path: "/permintaan-kebutuhan" };
+  // SP untuk talent: tab Monitoring di Penempatan Saya.
+  if (tipe === "sp_diberikan" && role === ROLE.TALENT) return { ...t, path: "/penugasan-penempatan?tab=monitoring" };
   return t;
 }
 
