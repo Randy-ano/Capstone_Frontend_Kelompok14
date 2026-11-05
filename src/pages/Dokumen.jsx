@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
@@ -26,6 +27,17 @@ export default function Dokumen() {
   const toast = useToast();
   const [modal, setModal] = useState(""); // "" | "unggah" | "generate"
   const [dipilih, setDipilih] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const idTautan = params.get("dokumen");
+
+  // Tautan dari daftar periksa kelengkapan dokumen (R36): /dokumen-quotation-po?dokumen=ID membuka detailnya.
+  useEffect(() => {
+    if (!idTautan) return;
+    api(`/dokumen/${idTautan}`)
+      .then((res) => setDipilih(res.data))
+      .catch((err) => toast.gagal(err.message))
+      .finally(() => setParams({}, { replace: true }));
+  }, [idTautan, setParams, toast]);
 
   useEffect(() => setPage(1), [search]);
 
@@ -132,6 +144,7 @@ export default function Dokumen() {
                     </Sel>
                     <Sel peran="setengah" label={user.role === ROLE.TALENT ? "Klien" : "Klien / Talent"}>
                       <span className="block text-on-surface">{d.klien?.nama_perusahaan ?? "-"}</span>
+                      {d.permintaan && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.permintaan.posisi}</span>}
                       {d.talent && user.role !== ROLE.TALENT && <span className="block font-body-sm text-body-sm text-on-surface-variant">{d.talent.nama_lengkap}</span>}
                     </Sel>
                     <Sel peran="setengah" label="Diunggah" className="whitespace-nowrap">

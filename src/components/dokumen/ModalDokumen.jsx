@@ -5,6 +5,7 @@ import { Pesan, errorField, Proses } from "../ui";
 import { useToast, useToastGagal } from "../toast";
 import { Field, Modal, inputClass, labelPlacement, usePlacement } from "../operasional/shared";
 import { JENIS_DOKUMEN, formatRupiahInput } from "./shared";
+import { JENIS_BERURUTAN, SYARAT, jenisBolehUnggah, labelTujuan, useTujuan } from "./berurutan";
 
 const tombolSimpan = "tombol-utama";
 
@@ -34,21 +35,44 @@ function useKlien(aktif) {
   return daftar;
 }
 
-// R25: unggah file (pdf/doc/docx/png/jpg, maks 5 MB).
+// Pilih permintaan (Quotation/PO/PKS) atau kandidat diterima (Kontrak Kerja); hanya yang memenuhi urutan (R34).
+function PilihTujuan({ jenis, value, onChange, error }) {
+  const { data, error: errorMuat } = useTujuan(jenis);
+  const kontrak = jenis === "kontrak_kerja";
+  const label = kontrak ? "Kandidat diterima" : "Permintaan kebutuhan";
+  return (
+    <Field label={label} wajib error={error ?? errorMuat} keterangan={data?.length === 0 ? `Belum ada pilihan. Syarat: ${SYARAT[jenis]}` : SYARAT[jenis]}>
+      <select value={value} onChange={onChange} disabled={!data || data.length === 0} className={inputClass(error)}>
+        <option value="">{!data ? "Memuat..." : data.length === 0 ? "Tidak ada yang memenuhi urutan" : `Pilih ${label.toLowerCase()}...`}</option>
+        {data?.map((t) => (
+          <option key={t.id_pengajuan ?? t.id_job_req} value={t.id_pengajuan ?? t.id_job_req}>
+            {labelTujuan(t)}
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
+}
+
+// R25: unggah file (pdf/doc/docx/png/jpg, maks 5 MB). Jenis berurutan memilih tujuan dulu (R34–R35).
 export function ModalUnggah({ user, onClose, onBerhasil }) {
   const internal = INTERNAL.includes(user.role);
   const { daftar: placement, error: errorPlacement } = usePlacement("");
   useToastGagal(errorPlacement);
   const klien = useKlien(internal);
-  const { form, error, setError, set, e } = useForm({ jenis_dokumen: "", id_placement: "", id_klien: "" });
+  const { form, setForm, error, setError, set, e } = useForm({ jenis_dokumen: "", tujuan: "", id_placement: "", id_klien: "" });
   const [file, setFile] = useState(null);
   const [kirim, setKirim] = useState(false);
+  const berurutan = JENIS_BERURUTAN.includes(form.jenis_dokumen);
+  const kontrak = form.jenis_dokumen === "kontrak_kerja";
 
   async function simpan() {
     const fd = new FormData();
     if (file) fd.append("file", file);
     fd.append("jenis_dokumen", form.jenis_dokumen);
-    if (form.id_placement) fd.append("id_placement", form.id_placement);
+    if (berurutan) {
+      if (form.tujuan) fd.append(kontrak ? "id_pengajuan" : "id_job_req", form.tujuan);
+    } else if (form.id_placement) fd.append("id_placement", form.id_placement);
     else if (internal && form.id_klien) fd.append("id_klien", form.id_klien);
 
     setKirim(true);
@@ -71,6 +95,24 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
           Dokumen yang Anda unggah langsung menunggu tanda tangan Anda sendiri; penandatangan tidak perlu dipilih.
         </p>
       )}
+      <Field label="Jenis dokumen" wajib error={e("jenis_dokumen")}>
+        <select
+          value={form.jenis_dokumen}
+          onChange={(ev) => {
+            setForm((x) => ({ ...x, jenis_dokumen: ev.target.value, tujuan: "" }));
+            setError(null);
+          }}
+          className={inputClass(e("jenis_dokumen"))}
+        >
+          <option value="">Pilih jenis...</option>
+          {jenisBolehUnggah(user.role).map((v) => (
+            <option key={v} value={v}>
+              {JENIS_DOKUMEN[v].label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      {berurutan && <PilihTujuan jenis={form.jenis_dokumen} value={form.tujuan} onChange={set("tujuan")} error={e(kontrak ? "id_pengajuan" : "id_job_req")} />}
       <Field label="File" wajib error={e("file")} keterangan="PDF, DOC, DOCX, PNG, atau JPG; maksimal 5 MB.">
         <input
           type="file"
@@ -82,29 +124,20 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
           className="block w-full font-body-sm text-body-sm text-on-surface-variant file:mr-3 file:h-9 file:px-3 file:rounded-lg file:border-0 file:bg-surface-container file:text-primary file:font-label-md"
         />
       </Field>
-      <Field label="Jenis dokumen" wajib error={e("jenis_dokumen")}>
-        <select value={form.jenis_dokumen} onChange={set("jenis_dokumen")} className={inputClass(e("jenis_dokumen"))}>
-          <option value="">Pilih jenis...</option>
-          {Object.entries(JENIS_DOKUMEN)
-            .map(([v, j]) => (
-              <option key={v} value={v}>
-                {j.label}
+      {!berurutan && (
+        <Field label="Terkait penempatan" error={e("id_placement")} keterangan="Opsional. Talent dan klien dokumen diambil dari penempatan ini.">
+          <select value={form.id_placement} onChange={set("id_placement")} disabled={!placement} className={inputClass(e("id_placement"))}>
+            <option value="">{placement ? "Tidak terkait penempatan" : "Memuat..."}</option>
+            {placement?.map((p) => (
+              <option key={p.id_placement} value={p.id_placement}>
+                {labelPlacement(p)}
               </option>
             ))}
-        </select>
-      </Field>
-      <Field label="Terkait penempatan" error={e("id_placement")} keterangan="Opsional. Talent dan klien dokumen diambil dari penempatan ini.">
-        <select value={form.id_placement} onChange={set("id_placement")} disabled={!placement} className={inputClass(e("id_placement"))}>
-          <option value="">{placement ? "Tidak terkait penempatan" : "Memuat..."}</option>
-          {placement?.map((p) => (
-            <option key={p.id_placement} value={p.id_placement}>
-              {labelPlacement(p)}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {internal && !form.id_placement && (
-        <Field label="Klien" error={e("id_klien")} keterangan="Opsional, untuk dokumen klien seperti quotation, PO, atau PKS.">
+          </select>
+        </Field>
+      )}
+      {internal && !berurutan && !form.id_placement && (
+        <Field label="Klien" error={e("id_klien")} keterangan="Opsional, untuk dokumen yang terkait klien.">
           <select value={form.id_klien} onChange={set("id_klien")} disabled={!klien} className={inputClass(e("id_klien"))}>
             <option value="">Tidak terkait klien</option>
             {klien?.map((k) => (
@@ -121,14 +154,13 @@ export function ModalUnggah({ user, onClose, onBerhasil }) {
 
 const ITEM_KOSONG = { deskripsi: "", jumlah: "1", harga_satuan: "" };
 
-// R26: quotation / purchase order / PKS dari template.
+// R26: Quotation / PKS dari template untuk permintaan yang memenuhi urutan (R34). PO diunggah HR Client (R35).
 export function ModalGenerate({ onClose, onBerhasil }) {
-  const klien = useKlien(true);
   const hari = new Date();
   const hariIni = `${hari.getFullYear()}-${String(hari.getMonth() + 1).padStart(2, "0")}-${String(hari.getDate()).padStart(2, "0")}`;
-  const { form, error, setError, set, e } = useForm({
+  const { form, setForm, error, setError, set, e } = useForm({
     jenis_dokumen: "quotation",
-    id_klien: "",
+    id_job_req: "",
     nomor_dokumen: "",
     tanggal_dokumen: hariIni,
     berlaku_sampai: "",
@@ -154,7 +186,7 @@ export function ModalGenerate({ onClose, onBerhasil }) {
         method: "POST",
         body: {
           jenis_dokumen: form.jenis_dokumen,
-          id_klien: form.id_klien ? Number(form.id_klien) : null,
+          id_job_req: form.id_job_req ? Number(form.id_job_req) : null,
           nomor_dokumen: form.nomor_dokumen.trim(),
           tanggal_dokumen: form.tanggal_dokumen || null,
           berlaku_sampai: form.berlaku_sampai || null,
@@ -182,24 +214,22 @@ export function ModalGenerate({ onClose, onBerhasil }) {
       {error && <Pesan>{error.message}</Pesan>}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
         <Field label="Jenis" wajib error={e("jenis_dokumen")}>
-          <select value={form.jenis_dokumen} onChange={set("jenis_dokumen")} className={inputClass(e("jenis_dokumen"))}>
-            {["quotation", "purchase_order", "pks"].map((v) => (
+          <select
+            value={form.jenis_dokumen}
+            onChange={(ev) => {
+              setForm((x) => ({ ...x, jenis_dokumen: ev.target.value, id_job_req: "" }));
+              setError(null);
+            }}
+            className={inputClass(e("jenis_dokumen"))}
+          >
+            {["quotation", "pks"].map((v) => (
               <option key={v} value={v}>
                 {JENIS_DOKUMEN[v].label}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Klien" wajib error={e("id_klien")}>
-          <select value={form.id_klien} onChange={set("id_klien")} disabled={!klien} className={inputClass(e("id_klien"))}>
-            <option value="">{klien ? "Pilih klien..." : "Memuat..."}</option>
-            {klien?.map((k) => (
-              <option key={k.id_klien} value={k.id_klien}>
-                {k.nama_perusahaan}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <PilihTujuan jenis={form.jenis_dokumen} value={form.id_job_req} onChange={set("id_job_req")} error={e("id_job_req")} />
         <Field label="Nomor dokumen" wajib error={e("nomor_dokumen")}>
           <input value={form.nomor_dokumen} onChange={set("nomor_dokumen")} maxLength={100} placeholder="Contoh: QUO/2026/10/002" className={inputClass(e("nomor_dokumen"))} />
         </Field>
