@@ -1,208 +1,150 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
-import { ROLE } from "../auth/roles";
-import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, errorField, formatTanggalWaktu, useTunda, Proses } from "../components/ui";
-import { useToast, useToastGagal } from "../components/toast";
-import { PlacementBadge } from "../components/rekrutmen/shared";
-import { Field, Modal, inputClass, labelPlacement, tombolHalaman, usePlacement } from "../components/operasional/shared";
+import { INTERNAL, ROLE } from "../auth/roles";
+import { KeadaanKosong, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Skeleton, useTunda } from "../components/ui";
+import { KartuTalent, PanelTalent } from "../components/operasional/monitoring";
 
-// Halaman Monitoring Kinerja (FR-18, R23): Manager mencatat, AM & Manager melihat.
+const KETERANGAN = {
+  [ROLE.HR_CLIENT]: "Pantau talent yang ditempatkan di perusahaan Anda dan tambahkan catatan absensi, shift, atau kinerja harian.",
+  [ROLE.MANAGER]: "Pantau kinerja setiap talent dari catatan HR Client, tambahkan catatan, dan beri Surat Peringatan bila diperlukan.",
+};
+
+const STATUS = [
+  ["aktif", "Aktif"],
+  ["belum_aktif", "Belum Aktif"],
+  ["selesai", "Selesai"],
+];
+
+// Halaman Monitoring Kinerja (FR-18, R23, revisi 2026-11-06): grid kartu per talent yang punya penempatan.
+// HR Client mencatat, Manager mencatat & memberi SP, AM & TS melihat.
 export default function MonitoringKinerja() {
   const { user } = useAuth();
-  const manager = user.role === ROLE.MANAGER;
-  const { daftar: placement, error: errorPlacement } = usePlacement("");
-  useToastGagal(errorPlacement);
-  const toast = useToast();
+  const internal = INTERNAL.includes(user.role);
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
-  const [idPlacement, setIdPlacement] = useState("");
+  const [status, setStatus] = useState("aktif");
+  const [klien, setKlien] = useState("");
+  const [opsiKlien, setOpsiKlien] = useState([]);
   const [page, setPage] = useState(1);
   const [versi, setVersi] = useState(0);
   const [hasil, setHasil] = useState(null);
+  const [memuat, setMemuat] = useState(true);
   const [error, setError] = useState("");
-  const [catat, setCatat] = useState(false);
+  const [dipilih, setDipilih] = useState(null);
 
   useEffect(() => setPage(1), [search]);
 
   useEffect(() => {
+    if (!internal) return;
+    api("/klien?per_page=100")
+      .then((res) => setOpsiKlien(res.data))
+      .catch(() => setOpsiKlien([]));
+  }, [internal]);
+
+  useEffect(() => {
     let batal = false;
-    const params = new URLSearchParams({ page, per_page: 10 });
+    const params = new URLSearchParams({ page, per_page: 12 });
     if (search) params.set("search", search);
-    if (idPlacement) params.set("id_placement", idPlacement);
+    if (status) params.set("status", status);
+    if (klien) params.set("id_klien", klien);
+    setMemuat(true);
     setError("");
-    api(`/monitoring?${params}`)
+    api(`/monitoring/talent?${params}`)
       .then((res) => {
         if (batal) return;
         if (res.data.length === 0 && page > 1 && res.meta.last_page < page) setPage(res.meta.last_page);
-        else setHasil(res);
+        else {
+          setHasil(res);
+          // Panel yang terbuka memakai data kartu terbaru (jumlah catatan & SP).
+          setDipilih((d) => (d ? res.data.find((p) => p.id_placement === d.id_placement) ?? d : d));
+        }
       })
-      .catch((err) => !batal && setError(err.message));
+      .catch((err) => !batal && setError(err.message))
+      .finally(() => !batal && setMemuat(false));
     return () => {
       batal = true;
     };
-  }, [search, idPlacement, page, versi]);
+  }, [search, status, klien, page, versi]);
+
+  const r = hasil?.meta?.ringkasan;
+  const adaFilter = Boolean(search || klien || status !== "aktif");
 
   return (
     <div className="flex flex-col w-full pb-space-xl">
-      <KepalaHalaman
-        ikon="monitoring"
-        kategori="Operasional & HR"
-        judul="Monitoring Kinerja"
-        aksi={
-          manager && (
-            <button type="button" onClick={() => setCatat(true)} className={tombolHalaman}>
-              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add_notes</span>
-              Catat Monitoring
-            </button>
-          )
-        }
-      >
-        Catatan pemantauan kinerja talent yang ditempatkan di klien beserta rencana tindak lanjutnya.
+      <KepalaHalaman ikon="monitoring" kategori="Operasional & HR" judul="Monitoring Kinerja">
+        {KETERANGAN[user.role] ?? "Pantau catatan kinerja dan Surat Peringatan setiap talent yang ditempatkan."}
       </KepalaHalaman>
 
-      <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
+      <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent, posisi, atau klien..." />
-          {placement && (
+          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama talent atau posisi..." />
+          <PilihFilter
+            ikon="filter_alt"
+            label="Status kontrak"
+            value={status}
+            onChange={(v) => (setStatus(v), setPage(1))}
+            semua="Semua Status"
+            opsi={STATUS.map(([v, l]) => [v, r ? `${l} (${r[v]})` : l])}
+          />
+          {internal && (
             <PilihFilter
-              ikon="badge"
-              label="Penempatan"
-              value={idPlacement}
-              onChange={(v) => {
-                setIdPlacement(v);
+              ikon="apartment"
+              label="Klien"
+              value={klien}
+              onChange={(v) => (setKlien(v), setPage(1))}
+              semua="Semua Klien"
+              opsi={opsiKlien.map((k) => [String(k.id_klien), k.nama_perusahaan])}
+            />
+          )}
+          {adaFilter && (
+            <button
+              type="button"
+              onClick={() => {
+                setCari("");
+                setStatus("aktif");
+                setKlien("");
                 setPage(1);
               }}
-              semua="Semua Penempatan"
-              opsi={placement.map((p) => [String(p.id_placement), `${p.talent.nama_lengkap} (${p.klien.nama_perusahaan})`])}
-            />
+              className="tombol-teks"
+            >
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">filter_alt_off</span>
+              Reset
+            </button>
           )}
         </div>
 
         {error && <Pesan>{error}</Pesan>}
-        {!hasil && !error && <Memuat>Memuat monitoring...</Memuat>}
-        {hasil?.data.length === 0 && (
-          <div className="kartu">
-            <KeadaanKosong ikon="monitoring">
-            {search || idPlacement ? "Tidak ada catatan monitoring yang cocok." : "Belum ada catatan monitoring."}
-            </KeadaanKosong>
+
+        {!hasil && memuat && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md" aria-busy="true">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-40 rounded-xl" />
+            ))}
           </div>
         )}
-
-        <ol className="flex flex-col gap-space-sm">
-          {hasil?.data.map((m) => (
-            <li key={m.id_monitoring} className="kartu-item p-space-md space-y-space-sm">
-              <div className="flex items-start justify-between gap-space-sm">
-                <div className="min-w-0">
-                  <div className="font-title-sm text-title-sm text-on-surface">{m.placement.talent.nama_lengkap}</div>
-                  <div className="font-body-sm text-body-sm text-on-surface-variant">
-                    {m.placement.posisi_penempatan} · {m.placement.klien.nama_perusahaan}
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <PlacementBadge status={m.placement.status_placement} />
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">{formatTanggalWaktu(m.tanggal_monitoring)}</span>
-                </div>
-              </div>
-              <div>
-                <div className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Hasil monitoring</div>
-                <p className="font-body-md text-body-md text-on-surface whitespace-pre-line">{m.hasil_monitoring}</p>
-              </div>
-              {m.catatan_tindak_lanjut && (
-                <div className="bg-surface-container-low rounded-lg p-space-sm">
-                  <div className="font-label-sm text-label-sm text-outline uppercase tracking-wider">Tindak lanjut</div>
-                  <p className="font-body-sm text-body-sm text-on-surface whitespace-pre-line">{m.catatan_tindak_lanjut}</p>
-                </div>
-              )}
-              {m.manager && <div className="font-body-sm text-body-sm text-on-surface-variant">Dicatat oleh {m.manager.nama_pegawai}</div>}
-            </li>
-          ))}
-        </ol>
-        {hasil && hasil.meta.total > 0 && (
+        {hasil?.data.length === 0 && (
           <div className="kartu">
-            <Pagination meta={hasil.meta} onPage={setPage} satuan="catatan" />
+            <KeadaanKosong ikon="monitoring">{adaFilter ? "Tidak ada talent yang cocok dengan pencarian atau filter." : "Belum ada talent dengan penempatan aktif."}</KeadaanKosong>
+          </div>
+        )}
+        {hasil?.data.length > 0 && (
+          <ul className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-space-md transition-opacity ${memuat ? "opacity-60" : ""}`} aria-label="Talent dengan penempatan">
+            {hasil.data.map((p) => (
+              <li key={p.id_placement}>
+                <KartuTalent p={p} onOpen={() => setDipilih(p)} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {hasil && hasil.meta.total > 0 && (
+          <div className="kartu overflow-hidden">
+            <Pagination meta={hasil.meta} onPage={setPage} satuan="talent" />
           </div>
         )}
       </div>
 
-      {catat && (
-        <ModalCatat
-          placement={placement}
-          awal={idPlacement}
-          onClose={() => setCatat(false)}
-          onBerhasil={(pesan) => {
-            setCatat(false);
-            toast.sukses(pesan);
-            setVersi((v) => v + 1);
-          }}
-        />
-      )}
+      {dipilih && <PanelTalent p={dipilih} onClose={() => setDipilih(null)} onChanged={() => setVersi((v) => v + 1)} />}
     </div>
-  );
-}
-
-function ModalCatat({ placement, awal, onClose, onBerhasil }) {
-  const [form, setForm] = useState({ id_placement: awal, tanggal_monitoring: "", hasil_monitoring: "", catatan_tindak_lanjut: "" });
-  const [kirim, setKirim] = useState(false);
-  const [error, setError] = useState(null);
-  const e = (f) => errorField(error, f);
-  const set = (f) => (ev) => {
-    setForm((x) => ({ ...x, [f]: ev.target.value }));
-    setError(null);
-  };
-
-  async function simpan() {
-    setKirim(true);
-    setError(null);
-    try {
-      const res = await api("/monitoring", {
-        method: "POST",
-        body: {
-          id_placement: form.id_placement ? Number(form.id_placement) : null,
-          tanggal_monitoring: form.tanggal_monitoring ? `${form.tanggal_monitoring.replace("T", " ")}:00` : null,
-          hasil_monitoring: form.hasil_monitoring.trim() || null,
-          catatan_tindak_lanjut: form.catatan_tindak_lanjut.trim() || null,
-        },
-      });
-      onBerhasil(res.message);
-    } catch (err) {
-      setError(err);
-      setKirim(false);
-    }
-  }
-
-  return (
-    <Modal
-      judul="Catat Monitoring"
-      sibuk={kirim}
-      onClose={onClose}
-      onSubmit={simpan}
-      aksi={
-        <button type="submit" disabled={kirim} className="tombol-utama">
-          <Proses aktif={kirim}>Simpan</Proses>
-        </button>
-      }
-    >
-      {error && <Pesan>{error.message}</Pesan>}
-      <Field label="Penempatan" wajib error={e("id_placement")}>
-        <select value={form.id_placement} onChange={set("id_placement")} disabled={!placement} className={inputClass(e("id_placement"))}>
-          <option value="">{placement ? "Pilih talent yang ditempatkan..." : "Memuat..."}</option>
-          {placement?.map((p) => (
-            <option key={p.id_placement} value={p.id_placement}>
-              {labelPlacement(p)}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Waktu monitoring" error={e("tanggal_monitoring")} keterangan="Kosongkan untuk memakai waktu sekarang.">
-        <input type="datetime-local" value={form.tanggal_monitoring} onChange={set("tanggal_monitoring")} className={inputClass(e("tanggal_monitoring"))} />
-      </Field>
-      <Field label="Hasil monitoring" wajib error={e("hasil_monitoring")}>
-        <textarea rows={4} value={form.hasil_monitoring} onChange={set("hasil_monitoring")} maxLength={5000} className={`${inputClass(e("hasil_monitoring"))} h-auto py-2`} />
-      </Field>
-      <Field label="Catatan tindak lanjut" error={e("catatan_tindak_lanjut")}>
-        <textarea rows={3} value={form.catatan_tindak_lanjut} onChange={set("catatan_tindak_lanjut")} maxLength={5000} className={`${inputClass(e("catatan_tindak_lanjut"))} h-auto py-2`} />
-      </Field>
-    </Modal>
   );
 }
