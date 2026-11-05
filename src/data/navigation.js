@@ -39,7 +39,8 @@ export const NAV_GROUPS = [
       { path: "/monitoring-kinerja", label: "Monitoring Kinerja", icon: "monitoring", ready: true, roles: [ACCOUNT_MANAGER, MANAGER] },
       { path: "/pengajuan-cuti-shift", label: "Pengajuan Cuti & Shift", icon: "calendar_clock", ready: true, roles: [TALENT, HR_CLIENT, ...INTERNAL], perluDitempatkan: true },
       { path: "/tiket-komplain-klien", label: "Tiket Komplain Klien", icon: "support_agent", ready: true, roles: [HR_CLIENT, ACCOUNT_MANAGER, MANAGER] },
-      { path: "/dokumen-quotation-po", label: "Dokumen", icon: "description", ready: true, perluDitempatkan: true },
+      // Dokumen juga terbuka untuk talent yang punya Kontrak Kerja untuk ditandatangani (`user.akses_dokumen`, R36).
+      { path: "/dokumen-quotation-po", label: "Dokumen", icon: "description", ready: true, perluDitempatkan: "dokumen" },
     ],
   },
   {
@@ -55,7 +56,8 @@ export const NAV_GROUPS = [
 export const NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items);
 
 // Talent yang belum ditempatkan tidak bisa membuka menu `perluDitempatkan` (cuti & shift, dokumen).
-export const belumDitempatkan = (item, user) => Boolean(item.perluDitempatkan && user.role === TALENT && !user.sudah_ditempatkan);
+export const belumDitempatkan = (item, user) =>
+  Boolean(item.perluDitempatkan && user.role === TALENT && !(item.perluDitempatkan === "dokumen" ? user.akses_dokumen : user.sudah_ditempatkan));
 
 export const canAccess = (item, user) => (!item.roles || item.roles.includes(user.role)) && !belumDitempatkan(item, user);
 

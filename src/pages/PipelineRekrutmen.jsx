@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { BarisKosong, BarisMemuat, KartuRingkasan, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggalWaktu, useTunda } from "../components/ui";
 import { useToast } from "../components/toast";
+import { TahapDokumen } from "../components/dokumen/berurutan";
 import { INDIKATOR_SLA, Pemenuhan, STATUS_REQ, SlaBadge, StatusReqBadge, TAHAPAN } from "../components/jobRequirement/shared";
 import FormJob, { tambahOpsiKompetensi } from "../components/jobRequirement/FormJob";
 import JobDrawer from "../components/jobRequirement/JobDrawer";
@@ -134,13 +135,13 @@ export default function PipelineRekrutmen() {
 
         <div className="kartu overflow-hidden">
           <TabelKartu
-            kolom={["Permintaan", "SLA", "Pemenuhan", { label: "Diusulkan", className: "angka" }, "Progres Terakhir", "Status"]}
-            className="md:min-w-[960px]"
+            kolom={["Permintaan", "SLA", "Pemenuhan", { label: "Diusulkan", className: "angka" }, "Progres Terakhir", "Dokumen", "Status"]}
+            className="md:min-w-[1100px]"
             redup={memuat && hasil}
           >
-            {!hasil && memuat && <BarisMemuat kolom={6} />}
+            {!hasil && memuat && <BarisMemuat kolom={7} />}
             {hasil?.data.length === 0 && (
-              <BarisKosong kolom={6} ikon="view_kanban">
+              <BarisKosong kolom={7} ikon="view_kanban">
                 {adaFilter ? "Tidak ada permintaan yang cocok dengan pencarian atau filter." : "Belum ada permintaan kebutuhan."}
               </BarisKosong>
             )}
@@ -216,6 +217,9 @@ function BarisPipeline({ job, onOpen }) {
         ) : (
           <span className="font-body-sm text-body-sm text-outline">Belum diajukan</span>
         )}
+      </Sel>
+      <Sel label="Dokumen" className="max-w-[220px]">
+        <TahapDokumen tahap={job.tahap_dokumen} />
       </Sel>
       <Sel peran="status">
         <StatusReqBadge status={job.status_req} />

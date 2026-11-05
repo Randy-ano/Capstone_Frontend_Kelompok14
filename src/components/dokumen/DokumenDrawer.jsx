@@ -44,6 +44,7 @@ export default function DokumenDrawer({ dokumen: d, onClose, onBerhasil }) {
         </div>
         <dl className="grid grid-cols-2 gap-space-sm font-body-sm text-body-sm">
           <Info label="Klien">{d.klien?.nama_perusahaan}</Info>
+          {d.permintaan && <Info label="Permintaan">{d.permintaan.posisi}</Info>}
           {user.role !== ROLE.TALENT && <Info label="Talent">{d.talent?.nama_lengkap}</Info>}
           <Info label="Diunggah oleh">{d.uploader?.nama}</Info>
           <Info label="Tanggal">{formatTanggalWaktu(d.tanggal_unggah)}</Info>
@@ -158,7 +159,11 @@ function AturPenandatangan({ dokumen, onBerhasil }) {
 
   useEffect(() => {
     api(`/dokumen/${dokumen.id_dokumen}/calon-penandatangan`)
-      .then((res) => setCalon(res.data))
+      .then((res) => {
+        setCalon(res.data);
+        // R35: penandatangan yang disarankan dicentang otomatis (masih bisa diubah).
+        setDipilih(res.data.filter((u) => u.disarankan).map((u) => u.id_user));
+      })
       .catch((err) => setError(err));
   }, [dokumen.id_dokumen]);
 
@@ -198,7 +203,10 @@ function AturPenandatangan({ dokumen, onBerhasil }) {
                 }}
               />
               <span className="min-w-0 flex-1">
-                <span className="block font-body-md text-body-md text-on-surface">{u.nama}</span>
+                <span className="flex flex-wrap items-center gap-x-space-sm font-body-md text-body-md text-on-surface">
+                  {u.nama}
+                  {u.disarankan && <span className="font-label-sm text-label-sm text-primary">Disarankan</span>}
+                </span>
                 <span className="block font-body-sm text-body-sm text-on-surface-variant">
                   {ROLE_SINGKAT[u.role]} · {u.keterangan}
                 </span>

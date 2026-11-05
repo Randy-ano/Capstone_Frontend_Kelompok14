@@ -6,6 +6,7 @@ import { KeadaanKosong, Memuat, Pesan, errorField, formatAngka, formatTanggal, P
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { DaftarSertifikat } from "../sertifikat";
+import { DaftarPeriksaPengajuan } from "../dokumen/berurutan";
 import {
   BadgeTahapPengajuan,
   EvaluasiBadge,
@@ -116,6 +117,11 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
             <Interviews p={p} user={user} terbuka={terbukaInterview} onBerhasil={berhasil} />
           )}
           <Evaluasi p={p} user={user} bolehIsi={bolehTinjau(user) && terbukaInterview && adaInterviewSelesai} perluInterview={terbukaInterview && !adaInterviewSelesai} onBerhasil={berhasil} />
+          {p.kelengkapan_dokumen && (
+            <Bagian icon="fact_check" judul="Kelengkapan Dokumen">
+              <DaftarPeriksaPengajuan kelengkapan={p.kelengkapan_dokumen} />
+            </Bagian>
+          )}
           <Penempatan p={p} user={user} jobBerjalan={jobBerjalan} onBerhasil={berhasil} />
         </>
       )}
@@ -488,7 +494,8 @@ function Evaluasi({ p, user, bolehIsi, perluInterview, onBerhasil }) {
   );
 }
 
-// R18: TS membuat placement dari evaluasi diterima; setelah ada, tampilkan tautannya.
+// R18, R36: TS membuat placement dari evaluasi diterima setelah Quotation, PO, PKS, dan Kontrak Kerja selesai;
+// setelah ada, tampilkan tautannya.
 function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
   const [form, setFormAsli] = useState({ tanggal_mulai: "", tanggal_selesai: "", posisi_penempatan: p.job_requirement.posisi });
   const { kirim, error, jalankan, setError } = useAksi(onBerhasil);
@@ -510,6 +517,7 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
     );
   }
   if (!(bolehPlacement(user) && p.evaluasi?.status_evaluasi === "diterima" && jobBerjalan)) return null;
+  const kurang = p.kelengkapan_dokumen?.kurang ?? [];
 
   return (
     <Bagian icon="assignment_ind" judul="Buat Penempatan">
@@ -526,10 +534,16 @@ function Penempatan({ p, user, jobBerjalan, onBerhasil }) {
         </Field>
       </div>
       <p className="font-body-sm text-body-sm text-on-surface-variant">Talent akan berstatus ditempatkan dan tidak tersedia di talent pool. Jika kebutuhan tercapai, permintaan menjadi terpenuhi.</p>
+      {kurang.length > 0 && (
+        <p role="status" className="flex items-start gap-1 rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm text-on-surface">
+          <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-warning">lock</span>
+          Penempatan belum bisa dibuat. Dokumen yang belum selesai ditandatangani: {kurang.join(", ")}.
+        </p>
+      )}
       <div className="flex justify-end">
         <button
           type="button"
-          disabled={kirim}
+          disabled={kirim || kurang.length > 0}
           onClick={() =>
             jalankan("/placement", "POST", {
               id_evaluasi: p.evaluasi.id_evaluasi,
