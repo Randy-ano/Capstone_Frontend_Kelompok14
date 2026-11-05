@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { initials } from "../../auth/roles";
-import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, pecahTag, Proses } from "../ui";
+import { Badge, Chip, KeadaanKosong, Memuat, NADA, Pesan, TagChip, formatBulan, formatRupiah, formatTanggal, tagSelainKompetensi, Proses } from "../ui";
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { HasilBadge, STATUS_KANDIDAT, STATUS_KETERSEDIAAN, StatusBadge } from "./shared";
@@ -89,7 +89,8 @@ function Profil({ detail }) {
     ["GitHub", talent.github],
     ["Portfolio", talent.portfolio],
   ].filter(([, url]) => amanUrl(url));
-  const tag = pecahTag(detail.tag_keahlian);
+  // Tag yang sama dengan nama kompetensi tidak diulang (kompetensi sudah tampil di atasnya).
+  const tag = tagSelainKompetensi(detail.tag_keahlian, talent.kompetensi.map((k) => k.nama_kompetensi));
 
   return (
     <Bagian icon="person" judul="Profil">

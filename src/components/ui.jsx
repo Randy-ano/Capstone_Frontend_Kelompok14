@@ -35,6 +35,12 @@ export const pecahTag = (tag) =>
     .map((t) => t.trim())
     .filter(Boolean);
 
+// Tag keahlian tanpa yang namanya sama dengan kompetensi yang sudah ditampilkan, agar tidak tampil dobel.
+export const tagSelainKompetensi = (tag, namaKompetensi) => {
+  const ada = new Set(namaKompetensi.map((n) => n.trim().toLowerCase()));
+  return pecahTag(tag).filter((t) => !ada.has(t.toLowerCase()));
+};
+
 // Warna badge status per arti, sama di semua halaman:
 // menunggu = kuning, proses = biru, sukses (disetujui/aktif/lolos) = hijau, bahaya (ditolak/terlambat) = merah,
 // netral (draft/selesai/dibatalkan) = abu.

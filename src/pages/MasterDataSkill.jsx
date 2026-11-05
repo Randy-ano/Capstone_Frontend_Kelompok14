@@ -2,16 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
-import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
+import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Pagination, Pesan, Sel, TabelKartu, errorField, useTunda, Proses } from "../components/ui";
+import PilihBanyak from "../components/PilihBanyak";
 
 const PER_PAGE = 15;
 
 // Halaman Master Data Skill (master kompetensi) — Talent Support & Manager.
 // Kompetensi yang masih dipakai talent/job requirement tidak bisa dihapus (ditolak backend).
+// Pencarian: beberapa kata kunci dipisah koma; filter kategori bisa lebih dari satu (backend: search & kategori[]).
 export default function MasterDataSkill() {
   const [cari, setCari] = useState("");
   const search = useTunda(cari.trim());
-  const [kategori, setKategori] = useState("");
+  const [kategori, setKategori] = useState([]);
   const [page, setPage] = useState(1);
   const [versi, setVersi] = useState(0);
 
@@ -27,7 +29,7 @@ export default function MasterDataSkill() {
     let batal = false;
     const params = new URLSearchParams({ page, per_page: PER_PAGE, dengan_pemakaian: 1 });
     if (search) params.set("search", search);
-    if (kategori) params.set("kategori", kategori);
+    kategori.forEach((k) => params.append("kategori[]", k));
 
     setMemuat(true);
     setError("");
@@ -47,7 +49,7 @@ export default function MasterDataSkill() {
   const muatUlang = useCallback(() => setVersi((v) => v + 1), []);
   const tutupForm = useCallback(() => setForm(null), []);
   const opsiKategori = hasil?.meta.kategori ?? [];
-  const adaFilter = Boolean(search || kategori);
+  const adaFilter = Boolean(search || kategori.length);
 
   function tersimpan(pesan) {
     setForm(null);
@@ -77,24 +79,25 @@ export default function MasterDataSkill() {
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
         <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
-          <KotakCari value={cari} onChange={setCari} placeholder="Cari nama kompetensi..." />
-          <PilihFilter
+          <KotakCari value={cari} onChange={setCari} placeholder="Cari kompetensi, pisahkan dengan koma: laravel, react, sql" />
+          <PilihBanyak
             ikon="category"
-            label="Kategori"
-            value={kategori}
+            label={kategori.length ? `Kategori (${kategori.length})` : "Semua Kategori"}
+            nilai={kategori}
             onChange={(nilai) => {
               setKategori(nilai);
               setPage(1);
             }}
-            semua="Semua Kategori"
-            opsi={opsiKategori.map((k) => [k, k])}
+            opsi={opsiKategori.map((k) => ({ value: k, label: k }))}
+            placeholder="Cari kategori..."
+            keterangan="Pilih satu atau beberapa kategori."
           />
           {adaFilter && (
             <button
               type="button"
               onClick={() => {
                 setCari("");
-                setKategori("");
+                setKategori([]);
                 setPage(1);
               }}
               className="tombol-teks"
@@ -104,6 +107,28 @@ export default function MasterDataSkill() {
             </button>
           )}
         </div>
+
+        {kategori.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1 -mt-space-sm">
+            <span className="font-label-sm text-label-sm text-on-surface-variant mr-1">Kategori:</span>
+            {kategori.map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => {
+                  setKategori(kategori.filter((v) => v !== k));
+                  setPage(1);
+                }}
+                title="Hapus filter"
+                aria-label={`Hapus filter ${k}`}
+                className="inline-flex items-center gap-0.5 min-h-[32px] pl-2.5 pr-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-md text-label-md hover:bg-primary-fixed-dim"
+              >
+                {k}
+                <span aria-hidden="true" className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {error && <Pesan>{error}</Pesan>}
 

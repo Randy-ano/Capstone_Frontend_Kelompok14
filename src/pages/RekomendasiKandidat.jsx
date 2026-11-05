@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
-import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, pecahTag, Proses } from "../components/ui";
+import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, errorField, formatAngka, formatTanggal, formatTanggalWaktu, tagSelainKompetensi, Proses } from "../components/ui";
 import { useToast } from "../components/toast";
 import { HASIL_SCREENING, HasilBadge } from "../components/talentPool/shared";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
 // Halaman Rekomendasi Kandidat (FR-07, FR-08) — khusus Talent Support.
-// Skor berbasis aturan (R9): 80% kecocokan kompetensi + 20% pengalaman kerja.
+// Skor berbasis aturan (R9): 80% kecocokan kompetensi + 20% pengalaman kerja. Hanya kandidat dengan skor
+// minimal `meta.skor_minimum` (70) yang dikirim backend. Setiap kompetensi permintaan tampil sekali per kandidat:
+// cocok (centang) atau belum dimiliki (silang).
 export default function RekomendasiKandidat() {
   const [params, setParams] = useSearchParams();
   const idJob = params.get("job") ?? "";
@@ -150,6 +152,12 @@ function DaftarKandidat({ job, onScreening }) {
     >
       {error && <Pesan>{error}</Pesan>}
       {!error && !hasil && <Memuat>Menghitung skor kecocokan...</Memuat>}
+      {hasil && (
+        <p className="mb-space-sm flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
+          <span aria-hidden="true" className="material-symbols-outlined text-[16px]">info</span>
+          Menampilkan kandidat dengan skor minimal {hasil.meta?.skor_minimum ?? 70}.
+        </p>
+      )}
       {hasil?.data.length === 0 && (
         <KeadaanKosong
           ikon="person_search"
@@ -159,7 +167,8 @@ function DaftarKandidat({ job, onScreening }) {
             </Link>
           }
         >
-          Tidak ada kandidat tersedia yang memiliki minimal 1 kompetensi yang dibutuhkan.
+          Belum ada kandidat tersedia dengan skor kecocokan minimal {hasil.meta?.skor_minimum ?? 70}. Kandidat lain belum cukup memenuhi
+          kompetensi atau pengalaman yang dibutuhkan, atau sudah di-screening untuk permintaan ini.
         </KeadaanKosong>
       )}
       <ol className="space-y-space-md">
@@ -176,7 +185,8 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
   const [catatan, setCatatan] = useState("");
   const [kirim, setKirim] = useState(false);
   const [error, setError] = useState(null);
-  const tag = pecahTag(k.tag_keahlian);
+  // Tag keahlian hanya yang bukan nama kompetensi, karena kompetensi sudah tampil sebagai cocok/belum.
+  const tag = tagSelainKompetensi(k.tag_keahlian, [...k.kompetensi_cocok, ...k.kompetensi_kurang]);
 
   async function screening() {
     setKirim(true);
@@ -230,22 +240,30 @@ function KartuKandidat({ kandidat: k, peringkat, job, onScreening }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1">
-        {k.kompetensi_cocok.map((nama) => (
-          <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
-            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">check</span>
-            {nama}
-          </span>
-        ))}
-        {k.kompetensi_kurang.map((nama) => (
-          <span key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg ring-1 ring-outline-variant text-outline font-label-md text-label-md">
-            <span aria-hidden="true" className="material-symbols-outlined text-[14px]">close</span>
-            {nama}
-          </span>
-        ))}
+      <div className="space-y-1">
+        <div className="font-label-sm text-label-sm text-on-surface-variant">
+          Kompetensi permintaan: {k.kompetensi_cocok.length} dari {k.kompetensi_cocok.length + k.kompetensi_kurang.length} cocok
+        </div>
+        <ul className="flex flex-wrap items-center gap-1" aria-label="Kompetensi permintaan">
+          {k.kompetensi_cocok.map((nama) => (
+            <li key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-label-md">
+              <span aria-hidden="true" className="material-symbols-outlined text-[14px]">check</span>
+              {nama}
+              <span className="sr-only">(cocok)</span>
+            </li>
+          ))}
+          {k.kompetensi_kurang.map((nama) => (
+            <li key={nama} className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg ring-1 ring-outline-variant text-outline font-label-md text-label-md">
+              <span aria-hidden="true" className="material-symbols-outlined text-[14px]">close</span>
+              {nama}
+              <span className="sr-only">(belum dimiliki)</span>
+            </li>
+          ))}
+        </ul>
       </div>
       {tag.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="font-label-sm text-label-sm text-on-surface-variant mr-1">Tag:</span>
           {tag.map((t) => (
             <TagChip key={t}>{t}</TagChip>
           ))}

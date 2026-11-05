@@ -72,3 +72,30 @@ export function BarSkor({ nilai, className = "bg-primary" }) {
     </div>
   );
 }
+
+// Kisaran gaji permintaan kebutuhan: "Rp8.000.000 – Rp12.000.000"; salah satu kosong → "Mulai …"/"Hingga …"; keduanya kosong → null.
+const rupiah = (n) => `Rp${Number(n).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
+export function formatKisaranGaji(min, maks) {
+  if (min == null && maks == null) return null;
+  if (min != null && maks != null) return min === maks ? rupiah(min) : `${rupiah(min)} – ${rupiah(maks)}`;
+  return min != null ? `Mulai ${rupiah(min)}` : `Hingga ${rupiah(maks)}`;
+}
+
+// Input rupiah dengan pemisah ribuan ("8.000.000"). `value` & `onChange` memakai string angka tanpa titik ("8000000").
+export function InputRupiah({ value, onChange, className = "", ...props }) {
+  const tampil = value === "" || value == null ? "" : Number(value).toLocaleString("id-ID");
+  return (
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body-md text-body-md text-on-surface-variant pointer-events-none">Rp</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        value={tampil}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, 13))}
+        className={`${className} pl-10`}
+        {...props}
+      />
+    </div>
+  );
+}

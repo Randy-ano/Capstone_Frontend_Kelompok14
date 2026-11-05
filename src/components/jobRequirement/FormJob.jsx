@@ -3,6 +3,7 @@ import { api } from "../../lib/api";
 import { ROLE } from "../../auth/roles";
 import { Chip, Pesan, errorField, Proses } from "../ui";
 import { Modal } from "../dialog";
+import { InputRupiah, formatKisaranGaji } from "./shared";
 import FilterKompetensi, { kunciKompetensi } from "../talentPool/FilterKompetensi";
 
 const inputClass = (error) => `input ${error ? "input-error" : ""}`;
@@ -42,6 +43,9 @@ function awal(job) {
     posisi: job?.posisi ?? "",
     jumlah_kebutuhan: job?.jumlah_kebutuhan ?? 1,
     pengalaman_min: job?.pengalaman_min ?? 0,
+    // Kisaran gaji (opsional), disimpan sebagai string angka tanpa pemisah ribuan.
+    gaji_min: job?.gaji_min != null ? String(job.gaji_min) : "",
+    gaji_maks: job?.gaji_maks != null ? String(job.gaji_maks) : "",
     sla_deadline: keInput(job?.sla_deadline),
     kualifikasi: job?.kualifikasi ?? "",
     kompetensi: job?.kompetensi.map((k) => k.id_kompetensi) ?? [],
@@ -83,6 +87,8 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
       posisi: form.posisi.trim(),
       jumlah_kebutuhan: Number(form.jumlah_kebutuhan),
       pengalaman_min: Number(form.pengalaman_min),
+      gaji_min: form.gaji_min === "" ? null : Number(form.gaji_min),
+      gaji_maks: form.gaji_maks === "" ? null : Number(form.gaji_maks),
       sla_deadline: keApi(form.sla_deadline),
       kualifikasi: form.kualifikasi.trim() || null,
       kompetensi: form.kompetensi,
@@ -207,6 +213,19 @@ export default function FormJob({ job, user, opsiKompetensi, onClose, onSaved })
           <input type="datetime-local" value={form.sla_deadline} onChange={(ev) => set("sla_deadline")(ev.target.value)} className={inputClass(e("sla_deadline"))} />
         </Field>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+        <Field label="Gaji minimal ditawarkan" error={e("gaji_min")}>
+          <InputRupiah value={form.gaji_min} onChange={set("gaji_min")} placeholder="8.000.000" aria-label="Gaji minimal" className={inputClass(e("gaji_min"))} />
+        </Field>
+        <Field label="Gaji maksimal ditawarkan" error={e("gaji_maks")}>
+          <InputRupiah value={form.gaji_maks} onChange={set("gaji_maks")} placeholder="12.000.000" aria-label="Gaji maksimal" className={inputClass(e("gaji_maks"))} />
+        </Field>
+      </div>
+      <p className="-mt-space-sm font-body-sm text-body-sm text-on-surface-variant">
+        Opsional, per bulan. {formatKisaranGaji(form.gaji_min === "" ? null : Number(form.gaji_min), form.gaji_maks === "" ? null : Number(form.gaji_maks)) ?? "Tidak dicantumkan."}{" "}
+        Tidak ditampilkan ke talent.
+      </p>
 
       <div className="space-y-1">
         <span className="block font-label-md text-label-md text-on-surface">
