@@ -25,7 +25,7 @@ export default function TabMonitoringTalent() {
     <div className="flex flex-col gap-space-md">
       <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
         <p className="flex-1 min-w-0 font-body-md text-body-md text-on-surface-variant">
-          Catatan kinerja dari HR Client perusahaan tempat Anda bekerja dan dari Manager PT Intellisys, termasuk Surat Peringatan bila ada.
+          Catatan kinerja dari HR Client perusahaan tempat Anda bekerja dan dari Manager PT Intellisys IT Outsourcing, termasuk Surat Peringatan bila ada.
         </p>
         {daftar?.length > 1 && (
           <PilihFilter

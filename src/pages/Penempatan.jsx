@@ -79,9 +79,9 @@ export default function Penempatan() {
 
   const keterangan =
     talent
-      ? "Penempatan Anda di klien PT Intellisys dan catatan monitoring kinerja Anda."
+      ? "Penempatan Anda di klien PT Intellisys IT Outsourcing dan catatan monitoring kinerja Anda."
       : user.role === ROLE.HR_CLIENT
-        ? "Talent PT Intellisys yang ditempatkan di perusahaan Anda."
+        ? "Talent PT Intellisys IT Outsourcing yang ditempatkan di perusahaan Anda."
         : "Talent yang sudah ditempatkan di klien. Penempatan dibuat dari evaluasi yang diterima di halaman Pengajuan Kandidat.";
 
   return (

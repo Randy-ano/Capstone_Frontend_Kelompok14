@@ -9,7 +9,7 @@ const JENIS_AKUN = [
   {
     key: "talent",
     label: "Saya Talent",
-    info: "Sebagai Talent, Anda dapat melengkapi profil & kompetensi, membuat CV otomatis, dan direkomendasikan ke klien PT Intellisys setelah profil lengkap.",
+    info: "Sebagai Talent, Anda dapat melengkapi profil & kompetensi, membuat CV otomatis, dan direkomendasikan ke klien PT Intellisys IT Outsourcing setelah profil lengkap.",
   },
   {
     key: "hr-client",

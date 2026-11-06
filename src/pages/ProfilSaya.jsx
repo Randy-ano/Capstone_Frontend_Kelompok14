@@ -195,7 +195,7 @@ export default function ProfilSaya() {
   return (
     <div className="flex flex-col w-full pb-32">
       <KepalaHalaman ikon="badge" kategori="Talent" judul="Profil & CV Saya">
-        Lengkapi profil Anda. Profil yang lengkap otomatis masuk talent pool PT Intellisys dan dapat direkomendasikan ke klien sesuai kompetensi dan pengalaman.
+        Lengkapi profil Anda. Profil yang lengkap otomatis masuk talent pool PT Intellisys IT Outsourcing dan dapat direkomendasikan ke klien sesuai kompetensi dan pengalaman.
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
@@ -604,7 +604,7 @@ function BagianCv({ profil, adaPerubahan, onCvDibuat }) {
         : "Anda belum membuat CV.";
 
   return (
-    <Bagian ikon="picture_as_pdf" judul="CV" keterangan="CV dibuat otomatis dari data profil Anda dan dapat dilihat oleh tim PT Intellisys.">
+    <Bagian ikon="picture_as_pdf" judul="CV" keterangan="CV dibuat otomatis dari data profil Anda dan dapat dilihat oleh tim PT Intellisys IT Outsourcing.">
       {error && <Pesan>{error}</Pesan>}
       <div className="flex flex-col sm:flex-row sm:items-center gap-space-sm">
         <span className="font-body-md text-body-md text-on-surface-variant sm:mr-auto">{keterangan}</span>

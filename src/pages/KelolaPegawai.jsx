@@ -76,7 +76,7 @@ export default function KelolaPegawai() {
           </button>
         }
       >
-        Akun internal PT Intellisys (Account Manager, Talent Support, Manager). Akun yang dinonaktifkan tidak dapat masuk dan sesinya langsung berakhir.
+        Akun internal PT Intellisys IT Outsourcing (Account Manager, Talent Support, Manager). Akun yang dinonaktifkan tidak dapat masuk dan sesinya langsung berakhir.
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">

@@ -68,7 +68,7 @@ export default function TiketKomplain() {
         }
       >
         {hr
-          ? "Laporkan kendala terkait talent yang ditempatkan di perusahaan Anda; tim PT Intellisys akan menindaklanjuti."
+          ? "Laporkan kendala terkait talent yang ditempatkan di perusahaan Anda; tim PT Intellisys IT Outsourcing akan menindaklanjuti."
           : "Keluhan klien terhadap talent yang ditempatkan beserta status tindak lanjutnya."}
       </KepalaHalaman>
 
