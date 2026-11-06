@@ -1,6 +1,6 @@
 # Intellisys Talent Hub — Frontend
 
-Frontend sistem outsourcing talent PT Intellisys: React (Vite), Tailwind CSS, React Router.
+Frontend sistem outsourcing talent PT Intellisys IT Outsourcing: React (Vite), Tailwind CSS, React Router.
 Desain mengikuti mockup Stitch "Intellisys Talent Hub Design System".
 
 Backend (Laravel REST API) ada di repo terpisah: [Capstone_Backend_Kelompok14](https://github.com/Randy-ano/Capstone_Backend_Kelompok14). Ikuti `README.md`/`SETUP.md` di sana untuk menyiapkan backend, database, queue, dan scheduler.
