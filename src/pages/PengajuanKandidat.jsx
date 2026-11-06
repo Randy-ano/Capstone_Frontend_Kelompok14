@@ -14,7 +14,7 @@ import { CatatanUsulan } from "../components/rekrutmen/usulan";
 const PER_PAGE = 10;
 
 const KETERANGAN = {
-  [ROLE.HR_CLIENT]: "Tinjau kandidat yang diajukan PT Intellisys, pantau jadwal interview dari Account Manager, lalu beri evaluasi.",
+  [ROLE.HR_CLIENT]: "Tinjau kandidat yang diajukan PT Intellisys IT Outsourcing, pantau jadwal interview dari Account Manager, lalu beri evaluasi.",
   [ROLE.TALENT]: "Pantau proses Anda: diajukan ke klien, interview, sampai hasil evaluasi.",
   [ROLE.ACCOUNT_MANAGER]: "Tinjau usulan kandidat dari Talent Support, teruskan ke klien, jadwalkan interview dan tandai selesai, lalu pantau hingga evaluasi.",
 };

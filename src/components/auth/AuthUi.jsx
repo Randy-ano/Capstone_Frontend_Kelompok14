@@ -25,7 +25,7 @@ export function Merek({ tengah = false }) {
 export function KakiHalaman({ className = "" }) {
   return (
     <p className={`font-body-sm text-body-sm text-on-surface-variant ${className}`}>
-      © PT Intellisys Tri Pratama • Sistem Manajemen Talenta Terpadu
+      © PT Intellisys IT Outsourcing • Sistem Manajemen Talenta Terpadu
     </p>
   );
 }

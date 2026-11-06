@@ -26,7 +26,7 @@ const PERAN = [
   },
   {
     ikon: "groups",
-    judul: "Tim PT Intellisys",
+    judul: "Tim PT Intellisys IT Outsourcing",
     isi: ["Mencari dan mengajukan kandidat", "Mengatur interview, dokumen, dan penempatan", "Memantau SLA dan kinerja penempatan"],
   },
 ];
@@ -66,7 +66,7 @@ export default function HalamanDepan() {
               Dari kebutuhan talent IT sampai penempatan, dalam satu alur yang bisa dipantau.
             </h1>
             <p className="mt-space-md max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
-              Sistem outsourcing talent PT Intellisys untuk talent IT, HR perusahaan klien, dan tim internal. Semua pihak melihat status terbaru tanpa perlu saling menanyakan.
+              Sistem outsourcing talent PT Intellisys IT Outsourcing untuk talent IT, HR perusahaan klien, dan tim internal. Semua pihak melihat status terbaru tanpa perlu saling menanyakan.
             </p>
             <div className="mt-space-lg flex flex-col sm:flex-row gap-space-sm">
               <Link to="/daftar" className="tombol-utama">

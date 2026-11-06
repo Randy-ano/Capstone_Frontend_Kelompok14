@@ -18,7 +18,7 @@
 | P-03b | Error hilang saat diperbaiki | Ganti email | `dewi@intellisys.test` | Pesan error hilang | Sesuai | Lulus |
 | P-04 | Tambah pegawai | **Tambah Pegawai** | Dewi Lestari, Talent Support, `rahasia123` | "Pegawai berhasil ditambahkan. (Dewi Lestari)"; 4 pegawai; akun baru bisa login sebagai Talent Support | Sesuai (login 200) | Lulus |
 | P-05 | Ubah tanpa ganti password | **Ubah** Dewi → jabatan → **Simpan Perubahan** (password dibiarkan kosong) | `Senior Talent Support` | "Pegawai berhasil diperbarui. (Dewi Lestari)"; password lama tetap berlaku | Sesuai | Lulus |
-| P-06 | Nonaktifkan | **Nonaktifkan** → **Ya** pada Dewi | - | "Akun berhasil dinonaktifkan (Dewi Lestari)"; status Nonaktif; login Dewi ditolak 403 "Akun Anda dinonaktifkan. Silakan hubungi Manager PT Intellisys." | Sesuai | Lulus |
+| P-06 | Nonaktifkan | **Nonaktifkan** → **Ya** pada Dewi | - | "Akun berhasil dinonaktifkan (Dewi Lestari)"; status Nonaktif; login Dewi ditolak 403 "Akun Anda dinonaktifkan. Silakan hubungi Manager PT Intellisys IT Outsourcing." | Sesuai | Lulus |
 | P-07 | Aktifkan kembali | **Aktifkan** → **Ya** | - | "Akun berhasil diaktifkan (Dewi Lestari)"; status Aktif; tombol kembali normal | Sesuai | Lulus |
 | P-08 | Filter role | Pilih role | Talent Support | 2 baris (Dewi, Rina) | Sesuai | Lulus |
 | P-09 | Nonaktifkan diri sendiri (API) | `PATCH /users/{id_user manager}/status` | `{"status_aktif": false}` | 403 "Anda tidak dapat mengubah status akun Anda sendiri." | Sesuai | Lulus |

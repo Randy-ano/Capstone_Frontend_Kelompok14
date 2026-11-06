@@ -54,7 +54,7 @@ export default function JadwalInterview() {
         Jadwal interview kandidat, urut dari yang terdekat.{" "}
         {bolehAturInterview(user)
           ? "Klik baris untuk melihat detail, menandai selesai, menjadwal ulang, atau membatalkan."
-          : "Jadwal diatur oleh Account Manager PT Intellisys; klik baris untuk melihat detail."}
+          : "Jadwal diatur oleh Account Manager PT Intellisys IT Outsourcing; klik baris untuk melihat detail."}
       </KepalaHalaman>
 
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-lg">
