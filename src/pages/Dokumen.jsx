@@ -5,7 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
 import { KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatTanggal, useTunda } from "../components/ui";
 import { useToast } from "../components/toast";
-import { JENIS_DOKUMEN, STATUS_DOKUMEN, StatusDokumenBadge } from "../components/dokumen/shared";
+import { JENIS_DOKUMEN, STATUS_DOKUMEN, StatusDokumenBadge, opsiJenisDokumen } from "../components/dokumen/shared";
 import { ModalGenerate, ModalUnggah } from "../components/dokumen/ModalDokumen";
 import DokumenDrawer from "../components/dokumen/DokumenDrawer";
 
@@ -103,7 +103,7 @@ export default function Dokumen() {
       <div className="px-space-md sm:px-space-xl pt-space-lg flex flex-col gap-space-md">
         <div className="kartu p-space-md flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-space-sm">
           <KotakCari value={cari} onChange={setCari} placeholder={user.role === ROLE.TALENT ? "Cari nama file atau klien..." : "Cari nama file, klien, atau talent..."} />
-          <PilihFilter ikon="category" label="Jenis dokumen" value={jenis} onChange={(v) => (setJenis(v), setPage(1))} semua="Semua Jenis" opsi={Object.entries(JENIS_DOKUMEN).map(([v, j]) => [v, j.label])} />
+          <PilihFilter ikon="category" label="Jenis dokumen" value={jenis} onChange={(v) => (setJenis(v), setPage(1))} semua="Semua Jenis" opsi={opsiJenisDokumen(user.role)} />
           <PilihFilter ikon="filter_alt" label="Status dokumen" value={status} onChange={(v) => (setStatus(v), setPage(1))} semua="Semua Status" opsi={Object.entries(STATUS_DOKUMEN).map(([v, s]) => [v, s.label])} />
           <button
             type="button"

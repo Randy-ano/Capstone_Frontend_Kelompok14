@@ -19,6 +19,7 @@ const TIPE = {
   keluhan_baru: { ikon: "support_agent", path: "/tiket-komplain-klien" },
   tanda_tangan_diminta: { ikon: "draw", path: "/dokumen-quotation-po" },
   pengingat_tanda_tangan: { ikon: "alarm", path: "/dokumen-quotation-po" },
+  surat_akhir_penempatan: { ikon: "workspace_premium", path: "/dokumen-quotation-po" },
   sla_mendekati: { ikon: "schedule", path: "/pipeline-rekrutmen" },
   sla_terlambat: { ikon: "warning", path: "/pipeline-rekrutmen" },
 };
