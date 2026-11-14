@@ -3,13 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { ROLE } from "../auth/roles";
-import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatAngka, formatTanggal, useTunda, Proses } from "../components/ui";
+import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatAngka, formatTanggal, useTunda } from "../components/ui";
 import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
 import { BadgeTahapPengajuan, STATUS_TAMPIL, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 import TabUsulan, { usulanAktif } from "../components/rekrutmen/TabUsulan";
 import { CatatanUsulan } from "../components/rekrutmen/usulan";
+import DetailUsulan from "../components/rekrutmen/DetailUsulan";
 
 const PER_PAGE = 10;
 
@@ -36,6 +37,8 @@ export default function PengajuanKandidat() {
   const toast = useToast();
   const [dipilih, setDipilih] = useState(null);
   const [ajukan, setAjukan] = useState(false);
+  // Usulan TS yang dibuka dari modal "Ajukan Kandidat": AM meninjau detail dulu sebelum mengajukan ke klien.
+  const [usulanDibuka, setUsulanDibuka] = useState(null);
   // AM: tab "Pengajuan ke Klien" (default) dan "Usulan dari Talent Support" (?tab=usulan).
   const am = user.role === ROLE.ACCOUNT_MANAGER;
   const [params, setParams] = useSearchParams();
@@ -232,11 +235,27 @@ export default function PengajuanKandidat() {
       {ajukan && (
         <ModalAjukan
           onClose={() => setAjukan(false)}
-          onBerhasil={(pesan, id) => {
+          onPilih={(id) => {
             setAjukan(false);
-            toast.sukses(pesan);
+            setUsulanDibuka(id);
+          }}
+        />
+      )}
+      {usulanDibuka && (
+        <DetailUsulan
+          id={usulanDibuka}
+          user={user}
+          onClose={() => setUsulanDibuka(null)}
+          onDiteruskan={(res, usulan) => {
+            setUsulanDibuka(null);
+            toast.sukses(`${res.message} (${usulan.talent.nama_lengkap})`);
             muatUlang();
-            setDipilih(id);
+            setDipilih(res.data.id_pengajuan);
+          }}
+          onTidakDiteruskan={(res) => {
+            setUsulanDibuka(null);
+            toast.sukses(`${res.message} (${res.data.talent.nama_lengkap})`);
+            muatUlang();
           }}
         />
       )}
@@ -244,11 +263,10 @@ export default function PengajuanKandidat() {
   );
 }
 
-// AM memilih usulan Talent Support yang belum diteruskan (R14).
-function ModalAjukan({ onClose, onBerhasil }) {
+// AM memilih usulan Talent Support yang belum diteruskan (R14); keputusan diambil di panel detail (DetailUsulan).
+function ModalAjukan({ onClose, onPilih }) {
   const [daftar, setDaftar] = useState(null);
   const [error, setError] = useState("");
-  const [kirim, setKirim] = useState(null);
 
   useEffect(() => {
     api("/screening?status_usulan=menunggu_am&per_page=100")
@@ -256,21 +274,11 @@ function ModalAjukan({ onClose, onBerhasil }) {
       .catch((err) => setError(err.message));
   }, []);
 
-  async function ajukan(s) {
-    setKirim(s.id_screening);
-    setError("");
-    try {
-      const res = await api("/pengajuan", { method: "POST", body: { id_screening: s.id_screening } });
-      onBerhasil(`${res.message} (${s.talent.nama_lengkap})`, res.data.id_pengajuan);
-    } catch (err) {
-      setError(errorField(err, "id_screening") ?? err.message);
-      setKirim(null);
-    }
-  }
-
   return (
-    <Modal judul="Ajukan Kandidat ke Klien" label="Ajukan kandidat" lebar="sm:max-w-2xl" sibuk={!!kirim} onClose={onClose}>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Usulan dari Talent Support yang belum diteruskan, untuk permintaan yang sedang diproses.</p>
+    <Modal judul="Ajukan Kandidat ke Klien" label="Ajukan kandidat" lebar="sm:max-w-2xl" onClose={onClose}>
+      <p className="font-body-sm text-body-sm text-on-surface-variant">
+        Usulan dari Talent Support yang belum diteruskan, untuk permintaan yang sedang diproses. Tinjau detail kandidat sebelum mengajukan ke klien.
+      </p>
       {error && <Pesan>{error}</Pesan>}
       {!error && !daftar && <Memuat />}
       {daftar?.length === 0 && <KeadaanKosong ringkas ikon="forward_to_inbox">Belum ada usulan Talent Support yang menunggu diteruskan.</KeadaanKosong>}
@@ -284,13 +292,9 @@ function ModalAjukan({ onClose, onBerhasil }) {
               </div>
               <CatatanUsulan catatan={s.catatan_screening} />
             </div>
-            <button
-              type="button"
-              onClick={() => ajukan(s)}
-              disabled={!!kirim}
-              className="tombol-utama shrink-0"
-            >
-              <Proses aktif={kirim === s.id_screening} ikon="send">Teruskan ke Klien</Proses>
+            <button type="button" onClick={() => onPilih(s.id_screening)} className="tombol-utama shrink-0">
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px]">visibility</span>
+              Tinjau Detail
             </button>
           </li>
         ))}
