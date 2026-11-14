@@ -520,38 +520,63 @@ function KartuBaris({ judul, onHapus, children }) {
   );
 }
 
-// Status R4 dari data yang sudah tersimpan.
+// Checklist kelengkapan profil (R4) dari backend (`kelengkapan_profil`), dihitung dari data yang sudah tersimpan.
 function StatusProfil({ profil }) {
-  const lengkap = profil.status_kelengkapan === "lengkap";
-  const syarat = [
-    ["Nama lengkap terisi", Boolean(profil.nama_lengkap)],
-    ["Minimal 1 riwayat pendidikan", profil.riwayat_pendidikan.length > 0],
-    ["Minimal 1 kompetensi", profil.kompetensi.length > 0],
-  ];
+  const k = profil.kelengkapan_profil;
+  if (!k) return null;
+  const lengkap = k.lengkap;
+  const persen = Math.round((k.terpenuhi / k.total) * 100);
   return (
-    <div
-      className={`rounded-xl ring-1 ring-inset p-space-md flex flex-col sm:flex-row sm:items-center gap-space-md ${
+    <section
+      aria-label="Kelengkapan profil"
+      className={`rounded-xl ring-1 ring-inset p-space-md flex flex-col gap-space-sm ${
         lengkap ? "bg-tertiary-fixed text-on-tertiary-fixed-variant ring-on-tertiary-container/25" : "bg-warning-container text-on-warning-container ring-warning/25"
       }`}
     >
-      <span aria-hidden="true" className="material-symbols-outlined text-[32px]">{lengkap ? "verified" : "pending"}</span>
-      <div className="flex-1 min-w-0">
-        <div className="font-title-md text-title-md">{lengkap ? "Profil lengkap" : "Profil belum lengkap"}</div>
-        <div className="font-body-sm text-body-sm">
-          {lengkap
-            ? `Anda sudah masuk talent pool. Status kandidat: ${STATUS_KANDIDAT[profil.status_kandidat] ?? profil.status_kandidat}.`
-            : "Lengkapi syarat berikut agar masuk talent pool dan bisa membuat CV."}
+      <div className="flex items-start gap-space-sm">
+        <span aria-hidden="true" className="material-symbols-outlined text-[28px] shrink-0">{lengkap ? "verified" : "pending"}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-space-sm">
+            <h2 className="font-title-md text-title-md">{lengkap ? "Profil lengkap" : "Kelengkapan profil"}</h2>
+            <span className="font-label-lg text-label-lg tabular-nums">
+              {k.terpenuhi}/{k.total} syarat
+            </span>
+          </div>
+          <p className="font-body-sm text-body-sm">
+            {lengkap && k.di_talent_pool
+              ? "Profil lengkap, kamu sudah masuk talent pool."
+              : lengkap
+                ? "Profil lengkap. Kamu akan segera masuk talent pool."
+                : "Lengkapi profil agar masuk talent pool."}
+            {lengkap && ` Status kandidat: ${STATUS_KANDIDAT[profil.status_kandidat] ?? profil.status_kandidat}.`}
+          </p>
         </div>
       </div>
-      <ul className="flex flex-col gap-0.5 shrink-0">
-        {syarat.map(([label, ok]) => (
-          <li key={label} className="flex items-center gap-1 font-label-md text-label-md">
-            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{ok ? "check_circle" : "radio_button_unchecked"}</span>
-            {label}
+      <div
+        className="h-2 rounded-full bg-surface-container-lowest/70 overflow-hidden"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={k.total}
+        aria-valuenow={k.terpenuhi}
+        aria-label={`Kelengkapan profil ${k.terpenuhi} dari ${k.total}`}
+      >
+        <div className={`h-full rounded-full ${lengkap ? "bg-on-tertiary-container" : "bg-warning"}`} style={{ width: `${persen}%` }} />
+      </div>
+      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-x-space-md gap-y-1">
+        {k.syarat.map((s) => (
+          <li key={s.kunci} className="flex items-center gap-1 font-label-md text-label-md">
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">{s.terpenuhi ? "check_circle" : "radio_button_unchecked"}</span>
+            <span>
+              {s.label}
+              <span className="sr-only">{s.terpenuhi ? " (sudah)" : " (belum)"}</span>
+            </span>
           </li>
         ))}
       </ul>
-    </div>
+      {!lengkap && (
+        <p className="font-body-sm text-body-sm opacity-90">Simpan perubahan agar checklist diperbarui. CV baru bisa dibuat setelah profil lengkap.</p>
+      )}
+    </section>
   );
 }
 
