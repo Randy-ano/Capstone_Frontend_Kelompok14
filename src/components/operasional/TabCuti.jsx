@@ -55,6 +55,7 @@ export default function TabCuti({ user }) {
 
   return (
     <div className="flex flex-col gap-space-md">
+      {talent && <KartuKuota versi={versi} />}
       <div className="kartu p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
         <PilihFilter
           ikon="filter_alt"
@@ -106,6 +107,48 @@ export default function TabCuti({ user }) {
         />
       )}
     </div>
+  );
+}
+
+// Sisa kuota cuti tahun ini (GET /cuti/kuota): 12 hari kerja dikurangi cuti menunggu + disetujui. Dimuat ulang setelah ajukan/batal.
+function KartuKuota({ versi }) {
+  const [kuota, setKuota] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let batal = false;
+    api("/cuti/kuota")
+      .then((res) => !batal && setKuota(res.data))
+      .catch((err) => !batal && setError(err.message));
+    return () => {
+      batal = true;
+    };
+  }, [versi]);
+
+  if (error) return <Pesan>{error}</Pesan>;
+  const persen = kuota ? Math.round((kuota.terpakai / kuota.kuota) * 100) : 0;
+  const habis = kuota && kuota.sisa <= 0;
+  return (
+    <section className="kartu p-space-md flex flex-col sm:flex-row sm:items-center gap-space-md" aria-label="Sisa kuota cuti">
+      <div className="flex items-center gap-space-sm min-w-0 flex-1">
+        <span aria-hidden="true" className={`material-symbols-outlined text-[32px] ${habis ? "text-error" : "text-primary"}`}>event_available</span>
+        <div className="min-w-0">
+          <div className="font-label-md text-label-md text-on-surface-variant">Sisa kuota cuti {kuota ? kuota.tahun : ""}</div>
+          <div className={`font-headline-sm text-headline-sm tabular-nums ${habis ? "text-error" : "text-on-surface"}`}>
+            {kuota ? `${kuota.sisa} hari kerja` : "..."}
+          </div>
+        </div>
+      </div>
+      <div className="sm:w-64 space-y-1">
+        <div className="h-2 rounded-full bg-surface-container-high overflow-hidden" role="presentation">
+          <div className={`h-full rounded-full ${habis ? "bg-error" : "bg-primary"}`} style={{ width: `${persen}%` }} />
+        </div>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          {kuota ? `Terpakai ${kuota.terpakai} dari ${kuota.kuota} hari kerja (cuti menunggu & disetujui).` : "Memuat kuota..."}
+          {habis && " Kuota tahun ini sudah habis."}
+        </p>
+      </div>
+    </section>
   );
 }
 
