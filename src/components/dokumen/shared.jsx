@@ -10,7 +10,18 @@ export const JENIS_DOKUMEN = {
   kontrak_kerja: { label: "Kontrak Kerja", ikon: "contract" },
   surat_peringatan: { label: "Surat Peringatan", ikon: "warning" },
   lainnya: { label: "Lainnya", ikon: "description" },
+  // Dibuat otomatis saat penempatan diakhiri (R37); tidak bisa diunggah manual dan tidak terlihat oleh Talent Support.
+  surat_selesai_penempatan: { label: "Surat Keterangan Selesai Penempatan", ikon: "workspace_premium" },
+  surat_pemberhentian_penempatan: { label: "Surat Pemberhentian Penempatan", ikon: "person_remove" },
 };
+
+export const JENIS_AKHIR_PENEMPATAN = ["surat_selesai_penempatan", "surat_pemberhentian_penempatan"];
+
+// Pilihan filter jenis di menu Dokumen: surat akhir penempatan tidak ditawarkan ke Talent Support (tidak berhak melihatnya).
+export const opsiJenisDokumen = (role) =>
+  Object.entries(JENIS_DOKUMEN)
+    .filter(([v]) => role !== "talent_support" || !JENIS_AKHIR_PENEMPATAN.includes(v))
+    .map(([v, j]) => [v, j.label]);
 
 // Siapa yang boleh menandatangani per jenis dokumen (R27, sama dengan DokumenService::calonPenandatangan di backend).
 export const ATURAN_PENANDATANGAN = {
@@ -20,6 +31,8 @@ export const ATURAN_PENANDATANGAN = {
   kontrak_kerja: "Talent terkait, Account Manager, dan Manager.",
   surat_peringatan: "Talent terkait, Account Manager, dan Manager.",
   lainnya: "Account Manager, Manager, HR Client dari klien dokumen, dan talent terkait.",
+  surat_selesai_penempatan: "Manager (ditunjuk otomatis saat penempatan diakhiri).",
+  surat_pemberhentian_penempatan: "Manager (ditunjuk otomatis saat penempatan diakhiri).",
 };
 
 export const STATUS_DOKUMEN = {
