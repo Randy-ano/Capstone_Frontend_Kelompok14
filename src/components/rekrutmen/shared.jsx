@@ -40,11 +40,11 @@ export const PlacementBadge = ({ status }) => <BadgeDari peta={STATUS_PLACEMENT}
 
 // Penjelasan singkat status untuk talent (halaman Proses Seleksi), per status_tampil.
 export const PENJELASAN_STATUS_TALENT = {
-  diajukan: "Diajukan ke klien: profilmu sedang ditinjau oleh HR klien.",
-  lanjut_interview: "Klien ingin mengenalmu lebih jauh. Ikuti jadwal interview yang diatur Account Manager.",
-  diterima: "Selamat, klien menerimamu. Tim kami sedang menyiapkan kontrak dan penempatanmu.",
-  ditempatkan: "Kamu sudah ditempatkan di klien ini. Detailnya ada di menu Penempatan Saya.",
-  ditolak: "Klien tidak melanjutkan proses ini. Profilmu tetap di talent pool untuk kesempatan lain.",
+  diajukan: "Diajukan ke klien: profil Anda sedang ditinjau oleh HR klien.",
+  lanjut_interview: "Klien ingin mengenal Anda lebih jauh. Ikuti jadwal interview yang diatur Account Manager.",
+  diterima: "Selamat, klien menerima Anda. Tim kami sedang menyiapkan kontrak dan penempatan Anda.",
+  ditempatkan: "Anda sudah ditempatkan di klien ini. Detailnya ada di menu Penempatan Saya.",
+  ditolak: "Klien tidak melanjutkan proses ini. Profil Anda tetap di talent pool untuk kesempatan lain.",
 };
 
 // Tahapan seleksi untuk stepper talent: Diajukan → Interview → Evaluasi → Penempatan.

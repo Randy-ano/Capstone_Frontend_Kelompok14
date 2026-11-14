@@ -18,19 +18,19 @@
 | ID | Skenario | Langkah | Input | Hasil yang Diharapkan | Hasil Aktual | Status |
 |---|---|---|---|---|---|---|
 | SUS-01 | Profil belum lengkap | Login `talent20@` → Profil & CV Saya | - | Kartu di atas form: "2/3 syarat", progres, "Lengkapi profil agar masuk talent pool.", kompetensi belum tercentang | ✓ Nama lengkap · ✓ Riwayat pendidikan (min. 1) · ○ Kompetensi (min. 1); kartu di atas Data Pribadi | Lulus |
-| SUS-02 | Profil menjadi lengkap | Tambah kompetensi & simpan, muat ulang | Kompetensi Laravel | "3/3 syarat", "Profil lengkap, kamu sudah masuk talent pool." | Sesuai (+ "Status kandidat: Tersedia.") | Lulus |
+| SUS-02 | Profil menjadi lengkap | Tambah kompetensi & simpan, muat ulang | Kompetensi Laravel | "3/3 syarat", "Profil lengkap, Anda sudah masuk talent pool." | Sesuai (+ "Status kandidat: Tersedia.") | Lulus |
 | SUS-03 | Syarat lain belum terpenuhi, lebar HP | Login `talent21@`, lebar 390 px | - | Pendidikan belum tercentang; tidak meluap | ○ Riwayat pendidikan; lebar dokumen 390 px | Lulus |
 
 ## 2. Status seleksi talent
 
 | ID | Skenario | Langkah | Input | Hasil yang Diharapkan | Hasil Aktual | Status |
 |---|---|---|---|---|---|---|
-| SUS-04 | Menunggu tinjauan klien | `talent07@` → Proses Seleksi | - | Stepper: langkah 1 aktif; teks & tooltip badge "Diajukan ke klien: profilmu sedang ditinjau oleh HR klien." | Sesuai | Lulus |
+| SUS-04 | Menunggu tinjauan klien | `talent07@` → Proses Seleksi | - | Stepper: langkah 1 aktif; teks & tooltip badge "Diajukan ke klien: profil Anda sedang ditinjau oleh HR klien." | Sesuai | Lulus |
 | SUS-05 | Lanjut interview + detail | `talent08@` → Proses Seleksi → buka detail | - | Langkah 1 selesai, Interview aktif; penjelasan interview; stepper sama di Detail Pengajuan | Sesuai | Lulus |
 | SUS-06 | Evaluasi ditolak | `talent18@` | - | Diajukan & Interview selesai, Evaluasi berhenti (silang); "Klien tidak melanjutkan proses ini. …" | Sesuai | Lulus |
 | SUS-07a | Ditolak saat tinjauan | `talent19@` | - | Langkah 1 berhenti (silang) | Sesuai | Lulus |
-| SUS-07b | Diterima | `talent12@` | - | Tiga langkah selesai, Penempatan aktif; "Selamat, klien menerimamu. …" | Sesuai | Lulus |
-| SUS-07c | Ditempatkan | `talent@` | - | Semua langkah selesai; "Kamu sudah ditempatkan di klien ini. …" | Sesuai | Lulus |
+| SUS-07b | Diterima | `talent12@` | - | Tiga langkah selesai, Penempatan aktif; "Selamat, klien menerima Anda. …" | Sesuai | Lulus |
+| SUS-07c | Ditempatkan | `talent@` | - | Semua langkah selesai; "Anda sudah ditempatkan di klien ini. …" | Sesuai | Lulus |
 | SUS-08 | Role internal tidak berubah | `am@` → Pengajuan Kandidat | - | Kolom "Tahap Saat Ini" tetap, tanpa stepper talent | Sesuai | Lulus |
 
 ## 3. Sisa kuota cuti

@@ -544,9 +544,9 @@ function StatusProfil({ profil }) {
           </div>
           <p className="font-body-sm text-body-sm">
             {lengkap && k.di_talent_pool
-              ? "Profil lengkap, kamu sudah masuk talent pool."
+              ? "Profil lengkap, Anda sudah masuk talent pool."
               : lengkap
-                ? "Profil lengkap. Kamu akan segera masuk talent pool."
+                ? "Profil lengkap. Anda akan segera masuk talent pool."
                 : "Lengkapi profil agar masuk talent pool."}
             {lengkap && ` Status kandidat: ${STATUS_KANDIDAT[profil.status_kandidat] ?? profil.status_kandidat}.`}
           </p>
