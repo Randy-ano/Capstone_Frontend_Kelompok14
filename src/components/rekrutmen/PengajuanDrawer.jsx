@@ -10,6 +10,8 @@ import { DaftarPeriksaPengajuan } from "../dokumen/berurutan";
 import {
   BadgeTahapPengajuan,
   EvaluasiBadge,
+  PENJELASAN_STATUS_TALENT,
+  StepperSeleksi,
   INTERVIEW_FINAL,
   InterviewBadge,
   bolehAturInterview,
@@ -170,6 +172,12 @@ function Ringkasan({ p, talent }) {
       <div className="flex flex-wrap gap-1">
         <BadgeTahapPengajuan pengajuan={p} />
       </div>
+      {talent && (
+        <div className="space-y-space-sm pt-space-xs">
+          <StepperSeleksi pengajuan={p} />
+          <p className="font-body-sm text-body-sm text-on-surface-variant">{PENJELASAN_STATUS_TALENT[p.status_tampil]}</p>
+        </div>
+      )}
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-space-md gap-y-space-sm pt-space-xs">
         <Info label="Posisi">{p.job_requirement.posisi}</Info>
         <Info label="Klien">{p.job_requirement.klien.nama_perusahaan}</Info>

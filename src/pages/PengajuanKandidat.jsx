@@ -6,7 +6,7 @@ import { ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KeadaanKosong, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, formatAngka, formatTanggal, useTunda } from "../components/ui";
 import { useToast } from "../components/toast";
 import { Modal } from "../components/dialog";
-import { BadgeTahapPengajuan, STATUS_TAMPIL, tahapPengajuan } from "../components/rekrutmen/shared";
+import { BadgeTahapPengajuan, PENJELASAN_STATUS_TALENT, STATUS_TAMPIL, StepperSeleksi, tahapPengajuan } from "../components/rekrutmen/shared";
 import PengajuanDrawer from "../components/rekrutmen/PengajuanDrawer";
 import TabUsulan, { usulanAktif } from "../components/rekrutmen/TabUsulan";
 import { CatatanUsulan } from "../components/rekrutmen/usulan";
@@ -171,8 +171,8 @@ export default function PengajuanKandidat() {
 
             <div className="kartu overflow-hidden">
               <TabelKartu
-                kolom={talent ? ["Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"] : ["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]}
-                className={talent ? "md:min-w-[680px]" : "md:min-w-[860px]"}
+                kolom={talent ? ["Posisi & Klien", "Diajukan", "Tahapan Seleksi", "Status"] : ["Kandidat", "Posisi & Klien", "Diajukan", "Tahap Saat Ini", "Status"]}
+                className={talent ? "md:min-w-[820px]" : "md:min-w-[860px]"}
                 redup={memuat && hasil}
               >
                 {!hasil && memuat && <BarisMemuat kolom={talent ? 4 : 5} />}
@@ -212,14 +212,24 @@ export default function PengajuanKandidat() {
                         <span className="block text-on-surface-variant">{formatTanggal(p.tanggal_pengajuan)}</span>
                         {p.account_manager && <span className="block font-body-sm text-body-sm text-outline">oleh {p.account_manager.nama_pegawai}</span>}
                       </Sel>
-                      <Sel peran="setengah" label="Tahap Saat Ini">
-                        <span className="flex items-center gap-1 text-on-surface">
-                          <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
-                          {tahap.label}
-                        </span>
-                      </Sel>
+                      {talent ? (
+                        // Talent: stepper tahapan + penjelasan singkat status (feedback SUS).
+                        <Sel label="Tahapan Seleksi" className="md:min-w-[320px]">
+                          <StepperSeleksi pengajuan={p} />
+                          <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">{PENJELASAN_STATUS_TALENT[p.status_tampil]}</p>
+                        </Sel>
+                      ) : (
+                        <Sel peran="setengah" label="Tahap Saat Ini">
+                          <span className="flex items-center gap-1 text-on-surface">
+                            <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-primary">{tahap.ikon}</span>
+                            {tahap.label}
+                          </span>
+                        </Sel>
+                      )}
                       <Sel peran="status">
-                        <BadgeTahapPengajuan pengajuan={p} />
+                        <span title={talent ? PENJELASAN_STATUS_TALENT[p.status_tampil] : undefined}>
+                          <BadgeTahapPengajuan pengajuan={p} />
+                        </span>
                       </Sel>
                     </tr>
                   );
