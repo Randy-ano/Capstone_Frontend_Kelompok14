@@ -38,6 +38,69 @@ export const InterviewBadge = ({ status }) => <BadgeDari peta={STATUS_INTERVIEW}
 export const EvaluasiBadge = ({ status }) => <BadgeDari peta={STATUS_EVALUASI} nilai={status} />;
 export const PlacementBadge = ({ status }) => <BadgeDari peta={STATUS_PLACEMENT} nilai={status} />;
 
+// Penjelasan singkat status untuk talent (halaman Proses Seleksi), per status_tampil.
+export const PENJELASAN_STATUS_TALENT = {
+  diajukan: "Diajukan ke klien: profilmu sedang ditinjau oleh HR klien.",
+  lanjut_interview: "Klien ingin mengenalmu lebih jauh. Ikuti jadwal interview yang diatur Account Manager.",
+  diterima: "Selamat, klien menerimamu. Tim kami sedang menyiapkan kontrak dan penempatanmu.",
+  ditempatkan: "Kamu sudah ditempatkan di klien ini. Detailnya ada di menu Penempatan Saya.",
+  ditolak: "Klien tidak melanjutkan proses ini. Profilmu tetap di talent pool untuk kesempatan lain.",
+};
+
+// Tahapan seleksi untuk stepper talent: Diajukan → Interview → Evaluasi → Penempatan.
+// status: selesai | aktif | gagal | nanti. Dihitung dari data pengajuan (status_pengajuan, evaluasi, id_placement).
+export function langkahSeleksi(p) {
+  const nama = ["Diajukan ke Klien", "Interview", "Evaluasi", "Penempatan"];
+  let posisi;
+  let gagal = false;
+  if (p.id_placement) posisi = 4;
+  else if (p.status_pengajuan === "ditolak") [posisi, gagal] = [0, true];
+  else if (p.evaluasi?.status_evaluasi === "ditolak") [posisi, gagal] = [2, true];
+  else if (p.evaluasi?.status_evaluasi === "diterima") posisi = 3;
+  else if (p.status_pengajuan === "lanjut_interview") posisi = 1;
+  else posisi = 0;
+  return nama.map((label, i) => ({
+    label,
+    status: i < posisi ? "selesai" : i === posisi ? (gagal ? "gagal" : "aktif") : "nanti",
+  }));
+}
+
+const GAYA_LANGKAH = {
+  selesai: { ikon: "check", bulat: "bg-primary text-on-primary", teks: "text-on-surface", sr: "selesai" },
+  aktif: { ikon: null, bulat: "bg-primary-fixed text-on-primary-fixed-variant ring-2 ring-primary", teks: "text-primary font-semibold", sr: "tahap saat ini" },
+  gagal: { ikon: "close", bulat: "bg-error-container text-on-error-container ring-2 ring-error", teks: "text-error font-semibold", sr: "berhenti di tahap ini" },
+  nanti: { ikon: null, bulat: "bg-surface-container text-outline", teks: "text-on-surface-variant", sr: "belum" },
+};
+
+// Stepper horizontal 4 langkah; muat di lebar HP (label kecil di bawah lingkaran).
+export function StepperSeleksi({ pengajuan, className = "" }) {
+  const langkah = langkahSeleksi(pengajuan);
+  return (
+    <ol className={`flex items-start w-full max-w-md ${className}`} aria-label="Tahapan seleksi">
+      {langkah.map((l, i) => {
+        const g = GAYA_LANGKAH[l.status];
+        return (
+          <li key={l.label} className="relative flex-1 flex flex-col items-center text-center min-w-0" aria-current={l.status === "aktif" || l.status === "gagal" ? "step" : undefined}>
+            {i > 0 && (
+              <span
+                aria-hidden="true"
+                className={`absolute top-3 right-1/2 w-full h-0.5 -translate-y-1/2 -z-0 ${l.status === "nanti" ? "bg-surface-container-high" : "bg-primary"}`}
+              />
+            )}
+            <span className={`relative z-[1] w-6 h-6 rounded-full flex items-center justify-center font-label-sm text-label-sm ${g.bulat}`}>
+              {g.ikon ? <span aria-hidden="true" className="material-symbols-outlined text-[16px]">{g.ikon}</span> : i + 1}
+            </span>
+            <span className={`mt-1 px-0.5 font-label-sm text-label-sm leading-tight ${g.teks}`}>
+              {l.label}
+              <span className="sr-only"> ({g.sr})</span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 // Status & label dihitung backend (status_tampil), sama dengan yang dipakai filter.
 export function BadgeTahapPengajuan({ pengajuan: p }) {
   return <Badge className={STATUS_TAMPIL[p.status_tampil]?.className ?? NADA.netral}>{p.label_status_tampil}</Badge>;
