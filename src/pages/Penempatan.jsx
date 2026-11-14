@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../auth/AuthContext";
 import { INTERNAL, ROLE } from "../auth/roles";
 import { BarisKosong, BarisMemuat, KepalaHalaman, KotakCari, Memuat, Pagination, Pesan, PilihFilter, Sel, TabelKartu, errorField, formatTanggal, useTunda, Proses } from "../components/ui";
-import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement } from "../components/rekrutmen/shared";
+import { PlacementBadge, STATUS_PLACEMENT, bolehAkhiriPlacement, hariIni } from "../components/rekrutmen/shared";
 import { useToast } from "../components/toast";
 import { Laci } from "../components/dialog";
 import TabMonitoringTalent from "../components/operasional/TabMonitoringTalent";
 import { PenempatanBadge } from "../components/operasional/shared";
+import { JENIS_DOKUMEN, StatusDokumenBadge } from "../components/dokumen/shared";
 
 const PER_PAGE = 10;
 
@@ -253,10 +254,11 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
                 ["Klien", pl.klien.nama_perusahaan],
                 ["Mulai", formatTanggal(pl.tanggal_mulai)],
                 ["Selesai", pl.tanggal_selesai ? formatTanggal(pl.tanggal_selesai) : "Belum ditentukan"],
+                ...(pl.alasan_penghentian ? [["Alasan penghentian", pl.alasan_penghentian]] : []),
               ].map(([label, isi]) => (
-                <div key={label} className="min-w-0">
+                <div key={label} className={`min-w-0 ${label === "Alasan penghentian" ? "col-span-2" : ""}`}>
                   <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{label}</dt>
-                  <dd className="font-body-md text-body-md text-on-surface break-words">{isi}</dd>
+                  <dd className="font-body-md text-body-md text-on-surface break-words whitespace-pre-line">{isi}</dd>
                 </div>
               ))}
             </dl>
@@ -274,6 +276,7 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
               </div>
             </section>
           )}
+          {pl.dokumen && <HistoriDokumen items={pl.dokumen} />}
           {bolehAkhiriPlacement(user) && pl.status_placement === "aktif" && (
             <AkhiriPlacement
               pl={pl}
@@ -291,17 +294,69 @@ function PlacementDrawer({ id, user, onClose, onChanged }) {
 }
 
 // R20: akhiri placement aktif → talent kembali tersedia di talent pool.
+const MAKS_ALASAN = 1000;
+
+// Histori dokumen penempatan (GET /placement/{id} → dokumen[]): kontrak kerja, SP, surat akhir penempatan, dll.
+// Backend hanya mengirim dokumen yang boleh dilihat user; tautan membuka detailnya di menu Dokumen.
+function HistoriDokumen({ items }) {
+  return (
+    <section className="kartu p-space-md space-y-space-sm">
+      <h3 className="font-title-sm text-title-sm text-on-surface">Histori Dokumen</h3>
+      {items.length === 0 ? (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">Belum ada dokumen untuk penempatan ini.</p>
+      ) : (
+        <ul className="divide-y divide-surface-container-high">
+          {items.map((d) => {
+            const j = JENIS_DOKUMEN[d.jenis_dokumen] ?? JENIS_DOKUMEN.lainnya;
+            return (
+              <li key={d.id_dokumen} className="py-space-sm first:pt-0 last:pb-0 flex items-start gap-space-sm">
+                <span aria-hidden="true" className="material-symbols-outlined text-primary text-[20px] mt-0.5">{j.ikon}</span>
+                <div className="min-w-0 flex-1">
+                  <Link to={`/dokumen-quotation-po?dokumen=${d.id_dokumen}`} className="block font-title-sm text-title-sm text-on-surface hover:text-primary hover:underline">
+                    {d.label_jenis}
+                  </Link>
+                  <div className="font-body-sm text-body-sm text-on-surface-variant break-all">{d.nama_file}</div>
+                  <div className="font-body-sm text-body-sm text-outline">{formatTanggal(d.tanggal_unggah)}</div>
+                </div>
+                <div className="shrink-0">
+                  <StatusDokumenBadge status={d.status_dokumen} />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// R20 + R37: akhiri placement aktif → talent kembali tersedia; sistem membuat surat akhir penempatan untuk ditandatangani Manager.
 function AkhiriPlacement({ pl, onBerhasil }) {
   const [status, setStatus] = useState("");
   const [tanggal, setTanggal] = useState(pl.tanggal_selesai ?? "");
+  const [alasan, setAlasan] = useState("");
   const [kirim, setKirim] = useState(false);
   const [error, setError] = useState(null);
+  const dihentikan = status === "dihentikan";
+  const kontrak = pl.tanggal_selesai ?? "";
+
+  // Dihentikan berlaku hari ini (bukan tanggal akhir kontrak); Selesai memakai tanggal akhir kontrak. Tanggal yang sudah diubah pengguna tidak ditimpa.
+  function pilihStatus(nilai) {
+    setStatus(nilai);
+    if (nilai === "dihentikan" && tanggal === kontrak) setTanggal(hariIni());
+    if (nilai === "selesai" && tanggal === hariIni() && kontrak) setTanggal(kontrak);
+  }
 
   async function simpan() {
+    if (dihentikan && !alasan.trim()) {
+      setError({ errors: { alasan_penghentian: ["Alasan penghentian wajib diisi bila penempatan dihentikan."] } });
+      return;
+    }
     setKirim(true);
     setError(null);
     try {
-      const res = await api(`/placement/${pl.id_placement}/status`, { method: "PATCH", body: { status_placement: status, tanggal_selesai: tanggal || null } });
+      const body = { status_placement: status, tanggal_selesai: tanggal || null, ...(dihentikan ? { alasan_penghentian: alasan.trim() } : {}) };
+      const res = await api(`/placement/${pl.id_placement}/status`, { method: "PATCH", body });
       onBerhasil(res.data, res.message);
     } catch (err) {
       setError(err);
@@ -313,7 +368,7 @@ function AkhiriPlacement({ pl, onBerhasil }) {
   return (
     <section className="kartu p-space-md space-y-space-sm">
       <h3 className="font-title-sm text-title-sm text-on-surface">Akhiri Penempatan</h3>
-      {error && <Pesan>{errorField(error, "tanggal_selesai") ?? errorField(error, "status_placement") ?? error.message}</Pesan>}
+      {error && !errorField(error, "alasan_penghentian") && <Pesan>{errorField(error, "tanggal_selesai") ?? errorField(error, "status_placement") ?? error.message}</Pesan>}
       <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Status akhir">
         {[
           ["selesai", "Selesai (kontrak berakhir)"],
@@ -324,7 +379,7 @@ function AkhiriPlacement({ pl, onBerhasil }) {
             type="button"
             role="radio"
             aria-checked={status === nilai}
-            onClick={() => setStatus(nilai)}
+            onClick={() => pilihStatus(nilai)}
             className={`min-h-10 px-2 rounded-lg font-label-md text-label-md ${status === nilai ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"}`}
           >
             {label}
@@ -334,9 +389,40 @@ function AkhiriPlacement({ pl, onBerhasil }) {
       <label className="block space-y-1">
         <span className="font-label-md text-label-md text-on-surface">Tanggal selesai</span>
         <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="w-full h-10 px-3 rounded-lg bg-surface-container-low font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" />
-        <span className="block font-body-sm text-body-sm text-on-surface-variant">Kosongkan untuk memakai tanggal hari ini.</span>
+        <span className="block font-body-sm text-body-sm text-on-surface-variant">
+          {dihentikan ? "Tanggal penghentian; tercetak di surat sebagai tanggal berakhir." : "Kosongkan untuk memakai tanggal selesai kontrak (atau hari ini)."}
+        </span>
       </label>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">Talent akan kembali tersedia di talent pool.</p>
+      {dihentikan && (
+        <label className="block space-y-1">
+          <span className="font-label-md text-label-md text-on-surface">
+            Alasan penghentian <span className="text-error">*</span>
+          </span>
+          <textarea
+            rows={3}
+            value={alasan}
+            onChange={(e) => setAlasan(e.target.value)}
+            maxLength={MAKS_ALASAN}
+            placeholder="Mis. klien mengakhiri proyek lebih awal."
+            aria-invalid={errorField(error, "alasan_penghentian") ? true : undefined}
+            className="input py-2"
+          />
+          <span className="flex justify-between gap-space-sm font-body-sm text-body-sm">
+            <span className="text-error">{errorField(error, "alasan_penghentian")}</span>
+            <span className="text-outline shrink-0">
+              {alasan.length}/{MAKS_ALASAN}
+            </span>
+          </span>
+        </label>
+      )}
+      <p className="flex items-start gap-1 font-body-sm text-body-sm text-on-surface-variant">
+        <span aria-hidden="true" className="material-symbols-outlined text-[16px] mt-0.5">info</span>
+        <span>
+          Talent kembali tersedia di talent pool. Sistem membuat{" "}
+          {status ? <strong>{dihentikan ? "Surat Pemberhentian Penempatan" : "Surat Keterangan Selesai Penempatan"}</strong> : "surat akhir penempatan"} untuk
+          ditandatangani Manager dan mengirim notifikasi ke talent.
+        </span>
+      </p>
       <div className="flex justify-end">
         <button
           type="button"
