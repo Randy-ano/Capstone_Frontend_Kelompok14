@@ -35,7 +35,7 @@ function Field({ label, wajib, error, className = "", children }) {
   );
 }
 
-function Bagian({ icon, judul, aksi, children }) {
+export function Bagian({ icon, judul, aksi, children }) {
   return (
     <section className="kartu p-space-md space-y-space-sm">
       <div className="flex items-center justify-between gap-space-sm">
@@ -129,7 +129,7 @@ export default function PengajuanDrawer({ id, user, onClose, onChanged }) {
   );
 }
 
-function Info({ label, children }) {
+export function Info({ label, children }) {
   return (
     <div className="min-w-0">
       <dt className="font-label-sm text-label-sm text-outline uppercase tracking-wider">{label}</dt>
@@ -139,7 +139,7 @@ function Info({ label, children }) {
 }
 
 // Pengalaman kerja kandidat (GET /pengajuan/{id}) beserta deskripsi pekerjaan, untuk HR Client & internal.
-function PengalamanKandidat({ items }) {
+export function PengalamanKandidat({ items }) {
   return (
     <Bagian icon="work_history" judul="Pengalaman Kerja">
       {items.length === 0 ? (

@@ -6,6 +6,7 @@ import { Chip, KeadaanKosong, Memuat, Pesan, formatAngka, formatTanggal, formatT
 import { useToast } from "../toast";
 import { Laci } from "../dialog";
 import { CatatanUsulan, UsulanBadge } from "../rekrutmen/usulan";
+import DetailUsulan from "../rekrutmen/DetailUsulan";
 import { DaftarPeriksaPermintaan } from "../dokumen/berurutan";
 import { BISA_DIBATALKAN, BISA_DIUBAH, Pemenuhan, SlaBadge, StatusReqBadge, TAHAPAN, TERBUKA, bolehKelola, formatKisaranGaji } from "./shared";
 
@@ -16,6 +17,7 @@ export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit 
   const [screening, setScreening] = useState(null);
   const [error, setError] = useState("");
   const [muat, setMuat] = useState(0);
+  const [usulanDibuka, setUsulanDibuka] = useState(null);
   const internal = INTERNAL.includes(user.role);
 
   useEffect(() => {
@@ -57,10 +59,11 @@ export default function JobDrawer({ id, user, versi, onClose, onChanged, onEdit 
               <DaftarPeriksaPermintaan kelengkapan={job.kelengkapan_dokumen} />
             </Bagian>
           )}
-          {internal && <KandidatDiusulkan items={screening} />}
+          {internal && <KandidatDiusulkan items={screening} onBuka={setUsulanDibuka} />}
           <LogProgres items={job.log_progres} />
         </>
       )}
+      {usulanDibuka && <DetailUsulan id={usulanDibuka} user={user} onClose={() => setUsulanDibuka(null)} />}
     </Laci>
   );
 }
@@ -229,7 +232,8 @@ function RingkasanProgres({ ringkasan }) {
   );
 }
 
-function KandidatDiusulkan({ items }) {
+// Nama kandidat membuka detail usulan (hanya baca; AM memutuskan di menu Pengajuan Kandidat).
+function KandidatDiusulkan({ items, onBuka }) {
   return (
     <Bagian icon="forward_to_inbox" judul="Kandidat Diusulkan">
       {!items ? (
@@ -241,7 +245,9 @@ function KandidatDiusulkan({ items }) {
           {items.map((s) => (
             <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 flex items-start justify-between gap-space-sm">
               <div className="min-w-0">
-                <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
+                <button type="button" onClick={() => onBuka(s.id_screening)} className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary underline-offset-2 hover:underline">
+                  {s.talent.nama_lengkap}
+                </button>
                 <div className="font-body-sm text-body-sm text-on-surface-variant">
                   {formatTanggal(s.tanggal_screening)} · oleh {s.talent_support?.nama_pegawai ?? "-"}
                 </div>

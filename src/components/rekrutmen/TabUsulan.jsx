@@ -1,10 +1,13 @@
 // Tab "Usulan dari Talent Support" di halaman Pengajuan Kandidat (khusus AM, revisi 2026-11-05).
-// Menunggu tinjauan: Teruskan ke Klien (POST /pengajuan) atau Tidak Diteruskan (PATCH /screening/{id}/tidak-diteruskan).
+// AM membuka detail kandidat (GET /screening/{id}) dulu, lalu dari panel detail memilih Ajukan ke Klien (POST /pengajuan)
+// atau Tidak Diteruskan (PATCH /screening/{id}/tidak-diteruskan).
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { BarisKosong, BarisMemuat, Pesan, PilihFilter, Proses, Sel, TabelKartu, errorField, formatAngka, formatTanggal } from "../ui";
+import { useAuth } from "../../auth/AuthContext";
+import { BarisKosong, BarisMemuat, Pesan, PilihFilter, Sel, TabelKartu, formatAngka, formatTanggal } from "../ui";
 import { useToast } from "../toast";
-import { CatatanUsulan, ModalTidakDiteruskan, UsulanBadge } from "./usulan";
+import { CatatanUsulan, UsulanBadge } from "./usulan";
+import DetailUsulan from "./DetailUsulan";
 
 // Opsi kosong PilihFilter = "Menunggu tinjauan" (status_usulan=menunggu_am).
 const FILTER = [["tidak_diteruskan", "Tidak diteruskan"]];
@@ -17,8 +20,8 @@ export default function TabUsulan({ onDiteruskan, onJumlah }) {
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
   const [versi, setVersi] = useState(0);
-  const [kirim, setKirim] = useState(null);
-  const [tolak, setTolak] = useState(null);
+  const [dibuka, setDibuka] = useState(null);
+  const { user } = useAuth();
   const toast = useToast();
 
   useEffect(() => {
@@ -37,29 +40,16 @@ export default function TabUsulan({ onDiteruskan, onJumlah }) {
     };
   }, [status, versi, onJumlah]);
 
-  async function teruskan(s) {
-    setKirim(s.id_screening);
-    setError("");
-    try {
-      const res = await api("/pengajuan", { method: "POST", body: { id_screening: s.id_screening } });
-      toast.sukses(`${res.message} (${s.talent.nama_lengkap})`);
-      setVersi((v) => v + 1);
-      onDiteruskan(res.data.id_pengajuan);
-    } catch (err) {
-      setError(errorField(err, "id_screening") ?? err.message);
-    } finally {
-      setKirim(null);
-    }
-  }
-
   const menunggu = status === "menunggu_am";
-  const kolom = ["Kandidat", "Permintaan", { label: "Skor", className: "angka" }, "Catatan Talent Support", "Diusulkan", menunggu ? "Aksi" : "Status"];
+  const kolom = ["Kandidat", !menunggu && "Status", "Permintaan", { label: "Skor", className: "angka" }, "Catatan Talent Support", "Diusulkan", "Detail"];
+  const jumlahKolom = kolom.filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-space-md">
       <div className="kartu p-space-md flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
         <p className="font-body-sm text-body-sm text-on-surface-variant">
-          Talent yang diusulkan Talent Support untuk permintaan yang sedang diproses. Teruskan ke klien atau catat alasan jika tidak diteruskan.
+          Talent yang diusulkan Talent Support untuk permintaan yang sedang diproses. Buka detail kandidat untuk meninjau profil, skor kecocokan,
+          catatan screening, CV, dan sertifikat sebelum mengajukan ke klien atau mencatat alasan tidak diteruskan.
         </p>
         <PilihFilter
           ikon="filter_alt"
@@ -75,17 +65,26 @@ export default function TabUsulan({ onDiteruskan, onJumlah }) {
 
       <div className="kartu overflow-hidden">
         <TabelKartu kolom={kolom} className="md:min-w-[960px]">
-          {!items && !error && <BarisMemuat kolom={6} />}
+          {!items && !error && <BarisMemuat kolom={jumlahKolom} />}
           {items?.length === 0 && (
-            <BarisKosong kolom={6} ikon="forward_to_inbox">
+            <BarisKosong kolom={jumlahKolom} ikon="forward_to_inbox">
               {menunggu ? "Belum ada usulan dari Talent Support yang menunggu tinjauan." : "Belum ada usulan yang tidak diteruskan."}
             </BarisKosong>
           )}
           {items?.map((s) => (
-            <tr key={s.id_screening} className="align-top">
+            <tr key={s.id_screening} onClick={() => setDibuka(s.id_screening)} className="align-top hover:bg-surface-container-low cursor-pointer transition-colors">
               <Sel peran="judul">
-                <span className="block font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</span>
-                <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{s.talent.email}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDibuka(s.id_screening);
+                  }}
+                  className="text-left group"
+                >
+                  <span className="block font-title-sm text-title-sm text-on-surface group-hover:text-primary">{s.talent.nama_lengkap}</span>
+                  <span className="block font-body-sm text-body-sm text-on-surface-variant break-all">{s.talent.email}</span>
+                </button>
               </Sel>
               {!menunggu && (
                 <Sel peran="status">
@@ -110,32 +109,37 @@ export default function TabUsulan({ onDiteruskan, onJumlah }) {
                 <span className="block text-on-surface-variant">{formatTanggal(s.tanggal_screening)}</span>
                 {s.talent_support && <span className="block font-body-sm text-body-sm text-outline">oleh {s.talent_support.nama_pegawai}</span>}
               </Sel>
-              {menunggu && (
-                <Sel peran="aksi">
-                  <div className="flex flex-col sm:flex-row md:flex-col xl:flex-row gap-space-xs">
-                    <button type="button" onClick={() => teruskan(s)} disabled={!!kirim} className="tombol-utama whitespace-nowrap">
-                      <Proses aktif={kirim === s.id_screening} ikon="send">
-                        Teruskan ke Klien
-                      </Proses>
-                    </button>
-                    <button type="button" onClick={() => setTolak(s)} disabled={!!kirim} className="tombol-kedua whitespace-nowrap">
-                      <span aria-hidden="true" className="material-symbols-outlined text-[18px]">block</span>
-                      Tidak Diteruskan
-                    </button>
-                  </div>
-                </Sel>
-              )}
+              <Sel peran="aksi">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDibuka(s.id_screening);
+                  }}
+                  className={`${menunggu ? "tombol-utama" : "tombol-kedua"} whitespace-nowrap w-full md:w-auto`}
+                >
+                  <span aria-hidden="true" className="material-symbols-outlined text-[18px]">visibility</span>
+                  {menunggu ? "Tinjau Detail" : "Lihat Detail"}
+                </button>
+              </Sel>
             </tr>
           ))}
         </TabelKartu>
       </div>
 
-      {tolak && (
-        <ModalTidakDiteruskan
-          usulan={tolak}
-          onClose={() => setTolak(null)}
-          onBerhasil={(res) => {
-            setTolak(null);
+      {dibuka && (
+        <DetailUsulan
+          id={dibuka}
+          user={user}
+          onClose={() => setDibuka(null)}
+          onDiteruskan={(res, usulan) => {
+            setDibuka(null);
+            toast.sukses(`${res.message} (${usulan.talent.nama_lengkap})`);
+            setVersi((v) => v + 1);
+            onDiteruskan(res.data.id_pengajuan);
+          }}
+          onTidakDiteruskan={(res) => {
+            setDibuka(null);
             toast.sukses(`${res.message} (${res.data.talent.nama_lengkap})`);
             setVersi((v) => v + 1);
           }}

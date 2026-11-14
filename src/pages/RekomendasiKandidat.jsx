@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
+import { useAuth } from "../auth/AuthContext";
 import { Chip, KeadaanKosong, KepalaHalaman, Memuat, Pesan, TagChip, formatAngka, formatTanggal, formatTanggalWaktu, tagSelainKompetensi } from "../components/ui";
 import { useToast } from "../components/toast";
 import { IKON_FILE, TombolLihatSertifikat } from "../components/sertifikat";
 import { CatatanUsulan, ModalUsulkan, UsulanBadge } from "../components/rekrutmen/usulan";
+import DetailUsulan from "../components/rekrutmen/DetailUsulan";
 import { BarSkor, Pemenuhan, SlaBadge, StatusReqBadge, TERBUKA } from "../components/jobRequirement/shared";
 
 // Halaman Rekomendasi Kandidat (FR-07, FR-08) — khusus Talent Support. TS mengusulkan kandidat ke Account Manager
@@ -300,6 +302,8 @@ function KartuKandidat({ kandidat: k, peringkat, job, onUsul }) {
 function SudahDiusulkan({ job }) {
   const [items, setItems] = useState(null);
   const [error, setError] = useState("");
+  const [dibuka, setDibuka] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     let batal = false;
@@ -321,7 +325,9 @@ function SudahDiusulkan({ job }) {
           <li key={s.id_screening} className="py-space-sm first:pt-0 last:pb-0 space-y-1">
             <div className="flex items-start justify-between gap-space-sm">
               <div className="min-w-0">
-                <div className="font-title-sm text-title-sm text-on-surface">{s.talent.nama_lengkap}</div>
+                <button type="button" onClick={() => setDibuka(s.id_screening)} className="text-left font-title-sm text-title-sm text-on-surface hover:text-primary underline-offset-2 hover:underline">
+                  {s.talent.nama_lengkap}
+                </button>
                 <div className="font-body-sm text-body-sm text-on-surface-variant">
                   Skor {formatAngka(s.skor_kecocokan, 2)} · {formatTanggal(s.tanggal_screening)}
                   {s.talent_support && ` · oleh ${s.talent_support.nama_pegawai}`}
@@ -335,6 +341,7 @@ function SudahDiusulkan({ job }) {
           </li>
         ))}
       </ul>
+      {dibuka && <DetailUsulan id={dibuka} user={user} onClose={() => setDibuka(null)} />}
     </Bagian>
   );
 }

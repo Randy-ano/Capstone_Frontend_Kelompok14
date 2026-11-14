@@ -61,17 +61,17 @@ function TombolTutup({ onClose, sibuk }) {
   );
 }
 
-// Panel samping detail. `kaki` = bagian tetap di bawah panel (opsional).
-export function Laci({ judul, label = judul, lebar = "max-w-xl", onClose, kaki, children }) {
+// Panel samping detail. `kaki` = bagian tetap di bawah panel (opsional). `sibuk` menahan penutupan selama aksi berjalan.
+export function Laci({ judul, label = judul, lebar = "max-w-xl", sibuk = false, onClose, kaki, children }) {
   const panel = useRef(null);
-  useDialog(panel, { onClose });
+  useDialog(panel, { sibuk, onClose });
   return (
     <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label={label}>
-      <div className="animasi-latar absolute inset-0 bg-inverse-surface/40" onClick={onClose} />
+      <div className="animasi-latar absolute inset-0 bg-inverse-surface/40" onClick={() => !sibuk && onClose()} />
       <div ref={panel} tabIndex={-1} className={`animasi-laci relative w-full ${lebar} h-full bg-surface flex flex-col shadow-xl`}>
         <div className="flex items-center justify-between gap-space-sm px-space-lg h-16 bg-surface-container-lowest border-b border-surface-container-high shrink-0">
           <h2 className="font-title-md text-title-md text-on-surface">{judul}</h2>
-          <TombolTutup onClose={onClose} />
+          <TombolTutup onClose={onClose} sibuk={sibuk} />
         </div>
         <div className="flex-1 overflow-y-auto p-space-md sm:p-space-lg space-y-space-md">{children}</div>
         {kaki && <div className="shrink-0 px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container-high">{kaki}</div>}

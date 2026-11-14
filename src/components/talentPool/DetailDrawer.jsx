@@ -414,7 +414,7 @@ function UsulkanKeAm({ detail, onBerhasil }) {
 }
 
 // CV diunduh lewat fetch ber-token (endpoint terproteksi), lalu dibuka di tab baru sebagai blob PDF.
-function TombolCv({ id, adaCv, nama }) {
+export function TombolCv({ id, adaCv, nama }) {
   const [memuat, setMemuat] = useState(false);
   const [error, setError] = useState("");
 
